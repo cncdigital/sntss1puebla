@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="108" fill="#071d36"/>
+  <path d="M96 126c0-17 13-30 30-30h260c17 0 30 13 30 30v260c0 17-13 30-30 30H126c-17 0-30-13-30-30V126Z" fill="#102f57" stroke="#f3ad18" stroke-width="14"/>
+  <text x="256" y="292" text-anchor="middle" font-family="Arial, sans-serif" font-size="190" font-weight="900" fill="#ffffff">S1</text>
+  <rect x="150" y="328" width="212" height="12" rx="6" fill="#f3ad18"/>
+  <text x="256" y="382" text-anchor="middle" font-family="Arial, sans-serif" font-size="39" font-weight="800" letter-spacing="8" fill="#ffffff">PUEBLA</text>
+</svg>

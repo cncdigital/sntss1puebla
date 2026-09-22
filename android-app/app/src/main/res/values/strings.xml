@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Credenciales SNTSS1Puebla</string>
+    <string name="radio_title">Radio SNTSS Puebla</string>
+    <string name="radio_subtitle">La voz de quienes hacen grande al IMSS</string>
+    <string name="radio_connecting">Conectando con Radio SNTSS Puebla…</string>
+</resources>

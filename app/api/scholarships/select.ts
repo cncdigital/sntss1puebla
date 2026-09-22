@@ -1,0 +1,22 @@
+export const SCHOLARSHIP_ENTRY_SELECT = `SELECT
+  entry.id,
+  entry.campaign_id AS campaignId,
+  entry.folio,
+  entry.level,
+  entry.level_sequence AS levelSequence,
+  entry.amount_cents AS amountCents,
+  entry.worker_name AS workerName,
+  entry.matricula,
+  entry.adscription,
+  entry.worker_curp AS workerCurp,
+  entry.rfc,
+  entry.child_beneficiary_id AS childBeneficiaryId,
+  entry.child_name AS childName,
+  entry.child_curp AS childCurp,
+  entry.grade_hundredths AS gradeHundredths,
+  entry.reader_actor AS readerActor,
+  entry.deleted_at AS deletedAt,
+  entry.deleted_by AS deletedBy,
+  entry.deletion_reason AS deletionReason,
+  entry.created_at AS createdAt
+FROM scholarship_entries entry`;

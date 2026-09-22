@@ -1,0 +1,286 @@
+.progressCoachPage {
+  min-height: 72vh;
+  background: #edf4f7;
+  color: #13354d;
+  padding: 28px 18px 80px;
+}
+.progressCoachHero,
+.progressCoachWorkspace,
+.progressCoachHistory,
+.progressCoachAlert {
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.progressCoachHero {
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  border-radius: 22px;
+  background: linear-gradient(120deg, #071f38, #0b5270);
+  box-shadow: 0 18px 45px rgba(5, 29, 48, .18);
+  color: white;
+  padding: 30px 34px;
+}
+.progressCoachHero > div { max-width: 760px; }
+.progressCoachHero span,
+.progressCoachStep {
+  color: #f3c96a;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+.progressCoachHero h1 {
+  margin: 7px 0 9px;
+  font: 800 38px/1.08 Georgia, serif;
+}
+.progressCoachHero p {
+  margin: 0;
+  color: #dcebf1;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.progressCoachHero ul {
+  min-width: 220px;
+  display: grid;
+  align-content: center;
+  gap: 9px;
+  margin: 0;
+  padding-left: 22px;
+  color: #eaf5f8;
+  font-size: 14px;
+  font-weight: 750;
+}
+.progressCoachAlert {
+  margin-top: 15px;
+  border-radius: 12px;
+  padding: 13px 15px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.progressCoachAlert.success { border: 1px solid #a9d6bf; background: #eaf8f0; color: #176246; }
+.progressCoachAlert.error { border: 1px solid #e4b7c0; background: #fff0f2; color: #963445; }
+.progressCoachWorkspace {
+  display: grid;
+  grid-template-columns: minmax(0, .94fr) minmax(0, 1.06fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+.progressCoachSearch,
+.progressCoachForm,
+.progressCoachHistory {
+  border: 1px solid #cfdee5;
+  border-radius: 19px;
+  background: white;
+  box-shadow: 0 14px 36px rgba(8, 37, 57, .08);
+}
+.progressCoachSearch,
+.progressCoachForm { padding: 23px; }
+.progressCoachStep { color: #26789c; }
+.progressCoachSearch h2,
+.progressCoachForm h2,
+.progressCoachHistory h2 {
+  margin: 5px 0 8px;
+  color: #0b304c;
+  font: 800 25px/1.15 Georgia, serif;
+}
+.progressCoachSearch > p {
+  margin: 0 0 16px;
+  color: #637988;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.progressCoachSearch label,
+.progressCoachForm label:not(.progressCoachConfirm) {
+  display: grid;
+  gap: 6px;
+}
+.progressCoachSearch label > span,
+.progressCoachForm label > span {
+  color: #365b70;
+  font-size: 14px;
+  font-weight: 850;
+}
+.progressCoachSearch input,
+.progressCoachForm input,
+.progressCoachForm select,
+.progressCoachForm textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #c7d8e1;
+  border-radius: 11px;
+  outline: none;
+  background: #f8fbfc;
+  color: #173950;
+  padding: 11px 12px;
+  font: 15px/1.45 Arial, sans-serif;
+}
+.progressCoachSearch input:focus,
+.progressCoachForm input:focus,
+.progressCoachForm select:focus,
+.progressCoachForm textarea:focus {
+  border-color: #2b82a8;
+  box-shadow: 0 0 0 3px rgba(43, 130, 168, .13);
+  background: white;
+}
+.progressCoachSearch > button,
+.progressCoachSave {
+  width: 100%;
+  min-height: 45px;
+  border: 0;
+  border-radius: 11px;
+  background: linear-gradient(110deg, #0c385a, #167094);
+  color: white;
+  margin-top: 11px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.progressCoachSearch > button:disabled,
+.progressCoachSave:disabled { cursor: not-allowed; filter: grayscale(.4); opacity: .55; }
+.progressCoachMatches {
+  max-height: 440px;
+  display: grid;
+  gap: 8px;
+  overflow: auto;
+  margin-top: 15px;
+}
+.progressCoachMatches > button {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #d5e2e8;
+  border-radius: 12px;
+  background: #fbfdfe;
+  color: #183d56;
+  padding: 12px 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.progressCoachMatches > button.selected {
+  border-color: #2790b4;
+  box-shadow: 0 0 0 3px rgba(39, 144, 180, .12);
+  background: #eff9fc;
+}
+.progressCoachMatches span { color: #28799c; font-size: 13px; font-weight: 900; }
+.progressCoachMatches b { font-size: 15px; }
+.progressCoachMatches small { color: #607988; font-size: 13px; line-height: 1.45; }
+.progressCoachMatches em { color: #2a6f55; font-size: 13px; font-style: normal; font-weight: 850; }
+.progressCoachForm { display: grid; align-content: start; gap: 13px; }
+.progressCoachSelection {
+  display: grid;
+  gap: 3px;
+  border: 1px solid #bcdccf;
+  border-radius: 12px;
+  background: #eff9f4;
+  padding: 12px 13px;
+}
+.progressCoachSelection b { color: #1e704e; font-size: 15px; }
+.progressCoachSelection span { color: #234d63; font-size: 14px; font-weight: 800; }
+.progressCoachSelection small { color: #5a756b; font-size: 13px; line-height: 1.45; }
+.progressCoachTwoFields { display: grid; grid-template-columns: 1fr 1.35fr; gap: 11px; }
+.progressCoachForm textarea { resize: vertical; }
+.progressCoachConfirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  border: 1px solid #d8e3e8;
+  border-radius: 11px;
+  background: #f8fafb;
+  color: #526d7d;
+  padding: 10px 11px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.progressCoachConfirm input { width: auto; margin-top: 2px; accent-color: #12698f; }
+.progressCoachSave { margin-top: 0; background: linear-gradient(110deg, #176245, #2e9270); }
+.progressCoachPlaceholder {
+  min-height: 310px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  color: #708592;
+  text-align: center;
+}
+.progressCoachPlaceholder b { color: #1c425b; font: 800 20px Georgia, serif; }
+.progressCoachPlaceholder span { font-size: 14px; }
+.progressCoachHistory { margin-top: 16px; overflow: hidden; }
+.progressCoachHistory > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  border-bottom: 1px solid #dae5ea;
+  background: #f5f9fa;
+  padding: 18px 21px;
+}
+.progressCoachHistory > header span { color: #28799c; font-size: 13px; font-weight: 900; letter-spacing: .1em; }
+.progressCoachHistory > header h2 { margin-bottom: 0; }
+.progressCoachHistory > header button,
+.progressCoachHistoryList article > button {
+  border: 1px solid #c3d6df;
+  border-radius: 9px;
+  background: white;
+  color: #245d7b;
+  padding: 8px 11px;
+  font-size: 13px;
+  font-weight: 850;
+  cursor: pointer;
+}
+.progressCoachHistoryList article {
+  display: grid;
+  grid-template-columns: 105px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 15px;
+  border-bottom: 1px solid #e2eaee;
+  padding: 17px 20px;
+}
+.progressCoachHistoryList article:last-child { border-bottom: 0; }
+.progressCoachHistoryList article.inactive { background: #f5f6f7; opacity: .72; }
+.progressCoachHistoryList article.stale { background: #fff9ec; }
+.progressCoachStatus { display: grid; gap: 6px; justify-items: start; }
+.progressCoachStatus span,
+.progressCoachStatus b {
+  border-radius: 999px;
+  background: #e5f6ed;
+  color: #24704f;
+  padding: 5px 7px;
+  font-size: 12px;
+  font-weight: 900;
+}
+.progressCoachStatus b.alta { background: #fff0d2; color: #8a5d09; }
+.progressCoachStatus b.media { background: #e7f2f8; color: #28698a; }
+.progressCoachStatus b.baja { background: #edf0f2; color: #65737c; }
+.progressCoachHistoryList h3 { margin: 0; color: #143b55; font-size: 16px; }
+.progressCoachHistoryList p { margin: 5px 0; color: #5a7484; font-size: 14px; line-height: 1.45; }
+.progressCoachHistoryList blockquote {
+  margin: 7px 0;
+  border-left: 3px solid #4ba383;
+  color: #315e50;
+  padding-left: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.progressCoachHistoryList small { color: #768a96; font-size: 13px; line-height: 1.45; }
+.progressCoachHistoryList article > button { border-color: #dfb6bf; color: #91384a; }
+.progressCoachEmpty { display: grid; gap: 5px; padding: 35px; color: #718590; text-align: center; }
+.progressCoachEmpty b { color: #1a4059; font: 800 19px Georgia, serif; }
+.progressCoachEmpty span { font-size: 14px; }
+@media (max-width: 900px) {
+  .progressCoachHero { align-items: flex-start; flex-direction: column; }
+  .progressCoachHero ul { min-width: 0; }
+  .progressCoachWorkspace { grid-template-columns: 1fr; }
+}
+@media (max-width: 650px) {
+  .progressCoachPage { padding: 16px 10px 70px; }
+  .progressCoachHero { padding: 24px 20px; }
+  .progressCoachHero h1 { font-size: 32px; }
+  .progressCoachSearch,
+  .progressCoachForm { padding: 18px; }
+  .progressCoachTwoFields { grid-template-columns: 1fr; }
+  .progressCoachHistory > header { align-items: flex-start; flex-direction: column; }
+  .progressCoachHistory > header button { width: 100%; }
+  .progressCoachHistoryList article { grid-template-columns: 1fr; }
+  .progressCoachStatus { display: flex; }
+  .progressCoachHistoryList article > button { width: 100%; }
+}

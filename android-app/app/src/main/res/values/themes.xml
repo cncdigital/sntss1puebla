@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CredencialesSNTSS" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">@color/sntss_gold</item>
+        <item name="android:navigationBarColor">@color/sntss_blue</item>
+        <item name="android:statusBarColor">@color/sntss_blue</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

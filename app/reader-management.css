@@ -1,0 +1,117 @@
+.readerManagement {
+  max-width: 1124px;
+  margin: 0 auto 70px;
+  padding: 28px;
+  border: 1px solid #d7e1ea;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 16px 42px #10243a0d;
+}
+.readerManagement .cardHead > b {
+  color: #102f57;
+  font-size: 12px;
+}
+.readerAssignment {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, 0.7fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 12px;
+  background: #f2f6fa;
+}
+.readerAssignment label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #334a5f;
+  font-size: 10px;
+  font-weight: 800;
+}
+.readerAssignment input {
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid #cbd7e1;
+  border-radius: 9px;
+  background: #fff;
+}
+.readerAssignment .primary {
+  min-height: 46px;
+}
+.readerManageError,
+.readerManageSuccess {
+  margin: 14px 0 0;
+  padding: 11px 13px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.readerManageError {
+  background: #fff1ed;
+  color: #9b321f;
+}
+.readerManageSuccess {
+  background: #eaf7ef;
+  color: #19734a;
+}
+.managedReaders {
+  margin-top: 18px;
+}
+.managedReaders article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 13px;
+  align-items: center;
+  padding: 15px 4px;
+  border-bottom: 1px solid #e8edf1;
+}
+.readerActive,
+.readerInactive,
+.masterBadge {
+  padding: 6px 9px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+.readerActive {
+  background: #e5f5ec;
+  color: #19734a;
+}
+.readerInactive {
+  background: #f3f0ed;
+  color: #7c6b60;
+}
+.masterBadge {
+  background: #fff2ca;
+  color: #835b00;
+}
+.managedReaders button {
+  min-width: 92px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 800;
+}
+@media (max-width: 720px) {
+  .readerManagement {
+    margin: 0 15px 50px;
+    padding: 21px;
+  }
+  .readerAssignment {
+    grid-template-columns: 1fr;
+  }
+  .readerAssignment .primary {
+    width: 100%;
+  }
+  .managedReaders article {
+    grid-template-columns: auto 1fr;
+  }
+  .managedReaders article > span,
+  .managedReaders article > button,
+  .managedReaders article > .masterBadge {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

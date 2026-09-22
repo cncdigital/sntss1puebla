@@ -1,0 +1,52 @@
+.deviFactWidget { position: fixed; z-index: 145; right: max(20px,env(safe-area-inset-right)); bottom: max(20px,env(safe-area-inset-bottom)); display: grid; justify-items: end; }
+.deviFactLauncher { position: relative; width: 72px; height: 72px; display: grid; place-items: center; border: 2px solid rgba(255,255,255,.95); border-radius: 24px; outline: none; background: radial-gradient(circle at 45% 34%,#fff 0 22%,#d9edf7 62%,#8bc8df); box-shadow: 0 14px 38px rgba(4,27,50,.32),0 0 0 6px rgba(39,143,190,.12); cursor: pointer; isolation: isolate; transition: transform .2s ease,box-shadow .2s ease; }
+.deviFactLauncher::before { position: absolute; z-index: -1; inset: -9px; border: 1px solid rgba(62,175,216,.38); border-radius: 29px; content: ""; animation: deviFactPulse 2.5s ease-out infinite; }
+.deviFactLauncher:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 18px 45px rgba(4,27,50,.38),0 0 0 7px rgba(39,143,190,.15); }
+.deviFactLauncher:focus-visible { box-shadow: 0 0 0 4px #f4c55a,0 18px 45px rgba(4,27,50,.38); }
+.deviFactLauncher img { width: 66px; height: 66px; display: block; object-fit: contain; }
+.deviFactLauncher span { position: absolute; right: -4px; bottom: -7px; border: 2px solid white; border-radius: 999px; background: #0b3154; color: #f4c55a; padding: 4px 8px; font-size: 8px; font-weight: 950; letter-spacing: .05em; }
+.deviFactCard { position: absolute; right: 0; bottom: 92px; width: min(360px,calc(100vw - 28px)); overflow: hidden; border: 1px solid rgba(159,193,211,.7); border-radius: 23px 23px 7px 23px; background: white; box-shadow: 0 24px 70px rgba(3,22,41,.3); transform-origin: bottom right; animation: deviFactOpen .22s ease-out both; }
+.deviFactCard::after { position: absolute; right: 21px; bottom: -8px; width: 18px; height: 18px; border-right: 1px solid rgba(159,193,211,.7); border-bottom: 1px solid rgba(159,193,211,.7); background: white; content: ""; transform: rotate(45deg); }
+.deviFactClose { position: absolute; z-index: 3; top: 10px; right: 10px; width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.45); border-radius: 50%; background: rgba(4,25,45,.72); color: white; font: 300 23px/1 Arial,sans-serif; cursor: pointer; backdrop-filter: blur(8px); }
+.deviFactClose:focus-visible { outline: 3px solid #f4c55a; outline-offset: 2px; }
+.deviFactArt { position: relative; height: 145px; overflow: hidden; background: radial-gradient(circle at 25% 45%,rgba(74,175,219,.42),transparent 32%),linear-gradient(125deg,#06182c,#0d3d66); }
+.deviFactArt::before { position: absolute; inset: 0; background: linear-gradient(108deg,transparent 0 62%,rgba(255,255,255,.05) 62% 64%,transparent 64%); content: ""; }
+.deviFactArt img { position: absolute; right: 13px; bottom: -23px; width: 158px; height: 158px; object-fit: contain; filter: drop-shadow(0 16px 16px rgba(0,0,0,.28)); }
+.deviFactArt span { position: absolute; z-index: 2; top: 38px; left: 22px; max-width: 160px; color: #f4c55a; font: 800 25px/.95 Georgia,serif; letter-spacing: -.02em; }
+.deviFactCopy { position: relative; z-index: 2; padding: 18px 20px 20px; }
+.deviFactKind { display: inline-flex; margin-bottom: 9px; border-radius: 999px; background: #e9f4fa; color: #17618e; padding: 5px 8px; font-size: 7px; font-weight: 950; letter-spacing: .1em; }
+.deviFactCopy p { margin: 0; color: #193d59; font: 700 15px/1.5 Georgia,serif; }
+.deviFactCopy small { display: block; margin-top: 12px; color: #2e719a; font-size: 8px; font-weight: 900; line-height: 1.4; letter-spacing: .035em; text-transform: uppercase; }
+.deviFactVoiceControls { display: flex; gap: 8px; margin-top: 14px; }
+.deviFactVoiceButton { min-height: 35px; display: inline-flex; flex: 1; align-items: center; justify-content: center; gap: 6px; border: 1px solid #17618e; border-radius: 11px; background: #17618e; color: white; padding: 7px 10px; font: 850 10px/1.1 Arial,sans-serif; cursor: pointer; transition: transform .16s ease,background .16s ease; }
+.deviFactVoiceButton.secondary { border-color: #c4dbe7; background: #eef7fb; color: #17618e; }
+.deviFactVoiceButton:hover:not(:disabled) { transform: translateY(-1px); background: #0e4d76; }
+.deviFactVoiceButton.secondary:hover:not(:disabled) { background: #deeff7; }
+.deviFactVoiceButton:focus-visible { outline: 3px solid #f4c55a; outline-offset: 2px; }
+.deviFactVoiceButton:disabled { cursor: wait; opacity: .65; }
+.deviFactVoiceMeta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; color: #617887; font-size: 8px; font-weight: 700; line-height: 1.35; }
+.deviFactVoiceMeta span { flex: 1; }
+.deviFactVoiceMeta b { flex: none; border-radius: 999px; background: #f3f6f8; color: #526d7d; padding: 4px 6px; font-size: 7px; letter-spacing: .02em; text-transform: uppercase; }
+.deviFactOpenDevi { min-height: 34px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; margin-top: 11px; border: 1px solid #d5aa43; border-radius: 999px; background: #f4c55a; color: #0b3154; padding: 7px 13px; font: 900 10px/1.1 Arial,sans-serif; cursor: pointer; box-shadow: 0 5px 13px rgba(193,139,25,.16); transition: transform .16s ease,background .16s ease,box-shadow .16s ease; }
+.deviFactOpenDevi:hover { transform: translateY(-1px); background: #f7d372; box-shadow: 0 7px 17px rgba(193,139,25,.22); }
+.deviFactOpenDevi:focus-visible { outline: 3px solid #17618e; outline-offset: 2px; }
+.deviFactDeckNote { display: block; margin-top: 10px; border-top: 1px solid #e0e9ef; color: #7a8b98; padding-top: 9px; font-size: 8px; font-weight: 750; }
+@keyframes deviFactOpen { from { opacity: 0; transform: translateY(14px) scale(.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes deviFactPulse { 0% { opacity: .75; transform: scale(.94); } 65%,100% { opacity: 0; transform: scale(1.18); } }
+@media (max-width: 520px) {
+  .deviFactWidget { right: max(13px,env(safe-area-inset-right)); bottom: max(14px,env(safe-area-inset-bottom)); }
+  .deviFactLauncher { width: 64px; height: 64px; border-radius: 21px; }
+  .deviFactLauncher img { width: 58px; height: 58px; }
+  .deviFactCard { bottom: 82px; width: min(340px,calc(100vw - 26px)); border-radius: 20px 20px 7px 20px; }
+  .deviFactArt { height: 130px; }
+  .deviFactArt img { right: 8px; width: 142px; height: 142px; }
+  .deviFactArt span { top: 34px; left: 19px; font-size: 22px; }
+  .deviFactCopy { padding: 16px 18px 18px; }
+  .deviFactCopy p { font-size: 14px; }
+  .deviFactVoiceButton { min-height: 38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deviFactLauncher,.deviFactCard { animation: none; transition: none; }
+  .deviFactLauncher::before { animation: none; }
+}
+@media print { .deviFactWidget { display: none !important; } }

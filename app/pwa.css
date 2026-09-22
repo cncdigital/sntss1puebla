@@ -1,0 +1,102 @@
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.installApp {
+  border: 1px solid #bfd0df;
+  border-radius: 9px;
+  background: #eef4f8;
+  color: #102f57;
+  padding: 9px 12px;
+  font-size: 11px;
+  font-weight: 900;
+}
+.installApp:hover {
+  background: #dfeaf3;
+}
+.installApp:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.startWindow > .installApp {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+}
+.appInstalled {
+  color: #19734a;
+  font-size: 10px;
+  font-weight: 800;
+}
+.installOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #061525b8;
+  backdrop-filter: blur(5px);
+}
+.installHelp {
+  position: relative;
+  width: min(430px, 100%);
+  padding: 34px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 30px 80px #020d1a80;
+  text-align: center;
+}
+.installClose {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  border: 0;
+  background: transparent;
+  color: #647483;
+  font-size: 28px;
+}
+.installIcon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px;
+  border-radius: 17px;
+  background: #e4edf5;
+  color: #102f57;
+  font-size: 30px;
+}
+.installHelp h2 {
+  margin: 0 0 13px;
+  font: 700 29px Georgia;
+  color: #10243a;
+}
+.installHelp p {
+  margin: 10px 0;
+  color: #657583;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.installHelp .primary {
+  margin-top: 13px;
+  width: 100%;
+}
+@media (max-width: 850px) {
+  .topActions {
+    margin-left: auto;
+  }
+  .topActions .secure {
+    display: none;
+  }
+}
+@media (max-width: 520px) {
+  .installApp {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+  .appInstalled {
+    display: none;
+  }
+}

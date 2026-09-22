@@ -1,0 +1,155 @@
+.scholarshipPage{--violet:#633f87;--violet-dark:#382653;--violet-soft:#f5f0fa;--amber:#d89b24;max-width:1280px;min-height:780px;margin:auto;padding:55px 28px 90px}.scholarshipHero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}.scholarshipHero h1{margin:7px 0 8px;color:var(--navy-900);font:700 48px/.98 Georgia,serif;letter-spacing:-.035em}.scholarshipHero p{max-width:760px;margin:0;color:var(--muted);font-size:12px;line-height:1.55}.scholarshipOnline{display:flex;align-items:center;gap:8px;border:1px solid #d7c6e6;border-radius:30px;background:var(--violet-soft);color:var(--violet-dark);padding:9px 13px;font-size:9px;font-weight:900}.scholarshipOnline i{width:8px;height:8px;border-radius:50%;background:#7d54a2;box-shadow:0 0 0 5px #7d54a220}.scholarshipAdminCard,.scholarshipSelector,.scholarshipScannerCard,.scholarshipDashboard{border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:var(--shadow)}.scholarshipAdminCard{margin-top:25px;overflow:hidden}.scholarshipAdminCard summary{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:17px 20px;color:var(--violet-dark);font-size:11px;font-weight:900;cursor:pointer;list-style:none}.scholarshipAdminCard summary::-webkit-details-marker{display:none}.scholarshipAdminCard summary small{color:#758594;font-size:8px}.scholarshipAdminCard[open] summary{border-bottom:1px solid #e5dced;background:#faf8fc}.scholarshipAdminBody{padding:20px}.scholarshipCampaignForm{display:grid;grid-template-columns:1.4fr .45fr 1fr;gap:12px;margin-bottom:14px}.scholarshipCampaignList{display:grid;gap:8px;margin-top:17px}.scholarshipCampaignList article{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid #e7edf2;padding:12px 0}.scholarshipCampaignList b{color:var(--navy-900);font:700 14px Georgia,serif}.scholarshipCampaignList p,.scholarshipCampaignList small{display:block;margin:3px 0 0;color:#71808e;font-size:8px}.scholarshipSelector{display:grid;grid-template-columns:minmax(280px,.8fr) 1.2fr;align-items:center;gap:22px;margin-top:18px;padding:18px 22px}.scholarshipSelectorInfo{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:2px 11px;border-left:1px solid #dbe5ec;padding-left:20px}.scholarshipSelectorInfo>span{grid-column:1/-1;color:var(--violet);font-size:8px;font-weight:950;letter-spacing:.09em}.scholarshipSelectorInfo>b{color:var(--navy-800);font:700 30px Georgia,serif}.scholarshipSelectorInfo>small{color:#71818f;font-size:10px;font-weight:800}.scholarshipMetrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.scholarshipMetrics article{border:1px solid #ddd5e5;border-radius:14px;background:linear-gradient(145deg,#fff,#faf8fc);padding:15px 17px}.scholarshipMetrics span,.scholarshipMetrics b{display:block}.scholarshipMetrics span{color:#758293;font-size:8px;font-weight:900;text-transform:uppercase}.scholarshipMetrics b{margin-top:5px;color:var(--violet-dark);font:700 23px Georgia,serif}.scholarshipWorkspace{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(335px,.55fr);gap:17px;margin-top:17px}.scholarshipScannerCard,.scholarshipDashboard{padding:22px}.scholarshipCamera{margin-top:0}.scholarshipCamera.active{box-shadow:0 0 0 4px #7d54a21c}.scholarshipUsb{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-top:13px;border:1px solid #d8cee2;border-radius:14px;background:#faf8fc;padding:14px}.scholarshipUsb.active{border-color:#8a6da6;background:#f5effa;box-shadow:0 0 0 3px #68458712}.scholarshipUsb>div strong{display:block;color:var(--navy-900);font-size:11px}.scholarshipUsb>div p{margin:3px 0;color:#5f6174;font-size:9px}.scholarshipUsb .usbCaptureField{grid-column:1/-1;border-color:#dacbe5}.scholarshipUsb .usbCaptureField>span{color:var(--violet)}.scholarshipUsb .usbCaptureField>span i{background:#7a51a0;box-shadow:0 0 0 4px #7a51a020}.scholarshipUsb .usbCaptureField input{border-color:#bca5cf;color:#3e2a50}.scholarshipManual{margin-top:10px}.scholarshipError{margin-top:14px;border:1px solid #e5a4a4;border-radius:12px;background:#fff1f1;color:#8c2828;padding:15px}.scholarshipError strong,.scholarshipError small{display:block}.scholarshipError p{margin:5px 0;font-size:11px;line-height:1.5}.scholarshipError small{margin-top:6px;font-size:8px}.scholarshipError .button{margin-top:12px}.scholarshipAssignment{min-height:620px}.scholarshipWorkerHead{display:flex;align-items:center;gap:13px;border-bottom:1px solid #e4e9ee;padding-bottom:17px}.scholarshipWorkerHead .successCheck{width:48px;height:48px;font-size:20px}.scholarshipWorkerHead>div{min-width:0}.scholarshipWorkerHead strong{color:#157049;font-size:9px;letter-spacing:.09em}.scholarshipWorkerHead h2{margin:4px 0 3px;color:var(--navy-900);font:700 27px Georgia,serif}.scholarshipWorkerHead p{margin:0;color:var(--muted);font-size:9px}.scholarshipWorkerFacts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:13px 0 19px}.scholarshipWorkerFacts span{min-width:0;border-radius:10px;background:#f3f6f8;color:#52697b;padding:10px;font-size:8px;overflow-wrap:anywhere}.scholarshipWorkerFacts b{display:block;margin-bottom:4px;color:var(--violet-dark);font-size:7px;text-transform:uppercase}.scholarshipStepTitle{display:flex;align-items:center;gap:9px;margin:17px 0 9px;color:var(--navy-900);font-size:11px;font-weight:900}.scholarshipStepTitle>b{display:grid;width:24px;height:24px;place-items:center;border-radius:50%;background:var(--violet);color:#fff;font-size:9px}.scholarshipChildren{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.scholarshipChildren button{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:flex-start;min-height:74px;border:1px solid #cfd9e2;border-radius:12px;background:#fff;padding:11px;text-align:left}.scholarshipChildren button>span{display:grid;width:25px;height:25px;place-items:center;border-radius:50%;background:#edf7f2;color:#18714d;font-size:9px;font-weight:950}.scholarshipChildren button>div{min-width:0}.scholarshipChildren b,.scholarshipChildren small,.scholarshipChildren em{display:block}.scholarshipChildren b{color:var(--navy-900);font-size:9px}.scholarshipChildren small{margin-top:4px;color:#768593;font-size:7px}.scholarshipChildren em{margin-top:6px;color:#963333;font-size:7px;font-style:normal;font-weight:800;line-height:1.4}.scholarshipChildren button.selected{border-color:var(--violet);background:var(--violet-soft);box-shadow:0 0 0 3px #68458714}.scholarshipChildren button.blocked{border-color:#e2b4b4;background:#fff5f5}.scholarshipChildren button.blocked>span{background:#f6dede;color:#9b3434}.scholarshipChildren button:disabled{cursor:not-allowed;opacity:.72}.scholarshipLevels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.scholarshipLevels button{min-height:105px;display:flex;flex-direction:column;align-items:flex-start;border:1px solid #d0dbe4;border-radius:11px;background:#fff;padding:10px;text-align:left}.scholarshipLevels button>span{border-radius:20px;background:#ede7f3;color:var(--violet-dark);padding:4px 7px;font-size:7px;font-weight:950}.scholarshipLevels button>b{margin-top:7px;color:var(--navy-900);font-size:8px;line-height:1.25}.scholarshipLevels button>strong{margin-top:auto;color:#986a10;font-size:10px}.scholarshipLevels button>small{display:block;margin-top:4px;color:#a63c3c;font-size:6px;line-height:1.3}.scholarshipLevels button.selected{border-color:var(--violet);background:var(--violet-soft);box-shadow:0 0 0 3px #68458714}.scholarshipLevels button:disabled{cursor:not-allowed;background:#f5f5f5;opacity:.58}.scholarshipGradeRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:17px}.scholarshipEligibility{display:flex;flex-direction:column;justify-content:center;border:1px solid #b9dfcb;border-radius:11px;background:#eefaf4;color:#176d49;padding:12px 15px}.scholarshipEligibility span{font:700 22px Georgia,serif}.scholarshipEligibility b{margin-top:3px;font-size:8px}.scholarshipEligibility.denied{border-color:#e5b3b3;background:#fff2f2;color:#943434}.scholarshipDuplicate{margin-top:12px;border:1px solid #e3adad;border-radius:11px;background:#fff1f1;color:#8e2d2d;padding:12px}.scholarshipDuplicate strong{font-size:9px;line-height:1.5}.scholarshipDuplicate p{margin:5px 0 0;font-size:8px}.scholarshipActions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.scholarshipSuccess{min-height:600px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}.scholarshipSuccess>strong{margin-top:11px;color:#16724b;font-size:10px;letter-spacing:.12em}.scholarshipSuccess h2{max-width:100%;margin:8px 0 5px;color:var(--violet-dark);font:700 26px Georgia,serif;overflow-wrap:anywhere}.scholarshipSuccess>p{margin:0;color:var(--muted);font-size:11px}.scholarshipReceipt{width:100%;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:22px 0}.scholarshipReceipt span{border-radius:10px;background:#f3f1f6;color:#4e5e6c;padding:11px;font-size:9px;text-align:left;overflow-wrap:anywhere}.scholarshipReceipt b{display:block;margin-bottom:4px;color:var(--violet-dark);font-size:7px;text-transform:uppercase}.scholarshipCardHeader{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:13px}.scholarshipCardHeader h2{margin:4px 0 0;color:var(--navy-900);font:700 20px Georgia,serif}.scholarshipCardHeader>b{color:var(--violet-dark);font:700 28px Georgia,serif}.scholarshipExportMessage{margin:7px 0 0;border-radius:8px;background:#eaf8f1;color:#176a48;padding:8px 9px;font-size:8px;font-weight:750;line-height:1.4}.scholarshipLevelStats{display:grid;gap:6px;margin-top:15px}.scholarshipLevelStats article{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;border-bottom:1px solid #e8edf1;padding:9px 0}.scholarshipLevelStats article>span{display:grid;width:32px;height:32px;place-items:center;border-radius:9px;background:var(--violet-soft);color:var(--violet-dark);font-size:7px;font-weight:950}.scholarshipLevelStats b,.scholarshipLevelStats small{display:block}.scholarshipLevelStats b{color:var(--navy-900);font-size:8px}.scholarshipLevelStats small{margin-top:3px;color:#798693;font-size:7px}.scholarshipLevelStats strong{color:#875d0c;font-size:9px}.scholarshipDaily,.scholarshipRecent{margin-top:20px}.scholarshipDaily h3,.scholarshipRecent h3{margin:0 0 9px;color:var(--navy-900);font:700 15px Georgia,serif}.scholarshipDaily>article{display:grid;grid-template-columns:1fr 80px;align-items:center;gap:10px;margin-top:9px}.scholarshipDaily b,.scholarshipDaily small{display:block}.scholarshipDaily b{font-size:8px}.scholarshipDaily small{margin-top:2px;color:#7b8792;font-size:6px}.scholarshipDaily article>span{height:5px;overflow:hidden;border-radius:5px;background:#ebe6ef}.scholarshipDaily article>span i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--violet),#b17e37)}.scholarshipDaily>p{color:#798793;font-size:8px}.scholarshipRecent{max-height:430px;overflow:auto;border-top:1px solid #e4e9ed;padding-top:16px}.scholarshipRecent article{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:9px;border-bottom:1px solid #edf0f3;padding:9px 0}.scholarshipRecent article>span{border-radius:16px;background:#f0eaf5;color:var(--violet-dark);padding:5px 7px;font-size:6px;font-weight:950}.scholarshipRecent article>div{min-width:0}.scholarshipRecent b,.scholarshipRecent p,.scholarshipRecent small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.scholarshipRecent b{font-size:8px}.scholarshipRecent p{margin:3px 0;color:#637586;font-size:7px}.scholarshipRecent small{color:#8b7a94;font-size:6px}
+@media(max-width:1050px){.scholarshipWorkspace{grid-template-columns:1fr}.scholarshipDashboard{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.scholarshipCardHeader,.scholarshipDashboard>.button,.scholarshipExportMessage{grid-column:1/-1}.scholarshipRecent{max-height:520px}}
+@media(max-width:800px){.scholarshipHero{align-items:flex-start;flex-direction:column}.scholarshipCampaignForm{grid-template-columns:1fr 1fr}.scholarshipCampaignForm .field:first-child{grid-column:1/-1}.scholarshipSelector{grid-template-columns:1fr}.scholarshipSelectorInfo{border-left:0;border-top:1px solid #dbe5ec;padding:14px 0 0}.scholarshipMetrics{grid-template-columns:1fr 1fr}.scholarshipLevels{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.scholarshipPage{padding:42px 14px 65px}.scholarshipHero h1{font-size:41px}.scholarshipAdminBody,.scholarshipScannerCard,.scholarshipDashboard{padding:17px}.scholarshipCampaignForm,.scholarshipChildren,.scholarshipGradeRow,.scholarshipReceipt{grid-template-columns:1fr}.scholarshipCampaignForm .field:first-child{grid-column:auto}.scholarshipCampaignList article{align-items:flex-start;flex-direction:column}.scholarshipCampaignList .button{width:100%}.scholarshipSelector{padding:16px}.scholarshipMetrics article{padding:13px}.scholarshipMetrics b{font-size:19px}.scholarshipUsb{grid-template-columns:auto 1fr}.scholarshipUsb>.button{grid-column:1/-1;width:100%}.scholarshipWorkerHead{align-items:flex-start}.scholarshipWorkerFacts{grid-template-columns:1fr}.scholarshipLevels{grid-template-columns:repeat(2,1fr)}.scholarshipActions{flex-direction:column}.scholarshipActions .button{width:100%}.scholarshipDashboard{display:block}.scholarshipDaily,.scholarshipRecent{margin-top:20px}}
+.scholarshipDeleteMessage{margin:7px 0 0;border-radius:8px;background:#fff4dc;color:#785309;padding:8px 9px;font-size:8px;font-weight:750;line-height:1.4}.scholarshipRecent{max-height:520px}.scholarshipRecentHead{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:9px}.scholarshipRecentHead h3{margin:0}.scholarshipRecentHead>small{color:#8a6c57;font-size:6px;text-align:right}.scholarshipRecordSearch{display:grid;gap:5px;margin-bottom:5px}.scholarshipRecordSearch>span{color:#667786;font-size:7px;font-weight:900;text-transform:uppercase}.scholarshipRecordSearch input{width:100%;min-height:38px;border:1px solid #d0dbe4;border-radius:9px;background:#fff;padding:9px 10px;color:var(--ink);font-size:8px;outline:none}.scholarshipRecordSearch input:focus{border-color:var(--violet);box-shadow:0 0 0 3px #68458712}.scholarshipRecent article{grid-template-columns:auto minmax(0,1fr) auto}.scholarshipRecent b,.scholarshipRecent p,.scholarshipRecent article small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.scholarshipDeleteButton{min-height:29px;border:1px solid #e1baba;border-radius:8px;background:#fff4f4;color:#963737;padding:5px 8px;font-size:7px;font-weight:900}.scholarshipDeleteButton:hover{border-color:#c87171;background:#ffeaea}.scholarshipDeleteButton:disabled{cursor:wait;opacity:.6}.scholarshipNoRecords{border-radius:9px;background:#f5f7f9;color:#758494;padding:12px;text-align:center;font-size:8px}
+@media(max-width:560px){.scholarshipRecentHead{align-items:flex-start;flex-direction:column}.scholarshipRecentHead>small{text-align:left}.scholarshipRecent article{grid-template-columns:auto minmax(0,1fr)}.scholarshipDeleteButton{grid-column:1/-1;width:100%}}
+.scholarshipPrintNotice{margin:-10px 0 16px!important;border-radius:9px;background:#f7f1fb;color:#67457f!important;padding:10px 13px;font-size:8px!important;font-weight:800;line-height:1.45}.scholarshipSuccessActions{display:flex;justify-content:center;gap:9px}.scholarshipRecordActions{display:grid;gap:5px}.scholarshipReprintButton{min-height:29px;border:1px solid #bca5cf;border-radius:8px;background:#f7f1fb;color:#67457f;padding:5px 8px;font-size:7px;font-weight:900}.scholarshipReprintButton:hover{border-color:#86649f;background:#efe4f6}.scholarshipReprintButton:disabled{cursor:wait;opacity:.6}.scholarshipPrintSheet{display:none}.scholarshipPaymentReceipt{display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;border:2px solid #432a5b;border-radius:14px;background:#fff;color:#1a2e40}.scholarshipPaymentReceipt>header{display:grid;grid-template-columns:43mm 1fr;align-items:center;gap:6mm;border-bottom:1px solid #d7c9e1;background:linear-gradient(135deg,#f8f3fb,#fff);padding:4mm 5mm}.scholarshipPaymentReceipt>header img{width:41mm;height:12mm;object-fit:contain;object-position:left}.scholarshipPaymentReceipt>header div{text-align:right}.scholarshipPaymentReceipt>header span{display:block;color:#75528f;font-size:7px;font-weight:950;letter-spacing:.13em}.scholarshipPaymentReceipt>header h1{margin:1mm 0 0;color:#352046;font:700 18px/.95 Georgia,serif;letter-spacing:-.02em}.scholarshipPaymentReceipt>header p{margin:1.2mm 0 0;color:#7a6a83;font-size:7px;font-weight:800}.scholarshipPaymentBody{display:grid;grid-template-columns:minmax(0,1fr) 39mm;gap:3mm 5mm;padding:3.5mm 5mm}.scholarshipPaymentBody>section{min-width:0}.scholarshipPaymentFolio{display:flex;align-items:center;justify-content:space-between;gap:4mm;border:1px solid #d4b551;border-radius:7px;background:#fff8df;padding:2mm 3mm}.scholarshipPaymentFolio span{color:#765b13;font-size:6px;font-weight:950;letter-spacing:.1em}.scholarshipPaymentFolio strong{color:#4d3500;font-size:11px;letter-spacing:.04em}.scholarshipPaymentBody dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.5mm 4mm;margin:3mm 0 0}.scholarshipPaymentBody dl div{min-width:0;border-bottom:1px solid #e1e7eb;padding-bottom:1mm}.scholarshipPaymentBody dt{color:#796b82;font-size:5.5px;font-weight:950;letter-spacing:.04em;text-transform:uppercase}.scholarshipPaymentBody dd{margin:.7mm 0 0;overflow-wrap:anywhere;color:#182d40;font-size:7px;font-weight:800;line-height:1.2}.scholarshipPaymentBody .scholarshipPaymentDate{grid-column:1/-1}.scholarshipPaymentBody>aside{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.scholarshipPaymentBody>aside img,.scholarshipQrLoading{display:grid;width:34mm;height:34mm;place-items:center}.scholarshipQrLoading{border:1px solid #ddd2e5;background:#faf8fc;color:#806d8b;font-size:6px}.scholarshipPaymentBody>aside b{margin-top:1.5mm;color:#513666;font-size:6px;letter-spacing:.07em}.scholarshipPaymentBody>aside code{margin-top:.8mm;color:#776985;font-size:5px}.scholarshipStampGrid{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,1fr);gap:5mm}.scholarshipStampGrid span{height:18mm;border:1px dashed #836c94;border-radius:7px;color:#765f87;padding:2mm;text-align:center;font-size:6px;font-weight:950;letter-spacing:.08em}.scholarshipPaymentReceipt>footer{display:flex;align-items:center;justify-content:space-between;gap:5mm;background:#432a5b;color:#fff;padding:2.2mm 5mm;font-size:5.5px}.scholarshipPaymentReceipt>footer b{color:#f0ce68;letter-spacing:.07em}
+@media(max-width:560px){.scholarshipSuccessActions{width:100%;flex-direction:column}.scholarshipSuccessActions .button{width:100%}.scholarshipRecordActions{grid-column:1/-1;grid-template-columns:1fr 1fr}.scholarshipRecordActions button{width:100%}}
+@media print{
+  html.printing-scholarship-receipts,html.printing-scholarship-receipts body{width:100%;min-height:0;margin:0!important;background:#fff!important}
+  body.printing-scholarship-receipts main{display:block!important;width:100%!important;margin:0!important;padding:0!important;background:#fff!important}
+  body.printing-scholarship-receipts main>:not(.scholarshipPrintSheet){display:none!important}
+  body.printing-scholarship-receipts .scholarshipPrintSheet{position:relative!important;inset:auto!important;display:grid!important;grid-template-rows:repeat(2,minmax(0,1fr));gap:5mm;width:190mm;height:277mm;margin:0 auto!important;padding:0!important;overflow:hidden;visibility:visible!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  body.printing-scholarship-receipts .scholarshipPrintSheet,body.printing-scholarship-receipts .scholarshipPrintSheet *{visibility:visible!important}
+  body.printing-scholarship-receipts .scholarshipPaymentReceipt{min-height:0;overflow:hidden;break-inside:avoid;page-break-inside:avoid;box-shadow:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  @page{size:A4 portrait;margin:10mm}
+}
+.scholarshipCampaignActions{display:flex;align-items:center;gap:7px}
+.scholarshipTechnicalCard{border-color:#b89bcf;background:linear-gradient(145deg,#fff,#faf5fd)}
+.scholarshipManualLookup{display:grid;grid-template-columns:minmax(220px,1fr) auto;align-items:end;gap:12px}
+.scholarshipTechnicalWorkspace{display:grid;gap:15px;margin-top:16px;border-top:1px solid #ded1e7;padding-top:16px}
+.scholarshipTechnicalWorkspace>header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}
+.scholarshipTechnicalWorkspace>header h3{margin:4px 0;color:var(--navy-900);font:700 21px Georgia,serif}
+.scholarshipTechnicalWorkspace>header p{margin:0;color:var(--muted);font-size:8px}
+.scholarshipTechnicalWorkspace>header>small{border-radius:20px;background:#efe4f6;color:#684587;padding:7px 10px;font-size:7px;font-weight:900}
+.scholarshipTechnicalChildren{display:grid;gap:8px}
+.scholarshipTechnicalChildren article{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;border:1px solid #d9dfe5;border-radius:11px;background:#fff;padding:11px 12px}
+.scholarshipTechnicalChildren b,.scholarshipTechnicalChildren p,.scholarshipTechnicalChildren small{display:block;overflow-wrap:anywhere}
+.scholarshipTechnicalChildren b{color:var(--navy-900);font-size:9px}
+.scholarshipTechnicalChildren p{margin:4px 0;color:#5f7180;font-size:7px}
+.scholarshipTechnicalChildren small{color:#806d8b;font-size:6px}
+.scholarshipTechnicalActions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+.scholarshipManualChildForm{display:grid;grid-template-columns:minmax(210px,1fr) minmax(180px,.8fr) auto auto;align-items:end;gap:10px;border-radius:12px;background:#f2ecf7;padding:13px}
+.scholarshipEditButton{min-height:29px;border:1px solid #b2c5d7;border-radius:8px;background:#f2f7fb;color:#365d7b;padding:5px 8px;font-size:7px;font-weight:900}
+.scholarshipEditButton:hover{border-color:#6f94b2;background:#e8f1f8}
+.scholarshipEditButton:disabled{cursor:wait;opacity:.6}
+@media(max-width:560px){.scholarshipCampaignActions{width:100%}.scholarshipCampaignActions .button{flex:1}}
+@media(max-width:800px){.scholarshipManualChildForm{grid-template-columns:1fr 1fr}.scholarshipTechnicalActions{justify-content:flex-start}}
+@media(max-width:560px){.scholarshipManualLookup,.scholarshipManualChildForm,.scholarshipTechnicalChildren article{grid-template-columns:1fr}.scholarshipManualLookup .button,.scholarshipManualChildForm .button{width:100%}.scholarshipTechnicalWorkspace>header{flex-direction:column}.scholarshipTechnicalActions{display:grid;grid-template-columns:1fr 1fr}.scholarshipTechnicalActions .button:first-child{grid-column:1/-1}}
+
+.scholarshipConfirmationBackdrop {
+  position: fixed;
+  z-index: 2000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  background: rgb(17 25 39 / 72%);
+  padding: 22px;
+  backdrop-filter: blur(5px);
+}
+.scholarshipConfirmationDialog {
+  width: min(680px, 100%);
+  max-height: calc(100dvh - 44px);
+  overflow-y: auto;
+  border: 1px solid #d8c5e6;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 28px 80px rgb(14 22 36 / 35%);
+  padding: 24px;
+}
+.scholarshipConfirmationDialog > header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 13px;
+}
+.scholarshipConfirmationDialog > header > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff1c9;
+  color: #7a5600;
+  font-size: 18px;
+  font-weight: 950;
+}
+.scholarshipConfirmationDialog header small {
+  display: block;
+  color: #7b5594;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .1em;
+}
+.scholarshipConfirmationDialog h2 {
+  margin: 5px 0 0;
+  color: var(--navy-900);
+  font: 700 25px/1.08 Georgia, serif;
+}
+.scholarshipConfirmationDialog > p {
+  margin: 14px 0;
+  color: #5e7080;
+  font-size: 10px;
+  line-height: 1.55;
+}
+.scholarshipConfirmationDialog dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.scholarshipConfirmationDialog dl > div {
+  min-width: 0;
+  border: 1px solid #e0e6eb;
+  border-radius: 10px;
+  background: #f7f9fb;
+  padding: 10px 11px;
+}
+.scholarshipConfirmationDialog dl > div.wide { grid-column: 1 / -1; }
+.scholarshipConfirmationDialog dt {
+  color: #745388;
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.scholarshipConfirmationDialog dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  color: #172d40;
+  font-size: 9px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+.scholarshipConfirmationNotice {
+  display: block;
+  margin-top: 12px;
+  border-radius: 9px;
+  background: #fff7df;
+  color: #6c5009;
+  padding: 9px 11px;
+  font-size: 8px;
+  font-weight: 850;
+  line-height: 1.4;
+}
+.scholarshipConfirmationDialog > footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 17px;
+}
+@media(max-width:560px) {
+  .scholarshipConfirmationBackdrop { align-items: start; padding: 12px; }
+  .scholarshipConfirmationDialog {
+    max-height: calc(100dvh - 24px);
+    border-radius: 16px;
+    padding: 18px;
+  }
+  .scholarshipConfirmationDialog h2 { font-size: 21px; }
+  .scholarshipConfirmationDialog dl { grid-template-columns: 1fr; }
+  .scholarshipConfirmationDialog dl > div.wide { grid-column: auto; }
+  .scholarshipConfirmationDialog > footer { flex-direction: column-reverse; }
+  .scholarshipConfirmationDialog > footer .button { width: 100%; }
+}

@@ -1,0 +1,181 @@
+.deviTrainerPage { min-height: 100vh; background: radial-gradient(circle at 92% 8%,rgba(63,166,207,.16),transparent 26%),linear-gradient(180deg,#edf5f8 0,#f8fafb 420px,#eef3f6 100%); color: #12334d; padding: 38px clamp(15px,3vw,42px) 90px; }
+.deviTrainerSecurity { max-width: 1220px; display: grid; grid-template-columns: minmax(260px,1fr) minmax(170px,.45fr) minmax(190px,.5fr) auto; align-items: center; gap: 10px; box-sizing: border-box; margin: 0 auto 15px; border: 1px solid #dfbd63; border-radius: 15px; background: #fff8df; box-shadow: 0 12px 35px rgba(91,67,15,.08); padding: 13px 15px; }
+.deviTrainerSecurity b,.deviTrainerSecurity span { display: block; }
+.deviTrainerSecurity b { color: #65470c; font-size: 11px; }
+.deviTrainerSecurity span { margin-top: 3px; color: #7b6840; font-size: 8px; line-height: 1.4; }
+.deviTrainerSecurity input { min-height: 38px; box-sizing: border-box; border: 1px solid #d8c58e; border-radius: 9px; outline: none; background: white; color: #433713; padding: 8px 10px; font-size: 9px; }
+.deviTrainerSecurity input:focus { border-color: #a77b19; box-shadow: 0 0 0 3px rgba(167,123,25,.12); }
+.deviTrainerSecurity button { min-height: 38px; border: 0; border-radius: 9px; background: #8a6514; color: white; padding: 8px 12px; font-size: 8px; font-weight: 950; cursor: pointer; }
+.deviTrainerSecurity button:disabled { cursor: wait; opacity: .6; }
+.deviTrainerHero { position: relative; max-width: 1220px; min-height: 310px; display: grid; grid-template-columns: minmax(0,1.2fr) minmax(290px,.8fr); align-items: center; gap: 35px; overflow: hidden; margin: 0 auto; border: 1px solid rgba(144,188,208,.5); border-radius: 27px; background: linear-gradient(120deg,#061b32 0,#0a3559 63%,#0f5676 100%); box-shadow: 0 25px 80px rgba(4,28,50,.2); padding: 42px clamp(25px,5vw,66px); }
+.deviTrainerHero::after { position: absolute; right: -120px; bottom: -220px; width: 490px; height: 490px; border: 1px solid rgba(255,255,255,.11); border-radius: 50%; content: ""; }
+.deviTrainerHero > div:first-child { position: relative; z-index: 2; }
+.deviTrainerEyebrow { color: #f4c55a; font-size: 9px; font-weight: 950; letter-spacing: .18em; }
+.deviTrainerHero h1 { margin: 9px 0 13px; color: white; font: 800 clamp(36px,5vw,61px)/.98 Georgia,serif; letter-spacing: -.045em; }
+.deviTrainerHero p { max-width: 690px; margin: 0; color: #d4e5ee; font-size: 13px; line-height: 1.65; }
+.deviTrainerRules { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 23px; }
+.deviTrainerRules span { border: 1px solid rgba(154,209,229,.22); border-radius: 999px; background: rgba(255,255,255,.07); color: #e8f4f8; padding: 7px 10px; font-size: 8px; font-weight: 850; }
+.deviTrainerHeroArt { position: relative; z-index: 2; height: 230px; display: grid; place-items: center; }
+.deviTrainerHeroArt > span { position: absolute; top: 10px; right: 15px; color: #f4c55a; font-size: 32px; animation: deviTrainerSpark 2.4s ease-in-out infinite; }
+.deviTrainerHeroArt img { width: 245px; height: 245px; object-fit: contain; filter: drop-shadow(0 22px 25px rgba(0,0,0,.35)); }
+.deviTrainerHeroArt b { position: absolute; bottom: 0; border: 1px solid rgba(255,255,255,.26); border-radius: 999px; background: rgba(5,25,45,.72); color: #f4c55a; padding: 7px 12px; font-size: 7px; letter-spacing: .14em; backdrop-filter: blur(8px); }
+.deviTrainerMetrics { max-width: 1120px; display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin: -22px auto 24px; position: relative; z-index: 4; }
+.deviTrainerMetrics article { border: 1px solid #d6e4eb; border-radius: 16px; background: white; box-shadow: 0 12px 32px rgba(8,37,59,.09); padding: 17px 18px; }
+.deviTrainerMetrics article.ready { background: #eaf8f0; border-color: #b9ddc8; }
+.deviTrainerMetrics span,.deviTrainerMetrics small { display: block; color: #708595; font-size: 7px; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
+.deviTrainerMetrics b { display: block; margin: 4px 0; color: #0b3556; font: 850 26px/1 Georgia,serif; }
+.deviTrainerMetrics .ready b { color: #19714e; font: 950 18px/1.4 Arial,sans-serif; letter-spacing: .08em; }
+.deviTrainerAlert { max-width: 1220px; display: flex; align-items: center; gap: 8px; margin: 0 auto 15px; border-radius: 13px; padding: 13px 15px; font-size: 10px; font-weight: 800; }
+.deviTrainerAlert.success { border: 1px solid #b8ddc7; background: #edf9f2; color: #176545; }
+.deviTrainerAlert.error { border: 1px solid #ebc5cb; background: #fff1f3; color: #963444; }
+.deviTrainerAlert button { margin-left: auto; border: 0; background: transparent; color: inherit; font-size: 9px; font-weight: 950; cursor: pointer; }
+.deviTrainerForms { max-width: 1220px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: start; gap: 14px; margin: 0 auto 24px; }
+.deviTrainerCard { display: grid; gap: 11px; border: 1px solid #d5e1e8; border-top: 4px solid #3382ad; border-radius: 19px; background: white; box-shadow: 0 14px 45px rgba(7,32,52,.08); padding: 20px; }
+.deviTrainerCard.correction { border-top-color: #d1a22d; }
+.deviTrainerCard.manual { border-top-color: #3a9670; }
+.deviTrainerCardTitle { display: flex; align-items: center; gap: 10px; }
+.deviTrainerCardTitle > span { width: 37px; height: 37px; display: grid; place-items: center; flex: none; border-radius: 12px; background: #eaf5fa; color: #1d6b98; font: 950 12px Arial,sans-serif; }
+.deviTrainerCard.correction .deviTrainerCardTitle > span { background: #fff5da; color: #916713; }
+.deviTrainerCard.manual .deviTrainerCardTitle > span { background: #e9f7f0; color: #237657; }
+.deviTrainerCardTitle small { display: block; color: #4a89ac; font-size: 6px; font-weight: 950; letter-spacing: .14em; }
+.deviTrainerCardTitle h2 { margin: 2px 0 0; color: #0c304c; font: 800 19px/1.05 Georgia,serif; }
+.deviTrainerCard > p { min-height: 45px; margin: 0; color: #657b8c; font-size: 9px; line-height: 1.55; }
+.deviTrainerCard label:not(.deviTrainerFile):not(.deviTrainerConfirm) { display: grid; gap: 5px; }
+.deviTrainerCard label > span:first-child { color: #3b5b70; font-size: 8px; font-weight: 900; }
+.deviTrainerCard input[type="text"],.deviTrainerCard label:not(.deviTrainerFile):not(.deviTrainerConfirm) input,.deviTrainerCard textarea { width: 100%; box-sizing: border-box; border: 1px solid #cfdae2; border-radius: 10px; outline: none; background: #f9fbfc; color: #173950; padding: 10px 11px; font: 9px/1.5 Arial,sans-serif; resize: vertical; }
+.deviTrainerCard input:focus,.deviTrainerCard textarea:focus { border-color: #3c8bb6; box-shadow: 0 0 0 3px rgba(60,139,182,.12); background: white; }
+.deviTrainerFile { min-height: 112px; display: grid; place-items: center; align-content: center; gap: 5px; border: 2px dashed #bad3df; border-radius: 13px; background: #f2f8fb; color: #285c79; text-align: center; padding: 13px; cursor: pointer; }
+.deviTrainerFile input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.deviTrainerFile > span { font-size: 22px; }
+.deviTrainerFile b { max-width: 100%; overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.deviTrainerFile small { color: #6e8795; font-size: 7px; line-height: 1.4; }
+.deviTrainerConfirm { display: flex; align-items: flex-start; gap: 8px; border: 1px solid #e1e8ed; border-radius: 10px; background: #f8fafb; padding: 9px 10px; color: #587080; font-size: 8px; font-weight: 750; line-height: 1.45; }
+.deviTrainerConfirm input { margin-top: 1px; accent-color: #176a96; }
+.deviTrainerPrimary { min-height: 41px; border: 0; border-radius: 11px; background: linear-gradient(110deg,#0b3658,#17658d); color: white; padding: 10px 14px; font-size: 9px; font-weight: 950; cursor: pointer; }
+.deviTrainerCard.correction .deviTrainerPrimary { background: linear-gradient(110deg,#9c6b10,#d1a22d); color: #fffdf7; }
+.deviTrainerCard.manual .deviTrainerPrimary { background: linear-gradient(110deg,#195e45,#30936a); }
+.deviTrainerPrimary:disabled { cursor: not-allowed; filter: grayscale(.4); opacity: .55; }
+.deviTrainerCounter { display: flex; justify-content: space-between; color: #728795; font-size: 7px; }
+.deviTrainerCounter b { color: #2f6e91; }
+.deviTrainerLibrary { max-width: 1220px; margin: 0 auto; border: 1px solid #d3e0e7; border-radius: 20px; background: white; box-shadow: 0 15px 48px rgba(7,31,51,.08); overflow: hidden; }
+.deviTrainerLibraryHead { display: flex; justify-content: space-between; align-items: center; gap: 20px; border-bottom: 1px solid #dfe8ed; background: linear-gradient(90deg,#f7fafb,#edf5f8); padding: 20px 22px; }
+.deviTrainerLibraryHead span { color: #3180aa; font-size: 7px; font-weight: 950; letter-spacing: .15em; }
+.deviTrainerLibraryHead h2 { margin: 3px 0; color: #0b304c; font: 800 24px/1.1 Georgia,serif; }
+.deviTrainerLibraryHead p { margin: 0; color: #6e8291; font-size: 8px; }
+.deviTrainerLibraryHead button { border: 1px solid #c6d8e2; border-radius: 9px; background: white; color: #215a7b; padding: 8px 11px; font-size: 8px; font-weight: 900; cursor: pointer; }
+.deviTrainerSourceList { display: grid; gap: 0; }
+.deviTrainerSource { display: grid; grid-template-columns: 90px minmax(0,1fr) auto; align-items: start; gap: 16px; border-bottom: 1px solid #e4ebef; padding: 17px 20px; }
+.deviTrainerSource:last-child { border-bottom: 0; }
+.deviTrainerSource.inactive { background: #f7f8f9; opacity: .72; }
+.deviTrainerSourceKind { display: inline-flex; justify-content: center; border-radius: 999px; background: #e9f4fa; color: #226e97; padding: 6px 8px; font-size: 7px; font-weight: 950; letter-spacing: .08em; }
+.deviTrainerSourceKind.correction { background: #fff3d4; color: #906712; }
+.deviTrainerSourceKind.manual { background: #e9f7ef; color: #267352; }
+.deviTrainerSourceCopy { min-width: 0; }
+.deviTrainerSourceCopy > div:first-child { display: flex; align-items: center; gap: 8px; }
+.deviTrainerSourceCopy h3 { margin: 0; color: #153a54; font-size: 12px; }
+.deviTrainerSourceCopy > div:first-child b { border-radius: 999px; background: #e7f7ee; color: #23704f; padding: 4px 6px; font-size: 6px; letter-spacing: .07em; }
+.deviTrainerSource.inactive .deviTrainerSourceCopy > div:first-child b { background: #eceff1; color: #707b83; }
+.deviTrainerSourceCopy p { display: -webkit-box; margin: 7px 0; overflow: hidden; color: #5b7283; font-size: 8px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.deviTrainerSourceCopy > small { display: block; color: #347797; font-size: 7px; font-weight: 850; }
+.deviTrainerSourceMeta { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 8px; }
+.deviTrainerSourceMeta span { color: #7c8e9b; font-size: 7px; }
+.deviTrainerSourceActions { display: grid; gap: 7px; min-width: 112px; }
+.deviTrainerSourceActions a,.deviTrainerSourceActions button { border: 1px solid #c7d7e0; border-radius: 8px; background: white; color: #245c7b; padding: 7px 9px; text-align: center; font-size: 7px; font-weight: 900; text-decoration: none; cursor: pointer; }
+.deviTrainerSourceActions button { border-color: #e1bdc4; color: #8b3545; }
+.deviTrainerSource.inactive .deviTrainerSourceActions button { border-color: #b9dac8; color: #26704f; }
+.deviTrainerEmpty { display: grid; justify-items: center; gap: 5px; padding: 35px; text-align: center; }
+.deviTrainerEmpty img { width: 95px; height: 95px; object-fit: contain; }
+.deviTrainerEmpty b { color: #183e59; font: 800 17px Georgia,serif; }
+.deviTrainerEmpty p { margin: 0; color: #748895; font-size: 8px; }
+.deviProgressAdmin { max-width: 1220px; margin: 0 auto 24px; overflow: hidden; border: 1px solid #b9d2df; border-radius: 22px; background: #f9fcfd; box-shadow: 0 16px 50px rgba(7,31,51,.1); }
+.deviProgressHead { display: flex; justify-content: space-between; align-items: center; gap: 25px; border-bottom: 1px solid #cfe0e8; background: linear-gradient(110deg,#082842,#105475); padding: 24px 27px; }
+.deviProgressHead > div:first-child { max-width: 710px; }
+.deviProgressHead > div:first-child > span { color: #f3c75e; font-size: 7px; font-weight: 950; letter-spacing: .16em; }
+.deviProgressHead h2 { margin: 5px 0 7px; color: #fff; font: 800 27px/1.08 Georgia,serif; }
+.deviProgressHead p { margin: 0; color: #d7e8ef; font-size: 9px; line-height: 1.55; }
+.deviProgressStats { min-width: 300px; display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
+.deviProgressStats span { display: grid; gap: 2px; border: 1px solid rgba(255,255,255,.14); border-radius: 11px; background: rgba(255,255,255,.07); color: #dcebf1; padding: 10px; font-size: 7px; text-align: center; }
+.deviProgressStats b { color: #fff; font: 850 17px Georgia,serif; }
+.deviProgressAdmin > .deviTrainerAlert { margin: 13px 16px 0; }
+.deviProgressBody { display: grid; grid-template-columns: minmax(300px,.72fr) minmax(0,1.28fr); align-items: start; gap: 15px; padding: 17px; }
+.deviProgressUpload { display: grid; gap: 11px; border: 1px solid #d5e3e9; border-radius: 17px; background: white; padding: 19px; }
+.deviProgressUpload.updating { border-color: #d0ab4c; box-shadow: 0 0 0 3px rgba(208,171,76,.12); }
+.deviProgressUpload .deviTrainerCardTitle > span { background: #e7f5f8; color: #146887; }
+.deviProgressUpload .deviTrainerCardTitle h3 { margin: 2px 0 0; color: #0c304c; font: 800 19px/1.05 Georgia,serif; }
+.deviProgressUpload label:not(.deviTrainerFile) { display: grid; gap: 5px; }
+.deviProgressUpload label > span:first-child { color: #3b5b70; font-size: 8px; font-weight: 900; }
+.deviProgressUpload input:not([type="file"]),.deviProgressUpload select { width: 100%; min-height: 39px; box-sizing: border-box; border: 1px solid #cfdae2; border-radius: 10px; outline: none; background: #f9fbfc; color: #173950; padding: 9px 11px; font: 9px Arial,sans-serif; }
+.deviProgressUpload input:focus,.deviProgressUpload select:focus { border-color: #3c8bb6; box-shadow: 0 0 0 3px rgba(60,139,182,.12); background: white; }
+.deviProgressUpload .deviTrainerFile { min-height: 95px; }
+.deviProgressPrivacy { display: grid; gap: 3px; border: 1px solid #bee0d1; border-radius: 10px; background: #edf9f3; color: #31664f; padding: 9px 10px; }
+.deviProgressPrivacy b { font-size: 8px; }
+.deviProgressPrivacy span { font-size: 7px; line-height: 1.5; }
+.deviProgressVersionNote { color: #6f8491; font-size: 7px; line-height: 1.45; text-align: center; }
+.deviProgressCancel { min-height: 36px; border: 1px solid #c8d7df; border-radius: 10px; background: #fff; color: #4d6879; padding: 8px 12px; font-size: 8px; font-weight: 900; cursor: pointer; }
+.deviProgressCancel:disabled { cursor: not-allowed; opacity: .55; }
+.deviProgressLibrary { overflow: hidden; border: 1px solid #d5e3e9; border-radius: 17px; background: white; }
+.deviProgressLibraryHead { display: flex; justify-content: space-between; align-items: center; gap: 15px; border-bottom: 1px solid #e1eaee; background: #f3f8fa; padding: 13px 15px; }
+.deviProgressLibraryHead > div { display: grid; gap: 2px; }
+.deviProgressLibraryHead b { color: #287797; font-size: 7px; letter-spacing: .12em; }
+.deviProgressLibraryHead span { color: #6d8290; font-size: 8px; }
+.deviProgressLibraryHead button { border: 1px solid #c6d8e2; border-radius: 8px; background: white; color: #215a7b; padding: 7px 10px; font-size: 7px; font-weight: 900; cursor: pointer; }
+.deviProgressList { max-height: 640px; overflow: auto; }
+.deviProgressList > article { display: grid; gap: 7px; border-bottom: 1px solid #e5ecef; padding: 15px; }
+.deviProgressList > article:last-child { border-bottom: 0; }
+.deviProgressList > article.inactive { background: #f7f8f9; opacity: .72; }
+.deviProgressFileTitle { display: flex; align-items: flex-start; gap: 9px; }
+.deviProgressFileTitle > span { flex: none; border-radius: 999px; background: #e5f7ed; color: #23704f; padding: 5px 7px; font-size: 6px; font-weight: 950; letter-spacing: .07em; }
+.deviProgressList > article.inactive .deviProgressFileTitle > span { background: #eceff1; color: #68757e; }
+.deviProgressFileTitle h3 { margin: 0 0 2px; color: #143a54; font-size: 11px; }
+.deviProgressFileTitle b { color: #327695; font-size: 7px; }
+.deviProgressList article > p { margin: 0; color: #587183; font-size: 8px; }
+.deviProgressFileMeta { display: flex; flex-wrap: wrap; gap: 5px 10px; }
+.deviProgressFileMeta span { color: #708592; font-size: 7px; }
+.deviProgressList article > small { overflow: hidden; color: #7c8d98; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+.deviProgressActions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 3px; }
+.deviProgressActions a,.deviProgressActions button { flex: 1; border: 1px solid #c4d8e2; border-radius: 8px; background: white; color: #245f7e; padding: 7px 8px; text-align: center; font-size: 7px; font-weight: 900; text-decoration: none; cursor: pointer; }
+.deviProgressActions button.update { border-color: #aad0c0; background: #f1faf6; color: #246b50; }
+.deviProgressActions button.delete { border-color: #e0b8c0; color: #94394a; }
+.deviProgressActions button:disabled { cursor: not-allowed; opacity: .55; }
+.deviProgressEmpty { display: grid; gap: 4px; padding: 35px 20px; color: #6e8290; text-align: center; }
+.deviProgressEmpty b { color: #183e59; font: 800 16px Georgia,serif; }
+.deviProgressEmpty span { font-size: 8px; }
+@keyframes deviTrainerSpark { 50% { transform: scale(1.18) rotate(8deg); opacity: .7; } }
+@media (max-width: 980px) { .deviTrainerSecurity { grid-template-columns: 1fr 1fr; } .deviTrainerSecurity > div { grid-column: 1/-1; } .deviTrainerForms { grid-template-columns: 1fr 1fr; } .deviTrainerCard.manual { grid-column: 1/-1; } .deviProgressHead { align-items: flex-start; flex-direction: column; } .deviProgressStats { width: 100%; min-width: 0; } .deviProgressBody { grid-template-columns: 1fr; } .deviProgressList { max-height: none; } }
+@media (max-width: 720px) { .deviTrainerPage { padding: 18px 11px 75px; } .deviTrainerHero { min-height: 0; grid-template-columns: 1fr; padding: 28px 22px 12px; } .deviTrainerHeroArt { height: 190px; } .deviTrainerHeroArt img { width: 205px; height: 205px; } .deviTrainerMetrics { grid-template-columns: 1fr 1fr; margin-top: 12px; } .deviTrainerForms { grid-template-columns: 1fr; } .deviTrainerCard.manual { grid-column: auto; } .deviTrainerSource { grid-template-columns: 1fr; gap: 9px; } .deviTrainerSourceKind { justify-self: start; } .deviTrainerSourceActions { display: flex; min-width: 0; } .deviTrainerSourceActions a,.deviTrainerSourceActions button { flex: 1; } .deviProgressHead { padding: 20px; } .deviProgressHead h2 { font-size: 23px; } .deviProgressBody { padding: 10px; } }
+@media (max-width: 430px) { .deviTrainerSecurity { grid-template-columns: 1fr; } .deviTrainerSecurity > div { grid-column: auto; } .deviTrainerHero h1 { font-size: 38px; } .deviTrainerMetrics { grid-template-columns: 1fr; } .deviTrainerLibraryHead { align-items: flex-start; flex-direction: column; } .deviTrainerLibraryHead button { width: 100%; } }
+
+.clause97Page { background: radial-gradient(circle at 92% 8%,rgba(197,152,50,.18),transparent 28%),linear-gradient(180deg,#f4f0e7 0,#fbfcfc 440px,#eef3f6 100%); }
+.clause97Hero { position: relative; max-width: 1220px; min-height: 235px; display: grid; grid-template-columns: minmax(0,1fr) 185px; align-items: center; gap: 28px; overflow: hidden; box-sizing: border-box; margin: 0 auto 18px; border: 1px solid rgba(211,174,84,.45); border-radius: 27px; background: linear-gradient(120deg,#132b37 0,#174859 64%,#94701d 150%); box-shadow: 0 24px 70px rgba(20,46,57,.18); padding: 36px clamp(24px,5vw,60px); }
+.clause97Hero::after { position: absolute; right: -80px; bottom: -210px; width: 410px; height: 410px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; content: ""; }
+.clause97Hero > div { position: relative; z-index: 1; }
+.clause97Hero > div:first-child > span,.clause97LookupHead > div > span { color: #f0c85e; font-size: 8px; font-weight: 950; letter-spacing: .16em; }
+.clause97Hero h1 { margin: 7px 0 11px; color: #fff; font: 800 clamp(38px,5vw,58px)/1 Georgia,serif; letter-spacing: -.04em; }
+.clause97Hero p { max-width: 720px; margin: 0; color: #dce9eb; font-size: 12px; line-height: 1.65; }
+.clause97HeroBadge { width: 150px; height: 150px; display: grid; place-content: center; justify-self: end; box-sizing: border-box; border: 1px solid rgba(255,255,255,.24); border-radius: 50%; background: rgba(255,255,255,.08); text-align: center; backdrop-filter: blur(8px); }
+.clause97HeroBadge b { color: #f2ca60; font: 800 53px/1 Georgia,serif; }
+.clause97HeroBadge span { max-width: 100px; margin-top: 6px; color: #fff; font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.clause97Lookup { max-width: 1220px; overflow: hidden; box-sizing: border-box; margin: 0 auto 20px; border: 1px solid #d7e1e5; border-radius: 21px; background: white; box-shadow: 0 14px 45px rgba(17,48,60,.08); }
+.clause97LookupHead { display: grid; grid-template-columns: minmax(0,1fr) minmax(320px,.7fr); align-items: end; gap: 25px; padding: 24px; border-bottom: 1px solid #e3eaed; background: linear-gradient(135deg,#f9fbfb,#f8f3e7); }
+.clause97LookupHead > div > span { color: #9a7118; }
+.clause97LookupHead h2 { margin: 6px 0; color: #163c4e; font: 800 25px/1.1 Georgia,serif; }
+.clause97LookupHead p { margin: 0; color: #617985; font-size: 9px; line-height: 1.5; }
+.clause97LookupHead form { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; }
+.clause97LookupHead input,.clause97EntryGrid input { min-height: 43px; box-sizing: border-box; border: 1px solid #cbd8dd; border-radius: 10px; outline: none; background: #fff; color: #193f4e; padding: 9px 11px; font-size: 10px; }
+.clause97LookupHead input:focus,.clause97EntryGrid input:focus { border-color: #a67d22; box-shadow: 0 0 0 3px rgba(166,125,34,.11); }
+.clause97LookupHead button,.clause97Results article > button { min-height: 43px; border: 0; border-radius: 10px; background: #a27921; color: #fff; padding: 9px 15px; font-size: 9px; font-weight: 950; cursor: pointer; }
+.clause97LookupHead button:disabled,.clause97Results article > button:disabled { cursor: wait; opacity: .58; }
+.clause97Results { display: grid; gap: 11px; padding: 15px; }
+.clause97Results article { border: 1px solid #d9e3e6; border-left: 4px solid #b98b26; border-radius: 15px; background: #fcfdfd; padding: 17px; }
+.clause97EntryHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+.clause97EntryHead > span { color: #815f14; font-size: 9px; font-weight: 950; letter-spacing: .05em; text-transform: uppercase; }
+.clause97EntryHead small { color: #71838b; font-size: 7px; }
+.clause97EntryGrid { display: grid; grid-template-columns: minmax(150px,.45fr) minmax(190px,.65fr) minmax(0,1.25fr); gap: 10px; margin-bottom: 11px; }
+.clause97EntryGrid label { display: grid; gap: 5px; }
+.clause97EntryGrid label.wide { grid-column: span 2; }
+.clause97EntryGrid label > span { color: #58717c; font-size: 7px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+.clause97EntryGrid input:disabled { background: #edf2f3; color: #5c7078; }
+.clause97Results article > button { display: block; margin-left: auto; }
+
+@media (max-width: 850px) { .clause97Hero { grid-template-columns: 1fr; } .clause97HeroBadge { display: none; } .clause97LookupHead { grid-template-columns: 1fr; } .clause97EntryGrid { grid-template-columns: 1fr 1fr; } .clause97EntryGrid label.wide { grid-column: span 1; } }
+@media (max-width: 560px) { .clause97Hero { min-height: 0; padding: 28px 22px; } .clause97LookupHead form,.clause97EntryGrid { grid-template-columns: 1fr; } .clause97EntryHead { align-items: flex-start; flex-direction: column; } .clause97LookupHead button,.clause97Results article > button { width: 100%; } }
