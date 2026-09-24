@@ -50,6 +50,9 @@ const ScholarshipReaderPanel = lazy(() =>
 const ConveniosPanel = lazy(() =>
   import("./convenios").then((module) => ({ default: module.ConveniosPanel })),
 );
+const CasaCulturaPanel = lazy(() =>
+  import("./casa-cultura").then((module) => ({ default: module.CasaCulturaPanel })),
+);
 const NoticiasPanel = lazy(() =>
   import("./noticias").then((module) => ({ default: module.NoticiasPanel })),
 );
@@ -138,7 +141,7 @@ class PanelLoadBoundary extends Component<
   }
 }
 
-type View = "inicio" | "registro" | "credenciales" | "noticias" | "convenios" | "herramientas" | "informacion-personalizada" | "devi" | "juegos" | "devi-entrenador" | "devi-listados-entrenamiento" | "clausula-97" | "calendario" | "admin" | "lector" | "eventos" | "becas" | "chat";
+type View = "inicio" | "registro" | "credenciales" | "noticias" | "convenios" | "casa-cultura" | "herramientas" | "informacion-personalizada" | "devi" | "juegos" | "devi-entrenador" | "devi-listados-entrenamiento" | "clausula-97" | "calendario" | "admin" | "lector" | "eventos" | "becas" | "chat";
 type Worker = {
   matricula: string;
   fullName: string;
@@ -4404,7 +4407,7 @@ function AdminPanel({ privilege }: { privilege: Privilege }) {
             {roles.map((role) => (
               <article className="roleRow" key={role.matricula}>
                 <span className={`styleDot ${role.credentialStyle}`} />
-                <div><b>{readableName(role.fullName || role.matricula)}</b><p>{role.designation} · Mat. {role.matricula}</p><small>{[role.canAdmin && "Administrador", role.canReview && "Verificador", role.canScan && "Lector QR", role.canTrainDevi && "Entrenador DeVi", role.canManageActs && "Actas y Acuerdos", role.canManageScholarships && "Asuntos Técnicos · Becas Sinabeth", role.canViewFacilityCalendar && "Consulta de calendario", role.canManageSportsCalendar && "Admin. Deportivo", role.canManageUnionCalendar && "Admin. SNTSS", role.canChat && "Chat privado"].filter(Boolean).join(" · ") || "Sin rol de acceso"}</small></div>
+                <div><b>{readableName(role.fullName || role.matricula)}</b><p>{role.designation} · Mat. {role.matricula}</p><small>{[role.canAdmin && "Administrador", role.canReview && "Verificador", role.canScan && "Lector QR", role.canTrainDevi && "Entrenador DeVi", role.canManageActs && "Actas y Acuerdos", role.canManageScholarships && "Asuntos Técnicos · Becas Sinabeth", role.canViewFacilityCalendar && "Consulta de calendario", role.canManageSportsCalendar && "Admin. Deportivo", role.canManageUnionCalendar && "Secretario de Cultura · Casa del Arte", role.canChat && "Chat privado"].filter(Boolean).join(" · ") || "Sin rol de acceso"}</small></div>
                 <StatusPill status={role.active ? "verified" : "rejected"} />
               </article>
             ))}
@@ -4970,6 +4973,8 @@ function HomeContent() {
           ? "admin"
           : nextPrivilege.canManageActs
             ? "clausula-97"
+            : nextPrivilege.canManageUnionCalendar
+              ? "casa-cultura"
             : nextPrivilege.canManageScholarships
               ? "becas"
             : nextPrivilege.canViewFacilityCalendar ||
@@ -5116,6 +5121,7 @@ function HomeContent() {
   const canUseReader = Boolean(privilege?.canScan || privilege?.canAdmin);
   const canTrainDevi = Boolean(privilege?.canTrainDevi || privilege?.canAdmin);
   const canManageActs = Boolean(privilege?.canManageActs || privilege?.canAdmin);
+  const canManageCulture = Boolean(privilege?.canManageUnionCalendar || privilege?.canAdmin);
   const canManageScholarships = Boolean(
     privilege?.canManageScholarships || privilege?.canAdmin,
   );
@@ -5161,7 +5167,8 @@ function HomeContent() {
     (view === "lector" && !canUseReader) ||
     (view === "eventos" && !canUseReader) ||
     (view === "becas" && !canUseReader && !canManageScholarships) ||
-    (view === "chat" && !canUsePrivateChat);
+    (view === "chat" && !canUsePrivateChat) ||
+    (view === "casa-cultura" && !canManageCulture);
 
   const openAccessGate = () => {
     setNationalSplashOpen(true);
@@ -5203,6 +5210,7 @@ function HomeContent() {
           {worker && <button className={view === "credenciales" ? "active" : ""} onClick={() => { setView("credenciales"); void loadCredentials(); }}>Mi credencial</button>}
           {canViewNews && <button className={view === "noticias" ? "active" : ""} onClick={() => setView("noticias")}>Noticias</button>}
           {canViewConvenios && <button className={view === "convenios" ? "active" : ""} onClick={() => setView("convenios")}>Convenios</button>}
+          {canManageCulture && <button className={view === "casa-cultura" ? "active" : ""} onClick={() => setView("casa-cultura")}>Casa de Cultura del Arte</button>}
           <button className={view === "herramientas" ? "active" : ""} onClick={() => setView("herramientas")}>Herramientas</button>
           {canViewPersonalizedInfo && <button className={view === "informacion-personalizada" ? "active" : ""} onClick={() => setView("informacion-personalizada")}>Información Personalizada</button>}
           {canUsePrivateChat && <button className={view === "chat" ? "active" : ""} onClick={() => setView("chat")}>Chat privado</button>}
@@ -5326,6 +5334,7 @@ function HomeContent() {
       <PanelLoadBoundary key={view}>
       <Suspense fallback={<PanelLoading />}>
       {view === "noticias" && canViewNews && <NoticiasPanel />}
+      {view === "casa-cultura" && canManageCulture && <CasaCulturaPanel canManage={canManageCulture} />}
       {view === "convenios" && canViewConvenios && (
         <ConveniosPanel
           memberName={worker ? readableName(worker.fullName) : null}
