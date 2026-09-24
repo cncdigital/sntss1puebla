@@ -5,11 +5,11 @@ import "./casa-cultura.css";
 
 type CasaItem = { id:string; title:string; kind:"publicación"|"curso"|"turismo"|"convenio"; text:string; schedule?:string; level?:string; image?:string; };
 const DEFAULT_ITEMS: CasaItem[] = [
-  {id:"arte",kind:"publicación",title:"Arte, cultura y comunidad",text:"Un espacio para desarrollar la creatividad, aprender nuevas disciplinas y fortalecer la convivencia sindical.",image:"/casa-cultura-arte.jpg"},
-  {id:"idiomas",kind:"curso",title:"Idiomas",text:"Inglés, francés y alemán para niñas, niños, adolescentes, adultos y jubilados.",schedule:"Consulta horarios y grupos disponibles.",level:"Todos los niveles",image:"/casa-cultura-idiomas.jpg"},
-  {id:"musica",kind:"curso",title:"Música",text:"Guitarra, rondalla, coro, batería y guitarra eléctrica.",schedule:"Clases entre semana y sábados.",level:"Inicial e intermedio",image:"/casa-cultura-musica.jpg"},
-  {id:"artes",kind:"curso",title:"Artes escénicas y visuales",text:"Teatro, danza, folclórica, arte y pintura, fotografía y amigurumis.",schedule:"Horarios sujetos a apertura de grupos.",level:"Niñas, niños, jóvenes, adultos y jubilados",image:"/casa-cultura-artes.jpg"},
-  {id:"turismo",kind:"turismo",title:"Turismo sindical",text:"Próximamente encontrarás recorridos, destinos, actividades culturales y promociones para disfrutar Puebla y México.",schedule:"Publicaremos calendario, costos y cupos en este espacio.",image:"/casa-cultura-portada.jpg"},
+  {id:"arte",kind:"publicación",title:"Arte, cultura y comunidad",text:"Un espacio para desarrollar la creatividad, aprender nuevas disciplinas y fortalecer la convivencia sindical.",image:"/casa-cultura-arte.svg"},
+  {id:"idiomas",kind:"curso",title:"Idiomas",text:"Inglés, francés y alemán para niñas, niños, adolescentes, adultos y jubilados.",schedule:"Consulta horarios y grupos disponibles.",level:"Todos los niveles",image:"/casa-cultura-idiomas.svg"},
+  {id:"musica",kind:"curso",title:"Música",text:"Guitarra, rondalla, coro, batería y guitarra eléctrica.",schedule:"Clases entre semana y sábados.",level:"Inicial e intermedio",image:"/casa-cultura-musica.svg"},
+  {id:"artes",kind:"curso",title:"Artes escénicas y visuales",text:"Teatro, danza, folclórica, arte y pintura, fotografía y amigurumis.",schedule:"Horarios sujetos a apertura de grupos.",level:"Niñas, niños, jóvenes, adultos y jubilados",image:"/casa-cultura-artes.svg"},
+  {id:"turismo",kind:"turismo",title:"Turismo sindical",text:"Próximamente encontrarás recorridos, destinos, actividades culturales y promociones para disfrutar Puebla y México.",schedule:"Publicaremos calendario, costos y cupos en este espacio.",image:"/casa-cultura-portada.svg"},
 ];
 const KEY="sntss-casa-cultura-items-v1";
 
@@ -25,7 +25,7 @@ export function CasaCulturaPanel({ canManage=false }: { canManage?: boolean }) {
   return <main className="casaCultura">
     <section className="casaHero">
       <div><span className="casaEyebrow">SNTSS · SECCIÓN I PUEBLA</span><h1>Casa de Cultura del Arte</h1><p>Un espacio para aprender, crear, convivir y descubrir nuevos destinos.</p><div className="casaPills"><span>Arte</span><span>Cultura</span><span>Turismo</span></div></div>
-      <img src="/casa-cultura-portada.jpg" alt="Casa de Cultura del Arte del SNTSS" />
+      <img src="/casa-cultura-portada.svg" alt="Casa de Cultura del Arte del SNTSS" />
     </section>
     <section className="casaIntro"><div><span className="casaEyebrow">TODOS JUNTOS TODOS FUERTES</span><h2>Talento que se organiza, comunidad que crece.</h2></div><p>Consulta publicaciones, cursos, horarios, convenios y actividades culturales de la Sección I Puebla.</p></section>
     <div className="casaFilters" role="tablist">{(["todos","publicación","curso","turismo","convenio"] as const).map(k=><button key={k} className={active===k?"active":""} onClick={()=>setActive(k)}>{k==="todos"?"Todo":k[0].toUpperCase()+k.slice(1)}</button>)}</div>
