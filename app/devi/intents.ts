@@ -173,15 +173,15 @@ const SECTION_INFORMATION_SOURCES: Record<string, DeviSource> = {
       "Página 382 del PDF oficial · texto vigente con última reforma DOF 14-05-2026",
     sourceKind: "official",
   },
-  "portal-access-mexico": {
-    id: "portal-access-mexico",
+  "portal-access-worldwide": {
+    id: "portal-access-worldwide",
     document: "Configuración operativa del portal SNTSS Sección I Puebla",
     page: 1,
-    section: "Control geográfico de acceso",
-    heading: "Acceso permitido únicamente desde México",
+    section: "Acceso global",
+    heading: "Acceso mundial sin bloqueo geográfico",
     excerpt:
-      "El portal valida el país asociado a la dirección IP y rechaza con código 403 las conexiones identificadas fuera de México. Una VPN o red corporativa puede hacer que una conexión ubicada físicamente en México aparezca como extranjera.",
-    locator: "Regla activa de seguridad del portal",
+      "El portal no aplica una restricción geográfica por país. SNTSS1PUEBLA, Credenciales y DeVi pueden abrirse desde México o desde el extranjero; un error 403 no debe atribuirse automáticamente a la ubicación de la persona usuaria.",
+    locator: "Configuración vigente del portal",
     sourceKind: "official",
   },
 };
@@ -220,15 +220,15 @@ const COMMON_INTENTS: CommonIntent[] = [
         has(text, /\b(no\s+(?:puedo\s+)?(?:entrar|abrir|acceder)|portal|pagina|sitio)\b/)),
     answer: () =>
       direct(
-        "El portal sólo permite conexiones cuya dirección IP sea identificada en México. Si estás en otro país, el bloqueo con código **403** es el comportamiento esperado; el módulo de DeVi tampoco podrá abrirse porque forma parte del mismo portal.",
-        "Si estás en México, desactiva cualquier VPN o proxy y vuelve a intentar. Si continúa el bloqueo, cambia entre Wi-Fi y datos móviles. Para reportarlo, envía al soporte una captura del error, la hora aproximada y el nombre de tu proveedor de internet, sin compartir contraseñas ni datos personales sensibles.",
+        "El portal **no tiene una restricción geográfica activa por país**. SNTSS1PUEBLA, Credenciales y DeVi pueden abrirse desde México o desde el extranjero.",
+        "Si aparece un **403**, no lo atribuyas automáticamente al país. Abre el portal desde su dominio oficial, actualiza la página y evita enlaces incrustados o intermediarios. Si persiste, reporta una captura del error y la hora aproximada, sin compartir contraseñas ni datos personales sensibles.",
       ),
-    referralMatter: () => "soporte tecnico portal acceso desde mexico error 403",
-    sourceQuery: "portal acceso Mexico bloqueo pais VPN error 403",
+    referralMatter: () => "soporte tecnico portal acceso mundial error 403",
+    sourceQuery: "portal acceso mundial sin bloqueo geografico error 403",
     sourceSpecs: [
       {
-        id: "portal-access-mexico",
-        heading: "Control geográfico de acceso al portal",
+        id: "portal-access-worldwide",
+        heading: "Acceso mundial sin bloqueo geográfico",
       },
     ],
   },
