@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { sha256 } from "../../reader/auth";
+import {\n  hashPrivilegedPin,\n  isLegacyPinHash,\n  verifyPrivilegedPin,\n} from "../pin-crypto";
 import {
   getPrivilege,
   getTrustedOwnerPrivilege,
@@ -15,7 +15,7 @@ const NO_STORE_HEADERS = {
   pragma: "no-cache",
 };
 
-const PERSISTENT_SESSION_SECONDS = 400 * 24 * 60 * 60;
+const PERSISTENT_SESSION_SECONDS = 12 * 60 * 60;
 
 function privilegedSessionCookie(
   token: string,
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
   if (token) {
     try {
       await env.DB.prepare(
-        "UPDATE privileged_sessions SET expires_at=datetime('now','+400 days') WHERE token=?",
+        "UPDATE privileged_sessions SET expires_at=datetime('now','+12 hours') WHERE token=?",
       )
         .bind(token)
         .run();
@@ -233,7 +233,7 @@ export async function POST(request: Request) {
     console.error("privileged-session.lookup-failed", error);
     return databaseBusyResponse();
   }
-  if (!account || (await sha256(pin)) !== account.pinHash) {
+  if (!account || !(await verifyPrivilegedPin(pin, account.pinHash))) {
     const failedAttempts = Number(loginSecurity?.failedAttempts || 0) + 1;
     const lockedUntil =
       failedAttempts >= 5
