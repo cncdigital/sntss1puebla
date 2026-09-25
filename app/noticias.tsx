@@ -24,6 +24,8 @@ type NewsApiResponse = {
 };
 
 const RADIO_STATION_URL = "https://sntss1puebla.radio12345.com/";
+const RADIO_AUTO_EXTENSION_VERSION = "0.10.1";
+const RADIO_AUTO_EXTENSION_APK_URL = "/downloads/RadioSindical-0.10.1.apk";
 
 function NewsCard({ item, index }: { item: NewsItem; index: number }) {
   const featured = index === 0;
@@ -71,6 +73,22 @@ export function NoticiasPanel() {
   >("checking");
   const [radioAvailable, setRadioAvailable] = useState(true);
   const [radioDirectUrl, setRadioDirectUrl] = useState(RADIO_STATION_URL);
+  const [showAutoExtension, setShowAutoExtension] = useState(false);
+
+  useEffect(() => {
+    const nativeRadio = (window as typeof window & {
+      NativeRadio?: { installedVersion?: () => string };
+    }).NativeRadio;
+    if (!nativeRadio?.installedVersion) {
+      setShowAutoExtension(true);
+      return;
+    }
+    try {
+      setShowAutoExtension(nativeRadio.installedVersion() !== RADIO_AUTO_EXTENSION_VERSION);
+    } catch {
+      setShowAutoExtension(true);
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -179,6 +197,19 @@ export function NoticiasPanel() {
             </div>
           </div>
           <div className="newsRadioConsole">
+            {showAutoExtension && (
+              <a
+                className="newsRadioAutoInstall"
+                href={RADIO_AUTO_EXTENSION_APK_URL}
+                download="RadioSindical-0.10.1.apk"
+              >
+                <span aria-hidden="true">🚘</span>
+                <span>
+                  <b>Instala la Extensión de Auto de Tu Radio Sindical</b>
+                  <small>Android Auto · versión {RADIO_AUTO_EXTENSION_VERSION}</small>
+                </span>
+              </a>
+            )}
             <div className="newsRadioSignal">
               <span>EMISORA OFICIAL</span>
               <i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" />
