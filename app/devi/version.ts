@@ -1,1 +1,1 @@
-export const DEVI_POLICY_VERSION = "2026-09-22.2";
+export const DEVI_POLICY_VERSION = "2026-09-25.1";
