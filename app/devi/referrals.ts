@@ -744,9 +744,19 @@ export function referralPlan(
   )
     selectedRules.push(ACTS_RULE);
 
-  const generalSecretary = directoryContactsById([GENERAL_SECRETARY_ID])[0];
-  if (!generalSecretary)
-    throw new Error("El Directorio de Devi no contiene a la Secretaría General.");
+  // The public mirror intentionally omits personal directory records. Keep
+  // referrals useful without fabricating or exposing a private phone number.
+  const generalSecretary =
+    directoryContactsById([GENERAL_SECRETARY_ID])[0] ??
+    ({
+      id: GENERAL_SECRETARY_ID,
+      kind: "secretaria",
+      area: "Secretaría General",
+      role: "Canal institucional de recepción",
+      name: "Personal designado por SNTSS Sección 1 Puebla",
+      phone: "Consulta el canal oficial del sindicato",
+      page: 0,
+    } satisfies DirectoryContact);
 
   const contacts = uniqueContacts(
     directoryContactsById(selectedRules.flatMap((rule) => rule.contactIds)),
