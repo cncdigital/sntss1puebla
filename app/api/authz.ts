@@ -51,10 +51,10 @@ function cookieValue(request: Request, name: string) {
 export function normalizedPersonName(value: string) {
   return value
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\\u0300-\\u036f]/g, "")
     .replace(/[&]/g, "N")
     .replace(/[^A-Z0-9 ]/gi, " ")
-    .replace(/\s+/g, " ")
+    .replace(/\\s+/g, " ")
     .trim()
     .toUpperCase();
 }
@@ -128,7 +128,8 @@ export async function getPrivilege(request: Request): Promise<Privilege | null> 
     FROM privileged_sessions s
     JOIN privileged_accounts p ON p.matricula=s.matricula
     LEFT JOIN role_assignments r ON r.matricula=p.matricula AND r.active=1
-    WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP AND p.active=1`,
+    WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP
+      AND s.created_at>datetime('now','-12 hours') AND p.active=1`,
   )
     .bind(token)
     .first<{
