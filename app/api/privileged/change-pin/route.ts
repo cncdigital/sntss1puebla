@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { getPrivilege } from "../../authz";
-import { sha256 } from "../../reader/auth";
+import { passwordValidationError } from "../../worker/password-crypto";\nimport { hashPrivilegedPin, verifyPrivilegedPin } from "../pin-crypto";
 
 export async function POST(request: Request) {
   const privilege = await getPrivilege(request);
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   )
     .bind(privilege.matricula)
     .first<{ pinHash: string }>();
-  if (!account || (await sha256(currentPin)) !== account.pinHash)
+  if (!account || !(await verifyPrivilegedPin(currentPin, account.pinHash)))
     return Response.json(
       { error: "La contraseña actual no es correcta." },
       { status: 403 },
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   await env.DB.prepare(
     "UPDATE privileged_accounts SET pin_hash=?,must_change_pin=0 WHERE matricula=?",
   )
-    .bind(await sha256(newPin), privilege.matricula)
+    .bind(await hashPrivilegedPin(newPin), privilege.matricula)
     .run();
   return Response.json({ ok: true });
 }
