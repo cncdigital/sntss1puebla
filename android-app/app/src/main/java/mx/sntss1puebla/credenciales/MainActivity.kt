@@ -36,6 +36,7 @@ class MainActivity : ComponentActivity() {
     private var playWhenConnected = false
     private var fileCallback: ValueCallback<Array<Uri>>? = null
     private var pendingWebPermission: PermissionRequest? = null
+    private var radioVolumeBeforeDevi = 1f
 
     private val filePicker = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -173,6 +174,8 @@ class MainActivity : ComponentActivity() {
                 event.stopPropagation();
                 window.NativeRadio.play();
               }, true);
+              window.addEventListener('sntss:devi-voice-start', () => window.NativeRadio?.duckForDevi?.());
+              window.addEventListener('sntss:devi-voice-end', () => window.NativeRadio?.restoreAfterDevi?.());
             })();
             """.trimIndent(),
             null,
@@ -220,9 +223,38 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
     }
 
+    private fun duckRadioForDevi() {
+        controller?.let {
+            radioVolumeBeforeDevi = it.volume.coerceIn(0f, 1f)
+            it.volume = (radioVolumeBeforeDevi * 0.18f).coerceAtLeast(0.04f)
+        }
+    }
+
+    private fun restoreRadioAfterDevi() {
+        controller?.let { active ->
+            val target = radioVolumeBeforeDevi.coerceIn(0f, 1f)
+            val start = active.volume
+            val steps = 8
+            val handler = android.os.Handler(mainLooper)
+            for (step in 1..steps) {
+                handler.postDelayed({
+                    if (::webView.isInitialized) {
+                        active.volume = start + ((target - start) * step / steps)
+                    }
+                }, step * 55L)
+            }
+        }
+    }
+
     inner class NativeRadioBridge {
         @JavascriptInterface
         fun play() = runOnUiThread { playRadio() }
+
+        @JavascriptInterface
+        fun duckForDevi() = runOnUiThread { duckRadioForDevi() }
+
+        @JavascriptInterface
+        fun restoreAfterDevi() = runOnUiThread { restoreRadioAfterDevi() }
     }
 
     companion object {
