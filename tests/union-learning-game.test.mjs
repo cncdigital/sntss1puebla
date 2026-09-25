@@ -10,9 +10,9 @@ import {
 } from "../app/union-game-data.ts";
 
 test("el banco mezcla CCT, Estatutos, trivia y rompecabezas", () => {
-  assert.ok(UNION_GAME_QUESTIONS.length >= 25);
-  assert.ok(questionsByMode("quiz").length >= 20);
-  assert.ok(questionsByMode("puzzle").length >= 5);
+  assert.ok(UNION_GAME_QUESTIONS.length >= 35);
+  assert.ok(questionsByMode("quiz").length >= 27);
+  assert.ok(questionsByMode("puzzle").length >= 9);
   assert.ok(UNION_GAME_QUESTIONS.some((question) => question.category === "Contrato Colectivo"));
   assert.ok(UNION_GAME_QUESTIONS.some((question) => question.category === "Estatutos"));
   assert.equal(new Set(UNION_GAME_QUESTIONS.map((question) => question.id)).size, UNION_GAME_QUESTIONS.length);
