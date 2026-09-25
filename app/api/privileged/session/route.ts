@@ -1,5 +1,9 @@
 import { env } from "cloudflare:workers";
-import {\n  hashPrivilegedPin,\n  isLegacyPinHash,\n  verifyPrivilegedPin,\n} from "../pin-crypto";
+import {
+  hashPrivilegedPin,
+  isLegacyPinHash,
+  verifyPrivilegedPin,
+} from "../pin-crypto";
 import {
   getPrivilege,
   getTrustedOwnerPrivilege,
