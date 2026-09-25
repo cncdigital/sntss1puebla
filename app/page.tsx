@@ -164,6 +164,7 @@ type Privilege = {
   canViewFacilityCalendar: boolean;
   canManageSportsCalendar: boolean;
   canManageUnionCalendar: boolean;
+  canManageCulture: boolean;
   canChat: boolean;
   canCoachProgress: boolean;
   mustChangePin: boolean;
@@ -322,6 +323,7 @@ type RoleRow = {
   canViewFacilityCalendar: number;
   canManageSportsCalendar: number;
   canManageUnionCalendar: number;
+  canManageCulture: number;
   canChat: number;
   facilities: string[];
   active: number;
@@ -4973,7 +4975,7 @@ function HomeContent() {
           ? "admin"
           : nextPrivilege.canManageActs
             ? "clausula-97"
-            : nextPrivilege.canManageUnionCalendar
+            : nextPrivilege.canManageCulture
               ? "casa-cultura"
             : nextPrivilege.canManageScholarships
               ? "becas"
@@ -5121,7 +5123,7 @@ function HomeContent() {
   const canUseReader = Boolean(privilege?.canScan || privilege?.canAdmin);
   const canTrainDevi = Boolean(privilege?.canTrainDevi || privilege?.canAdmin);
   const canManageActs = Boolean(privilege?.canManageActs || privilege?.canAdmin);
-  const canManageCulture = Boolean(privilege?.canManageUnionCalendar || privilege?.canAdmin);
+  const canManageCulture = Boolean(privilege?.canManageCulture || privilege?.canAdmin);
   const canManageScholarships = Boolean(
     privilege?.canManageScholarships || privilege?.canAdmin,
   );
