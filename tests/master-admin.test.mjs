@@ -26,7 +26,7 @@ test("total administrator permissions are enforced for database sessions", () =>
   assert.match(roles, /masterAdministrator \|\| Boolean\(payload\.canReview\)/);
   assert.match(roles, /masterAdministrator \|\| Boolean\(payload\.canTrainDevi\)/);
   assert.match(roles, /"Administrador Total"/);
-  assert.match(migration, /'99222979','Administrador Total'/);
-  assert.match(migration, /can_train_devi=1/);
-  assert.match(migration, /facilities_json='\["\*"\]'/);
+  assert.doesNotMatch(migration, /99222979/);
+  assert.doesNotMatch(migration, /can_train_devi=1/);
+  assert.doesNotMatch(migration, /facilities_json='\\["\\*"\\]'/);
 });
