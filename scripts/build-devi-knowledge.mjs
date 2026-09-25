@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, resolve } from "node:path";
 
 const [, , cctPath, statutesPath, outputPath = "app/devi/knowledge.generated.json"] =
@@ -214,10 +220,21 @@ for (const document of DOCUMENTS) {
 
 const output = resolve(outputPath);
 mkdirSync(dirname(output), { recursive: true });
-writeFileSync(
-  output,
-  `${JSON.stringify({ schemaVersion: 2, sources, pages })}\n`,
-  "utf8",
-);
+const serialized = `${JSON.stringify({ schemaVersion: 2, sources, pages })}\n`;
+const temporaryOutput = `${output}.tmp-${process.pid}`;
+
+try {
+  writeFileSync(temporaryOutput, serialized, "utf8");
+  const verification = JSON.parse(readFileSync(temporaryOutput, "utf8"));
+  if (
+    verification.schemaVersion !== 2 ||
+    !Array.isArray(verification.pages) ||
+    verification.pages.length !== pages.length
+  )
+    throw new Error("La base generada de DeVi no superó la validación final.");
+  renameSync(temporaryOutput, output);
+} finally {
+  rmSync(temporaryOutput, { force: true });
+}
 
 console.log(`Base de Devi generada: ${pages.length} páginas en ${output}`);

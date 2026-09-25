@@ -1,6 +1,21 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import test from "node:test";
+
+test("DeVi knowledge artifact is complete, parseable, and free of raw controls", () => {
+  const raw = readFileSync("app/devi/knowledge.generated.json", "utf8");
+  assert.doesNotMatch(raw, /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/u);
+
+  const knowledge = JSON.parse(raw);
+  assert.equal(
+    knowledge.pages.length,
+    knowledge.sources.cct.pdfPages + knowledge.sources.estatutos.pdfPages,
+  );
+  assert.equal(knowledge.pages[0].id, "cct-1");
+  assert.ok(knowledge.pages.some((page) => page.id === "cct-597"));
+  assert.ok(knowledge.pages.some((page) => page.id === "estatutos-71"));
+});
 
 function runExhaustiveAudit() {
   return JSON.parse(
