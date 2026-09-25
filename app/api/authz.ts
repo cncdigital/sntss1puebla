@@ -3,7 +3,18 @@ import { effectiveQrFacilities } from "../role-policy";
 import { isMasterAdministrator } from "../master-admin";
 import { canCoachProgressLists } from "../devi/progress-access";
 
-function configuredOwnerEmails() {\n  return new Set(\n    (env.OWNER_EMAILS ?? "")\n      .split(",")\n      .map((value) => value.trim().toLowerCase())\n      .filter(Boolean),\n  );\n}\n\nfunction configuredOwnerMatricula() {\n  return (env.OWNER_MATRICULA ?? "").trim();\n}
+function configuredOwnerEmails() {
+  return new Set(
+    (env.OWNER_EMAILS ?? "")
+      .split(",")
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean),
+  );
+}
+
+function configuredOwnerMatricula() {
+  return (env.OWNER_MATRICULA ?? "").trim();
+}
 export const PRIVILEGED_LOGOUT_COOKIE = "sntss_privileged_logged_out";
 export const WORKER_LOGOUT_COOKIE = "sntss_worker_logged_out";
 
@@ -69,7 +80,9 @@ export function forwardedIdentity(request: Request) {
 
 export function getTrustedOwnerPrivilege(request: Request): Privilege | null {
   const identity = forwardedIdentity(request);
-  const ownerEmails = configuredOwnerEmails();\n  const ownerMatricula = configuredOwnerMatricula();\n  if (!ownerMatricula || !ownerEmails.has(identity.email)) return null;
+  const ownerEmails = configuredOwnerEmails();
+  const ownerMatricula = configuredOwnerMatricula();
+  if (!ownerMatricula || !ownerEmails.has(identity.email)) return null;
   return {
     matricula: ownerMatricula,
     canAdmin: true,
