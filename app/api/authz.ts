@@ -18,6 +18,7 @@ export type Privilege = {
   canViewFacilityCalendar: boolean;
   canManageSportsCalendar: boolean;
   canManageUnionCalendar: boolean;
+  canManageCulture: boolean;
   canChat: boolean;
   canCoachProgress: boolean;
   mustChangePin: boolean;
@@ -80,6 +81,7 @@ export function getTrustedOwnerPrivilege(request: Request): Privilege | null {
     canViewFacilityCalendar: true,
     canManageSportsCalendar: true,
     canManageUnionCalendar: true,
+    canManageCulture: true,
     canChat: true,
     canCoachProgress: true,
     mustChangePin: false,
@@ -106,6 +108,7 @@ export async function getPrivilege(request: Request): Promise<Privilege | null> 
       COALESCE(r.can_view_facility_calendar,p.can_admin,0) AS canViewFacilityCalendar,
       COALESCE(r.can_manage_sports_calendar,p.can_admin,0) AS canManageSportsCalendar,
       COALESCE(r.can_manage_union_calendar,p.can_admin,0) AS canManageUnionCalendar,
+      COALESCE(r.can_manage_culture,p.can_admin,0) AS canManageCulture,
       COALESCE(r.can_chat,p.can_admin,0) AS canChat,
       COALESCE(r.credential_style,'standard') AS credentialStyle,
       COALESCE(r.facilities_json,'[]') AS facilitiesJson
@@ -127,6 +130,7 @@ export async function getPrivilege(request: Request): Promise<Privilege | null> 
       canViewFacilityCalendar: number;
       canManageSportsCalendar: number;
       canManageUnionCalendar: number;
+      canManageCulture: number;
       canChat: number;
       credentialStyle: string;
       facilitiesJson: string;
@@ -161,6 +165,7 @@ export async function getPrivilege(request: Request): Promise<Privilege | null> 
       masterAdministrator || Boolean(account.canManageSportsCalendar),
     canManageUnionCalendar:
       masterAdministrator || Boolean(account.canManageUnionCalendar),
+    canManageCulture: masterAdministrator || Boolean(account.canManageCulture),
     canChat: masterAdministrator || Boolean(account.canChat),
     canCoachProgress: canCoachProgressLists(
       account.matricula,
@@ -183,6 +188,7 @@ export async function requirePrivilege(
     | "acts"
     | "scholarships"
     | "facilityCalendar"
+    | "culture"
     | "chat",
 ) {
   const privilege = await getPrivilege(request);
@@ -203,6 +209,8 @@ export async function requirePrivilege(
                   privilege.canManageSportsCalendar ||
                   privilege.canManageUnionCalendar ||
                   privilege.canAdmin
+                : permission === "culture"
+                  ? privilege.canManageCulture || privilege.canAdmin
                 : permission === "chat"
                   ? privilege.canChat || privilege.canAdmin
                   : privilege.canTrainDevi || privilege.canAdmin;
