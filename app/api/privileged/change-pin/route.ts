@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 import { getPrivilege } from "../../authz";
-import { passwordValidationError } from "../../worker/password-crypto";\nimport { hashPrivilegedPin, verifyPrivilegedPin } from "../pin-crypto";
+import { passwordValidationError } from "../../worker/password-crypto";
+import { hashPrivilegedPin, verifyPrivilegedPin } from "../pin-crypto";
 
 export async function POST(request: Request) {
   const privilege = await getPrivilege(request);
@@ -10,11 +11,9 @@ export async function POST(request: Request) {
     currentPin?: string;
     newPin?: string;
   };
-  if (!/^\d{6,12}$/.test(newPin))
-    return Response.json(
-      { error: "La nueva contraseña debe tener de 6 a 12 dígitos." },
-      { status: 400 },
-    );
+  const validationError = passwordValidationError(newPin);
+  if (validationError)
+    return Response.json({ error: validationError }, { status: 400 });
   const account = await env.DB.prepare(
     "SELECT pin_hash AS pinHash FROM privileged_accounts WHERE matricula=? AND active=1",
   )
