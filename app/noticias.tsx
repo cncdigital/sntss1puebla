@@ -25,7 +25,7 @@ type NewsApiResponse = {
 
 const RADIO_STATION_URL = "https://sntss1puebla.radio12345.com/";
 const RADIO_AUTO_EXTENSION_VERSION = "0.10.1";
-const RADIO_AUTO_EXTENSION_APK_URL = "/downloads/RadioSindical-0.10.1.apk";
+const RADIO_AUTO_EXTENSION_APK_URL = "https://github.com/cncdigital/sntss1puebla/releases/download/v0.10.1/RadioSindical-0.10.1.apk";
 
 function NewsCard({ item, index }: { item: NewsItem; index: number }) {
   const featured = index === 0;
