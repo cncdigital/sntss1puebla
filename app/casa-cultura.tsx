@@ -11,17 +11,15 @@ const DEFAULT_ITEMS: CasaItem[] = [
   {id:"artes",kind:"curso",title:"Artes escénicas y visuales",text:"Teatro, danza, folclórica, arte y pintura, fotografía y amigurumis.",schedule:"Horarios sujetos a apertura de grupos.",level:"Niñas, niños, jóvenes, adultos y jubilados",image:"/casa-cultura-artes.svg"},
   {id:"turismo",kind:"turismo",title:"Turismo sindical",text:"Próximamente encontrarás recorridos, destinos, actividades culturales y promociones para disfrutar Puebla y México.",schedule:"Publicaremos calendario, costos y cupos en este espacio.",image:"/casa-cultura-portada.svg"},
 ];
-const KEY="sntss-casa-cultura-items-v1";
 
 export function CasaCulturaPanel({ canManage=false }: { canManage?: boolean }) {
   const [items,setItems]=useState<CasaItem[]>(DEFAULT_ITEMS);
   const [active,setActive]=useState<"todos"|CasaItem["kind"]>("todos");
   const [editing,setEditing]=useState<CasaItem|null>(null);
   const [notice,setNotice]=useState("");
-  useEffect(()=>{ try { const saved=localStorage.getItem(KEY); if(saved) setItems(JSON.parse(saved)); } catch {} },[]);
+  useEffect(()=>{ let active=true; fetch("/api/casa-cultura",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{if(active&&Array.isArray(data.items)&&data.items.length)setItems(data.items)}).catch(()=>{}); return()=>{active=false}; },[]);
   const visible=useMemo(()=>active==="todos"?items:items.filter(i=>i.kind===active),[active,items]);
-  const saveAll=(next:CasaItem[])=>{setItems(next); try {localStorage.setItem(KEY,JSON.stringify(next));} catch {}};
-  const submit=(event:React.FormEvent)=>{event.preventDefault(); if(!editing)return; const exists=items.some(i=>i.id===editing.id); saveAll(exists?items.map(i=>i.id===editing.id?editing:i):[...items,{...editing,id:crypto.randomUUID()}]); setEditing(null); setNotice("Contenido actualizado en este dispositivo."); setTimeout(()=>setNotice(""),3000);};
+  const submit=async(event:React.FormEvent)=>{event.preventDefault(); if(!editing)return; try { const response=await fetch("/api/casa-cultura",{method:editing.id?"PUT":"POST",headers:{"content-type":"application/json"},body:JSON.stringify(editing)}); const data=await response.json(); if(!response.ok) throw new Error(data.error||"No fue posible publicar."); setItems(data.items); setEditing(null); setNotice("Contenido publicado para SNTSS1PUEBLA y Credenciales."); } catch(error){setNotice(error instanceof Error?error.message:"No fue posible publicar.");} setTimeout(()=>setNotice(""),4000);};
   return <main className="casaCultura">
     <section className="casaHero">
       <div><span className="casaEyebrow">SNTSS · SECCIÓN I PUEBLA</span><h1>Casa de Cultura del Arte</h1><p>Un espacio para aprender, crear, convivir y descubrir nuevos destinos.</p><div className="casaPills"><span>Arte</span><span>Cultura</span><span>Turismo</span></div></div>
