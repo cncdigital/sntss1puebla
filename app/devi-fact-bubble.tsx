@@ -19,6 +19,13 @@ type StoredFactDeck = {
 
 type VoiceStatus = "idle" | "loading" | "playing" | "error";
 
+function notifyRadioDeviVoice(active: boolean) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent(active ? "sntss:devi-voice-start" : "sntss:devi-voice-end"),
+  );
+}
+
 function nextStoredFactId() {
   const validIds = new Set(DEVI_FACTS.map((fact) => fact.id));
   let stored: StoredFactDeck = { version: 3, pending: [], lastId: null };
@@ -92,6 +99,7 @@ export function DeviFactBubble({
     voiceRequestRef.current += 1;
     disposeAudio();
     cancelDeviceVoice();
+    notifyRadioDeviVoice(false);
     setVoiceStatus("idle");
   }, [disposeAudio]);
 
@@ -114,14 +122,17 @@ export function DeviFactBubble({
           {
             onStart: () => {
               if (requestId === voiceRequestRef.current)
+                notifyRadioDeviVoice(true);
                 setVoiceStatus("playing");
             },
             onEnd: () => {
               if (requestId !== voiceRequestRef.current) return;
+              notifyRadioDeviVoice(false);
               setVoiceStatus("idle");
             },
             onError: () => {
               if (requestId !== voiceRequestRef.current) return;
+              notifyRadioDeviVoice(false);
               setVoiceStatus("error");
             },
           },
@@ -140,17 +151,22 @@ export function DeviFactBubble({
       audio.onended = () => {
         if (requestId !== voiceRequestRef.current) return;
         audioRef.current = null;
+        notifyRadioDeviVoice(false);
         setVoiceStatus("idle");
       };
       audio.onerror = () => {
+        notifyRadioDeviVoice(false);
         startDeviceFallback();
       };
       try {
         await audio.play();
         if (requestId === voiceRequestRef.current) {
+          audio.volume = 1;
+          notifyRadioDeviVoice(true);
           setVoiceStatus("playing");
         }
       } catch {
+        notifyRadioDeviVoice(false);
         startDeviceFallback();
       }
     },
