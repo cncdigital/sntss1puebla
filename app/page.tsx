@@ -1318,9 +1318,8 @@ function StartGate({
             <span>Contraseña especial <small>administrador, verificador o lector QR</small></span>
             <input
               type="password"
-              inputMode="numeric"
               value={specialPin}
-              onChange={(event) => setSpecialPin(event.target.value.replace(/\D/g, ""))}
+              onChange={(event) => setSpecialPin(event.target.value)}
               placeholder="Contraseña del rol"
               autoComplete="current-password"
               onKeyDown={(event) => event.key === "Enter" && void submit()}
