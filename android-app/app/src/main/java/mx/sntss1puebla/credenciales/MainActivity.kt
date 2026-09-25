@@ -255,6 +255,9 @@ class MainActivity : ComponentActivity() {
 
         @JavascriptInterface
         fun restoreAfterDevi() = runOnUiThread { restoreRadioAfterDevi() }
+
+        @JavascriptInterface
+        fun installedVersion(): String = "0.10.1"
     }
 
     companion object {
