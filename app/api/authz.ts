@@ -3,7 +3,7 @@ import { effectiveQrFacilities } from "../role-policy";
 import { isMasterAdministrator } from "../master-admin";
 import { canCoachProgressLists } from "../devi/progress-access";
 
-const OWNER_EMAILS = new Set(["guardiandelallama@gmail.com"]);
+function configuredOwnerEmails() {\n  return new Set(\n    (env.OWNER_EMAILS ?? "")\n      .split(",")\n      .map((value) => value.trim().toLowerCase())\n      .filter(Boolean),\n  );\n}\n\nfunction configuredOwnerMatricula() {\n  return (env.OWNER_MATRICULA ?? "").trim();\n}
 export const PRIVILEGED_LOGOUT_COOKIE = "sntss_privileged_logged_out";
 export const WORKER_LOGOUT_COOKIE = "sntss_worker_logged_out";
 
@@ -69,9 +69,9 @@ export function forwardedIdentity(request: Request) {
 
 export function getTrustedOwnerPrivilege(request: Request): Privilege | null {
   const identity = forwardedIdentity(request);
-  if (!OWNER_EMAILS.has(identity.email)) return null;
+  const ownerEmails = configuredOwnerEmails();\n  const ownerMatricula = configuredOwnerMatricula();\n  if (!ownerMatricula || !ownerEmails.has(identity.email)) return null;
   return {
-    matricula: "99222979",
+    matricula: ownerMatricula,
     canAdmin: true,
     canReview: true,
     canScan: true,
