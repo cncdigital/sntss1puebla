@@ -1,4 +1,4 @@
-const CACHE_NAME = "sntss1puebla-portal-shell-v66";
+const CACHE_NAME = "sntss1puebla-portal-shell-v67";
 const SHELL = [
   "/",
   "/credenciales",
@@ -13,7 +13,18 @@ const SHELL = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await Promise.allSettled(
+        SHELL.map((path) =>
+          fetch(path, { cache: "reload" }).then((response) => {
+            if (!response.ok) throw new Error(`Unable to precache ${path}`);
+            return cache.put(path, response);
+          }),
+        ),
+      );
+    }),
+  );
   self.skipWaiting();
 });
 
@@ -26,12 +37,7 @@ self.addEventListener("activate", (event) => {
         .map((key) => caches.delete(key)),
     );
     await self.clients.claim();
-    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-    await Promise.all(windows.map((client) => {
-      const refreshUrl = new URL(client.url);
-      refreshUrl.searchParams.set("actualizar", Date.now().toString());
-      return client.navigate(refreshUrl.href);
-    }));
+    // Do not force-navigation of open clients during activation; it can interrupt active inputs.
   })());
 });
 
