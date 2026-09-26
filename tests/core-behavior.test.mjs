@@ -199,7 +199,7 @@ test("primary feature panels load on demand and remain protected from a blank sc
   assert.match(page, /unavailableProtectedView/);
   assert.match(page, /<PanelLoadBoundary>[\s\S]*<HomeContent \/>/);
   assert.match(serviceWorker, /fetch\(request, \{ cache: "no-store" \}\)/);
-  assert.match(serviceWorker, /clients\\s*\\.matchAll\\(\\{ type: "window", includeUncontrolled: true \\}\\)/);
+  assert.match(serviceWorker, /clients\s*\.matchAll\(\{ type: "window", includeUncontrolled: true \}\)/);
 });
 
 test("the service worker that refreshes installed apps is valid JavaScript", () => {
