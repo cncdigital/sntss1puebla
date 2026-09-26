@@ -1,4 +1,4 @@
-import knowledge from "./knowledge.generated.json";
+import knowledge from "./knowledge.generated.json" with { type: "json" };
 import { DEVI_DIRECTORY_SUMMARY } from "./directory.ts";
 import {
   buildQueryProfile,
