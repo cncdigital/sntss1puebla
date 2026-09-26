@@ -1,11 +1,23 @@
 import { env } from "cloudflare:workers";
 import { getCredentialValidity } from "../../credential-validity";
 import { audit, requirePrivilege } from "../../authz";
+import {
+  createPasswordSalt,
+  derivePasswordHash,
+  PASSWORD_ITERATIONS,
+} from "../password-crypto";
 
 const NO_STORE_HEADERS = {
   "cache-control": "private, no-store, max-age=0",
   pragma: "no-cache",
 };
+
+function generateTemporaryPassword() {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  const values = new Uint32Array(16);
+  crypto.getRandomValues(values);
+  return Array.from(values, (value) => alphabet[value % alphabet.length]).join("");
+}
 
 type ActiveCredentialRow = {
   applicationId: number;
@@ -127,12 +139,12 @@ export async function PATCH(request: Request) {
     );
   const payload = (await request.json()) as {
     applicationId?: number;
-    action?: "restart_validation" | "reset_password";
+    action?: "restart_validation" | "reset_password" | "issue_temporary_password";
     reason?: string;
   };
   if (
     !payload.applicationId ||
-    !["restart_validation", "reset_password"].includes(payload.action || "")
+    !["restart_validation", "reset_password", "issue_temporary_password"].includes(payload.action || "")
   )
     return Response.json(
       { error: "Acción inválida." },
@@ -158,6 +170,76 @@ export async function PATCH(request: Request) {
       { error: "Credencial no encontrada." },
       { status: 404, headers: NO_STORE_HEADERS },
     );
+
+  if (
+    (payload.action === "reset_password" ||
+      payload.action === "issue_temporary_password") &&
+    !privilege.canAdmin
+  )
+    return Response.json(
+      { error: "Solo un administrador puede entregar o restablecer contraseñas." },
+      { status: 403, headers: NO_STORE_HEADERS },
+    );
+
+  if (payload.action === "issue_temporary_password") {
+    if (credential.status !== "approved")
+      return Response.json(
+        { error: "La credencial no está aprobada." },
+        { status: 409, headers: NO_STORE_HEADERS },
+      );
+    const validity = await getCredentialValidity(credential.applicationId);
+    if (!validity.valid)
+      return Response.json(
+        { error: "Solo se puede entregar una contraseña temporal a una credencial válida." },
+        { status: 409, headers: NO_STORE_HEADERS },
+      );
+    const temporaryPassword = generateTemporaryPassword();
+    const salt = createPasswordSalt();
+    const passwordHash = await derivePasswordHash(
+      temporaryPassword,
+      salt,
+      PASSWORD_ITERATIONS,
+    );
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO worker_passwords
+          (matricula,password_hash,password_salt,iterations,failed_attempts,locked_until,must_change_password,temporary_expires_at,updated_at)
+         VALUES (?,?,?,?,0,NULL,1,datetime('now','+24 hours'),CURRENT_TIMESTAMP)
+         ON CONFLICT(matricula) DO UPDATE SET
+           password_hash=excluded.password_hash,password_salt=excluded.password_salt,
+           iterations=excluded.iterations,failed_attempts=0,locked_until=NULL,
+           must_change_password=1,temporary_expires_at=datetime('now','+24 hours'),
+           updated_at=CURRENT_TIMESTAMP`,
+      ).bind(
+        credential.matricula,
+        passwordHash,
+        salt,
+        PASSWORD_ITERATIONS,
+      ),
+      env.DB.prepare("DELETE FROM worker_sessions WHERE matricula=?").bind(
+        credential.matricula,
+      ),
+    ]);
+    await audit(
+      privilege.actor,
+      "worker.temporary_password_issued",
+      "worker",
+      credential.workerId,
+      `Matrícula ${credential.matricula}; vigencia 24 horas`,
+    );
+    return Response.json(
+      {
+        ok: true,
+        action: payload.action,
+        temporaryPassword,
+        expiresAt,
+        message:
+          "Contraseña temporal generada. Entrégala por un canal seguro; se mostrará una sola vez y deberá cambiarse al entrar.",
+      },
+      { headers: NO_STORE_HEADERS },
+    );
+  }
 
   if (payload.action === "reset_password") {
     const password = await env.DB.prepare(
