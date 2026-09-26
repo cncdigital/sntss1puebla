@@ -42,7 +42,7 @@ export function RadioCarInstall() {
   if (platform !== "android" || installed !== false) return null;
 
   return <div className="radioAndroidInstall" aria-label="Extensión de Radio Sindical para Android Auto">
-    <a href="https://github.com/cncdigital/sntss1puebla/releases/download/v0.10.1/RadioSindical-0.10.1.apk" download="RadioSindical-0.10.1.apk" type="application/vnd.android.package-archive">♫ Instala la Extensión de Radio Sindical para tu Auto <span aria-hidden="true">↓</span></a>
-    <small>Android Auto · versión 0.10.1. Si ya tienes una versión anterior con la misma firma, instálala como actualización. En navegadores sin detección de apps instaladas, el botón puede seguir visible.</small>
+    <a href="https://github.com/cncdigital/sntss1puebla/releases/download/v0.10.3/RadioSindical-0.10.3.apk" download="RadioSindical-0.10.3.apk" type="application/vnd.android.package-archive">♫ Instala la Extensión de Radio Sindical para tu Auto <span aria-hidden="true">↓</span></a>
+    <small>Android Auto · versión 0.10.3. Si ya tienes una versión anterior con la misma firma, instálala como actualización. En navegadores sin detección de apps instaladas, el botón puede seguir visible.</small>
   </div>;
 }

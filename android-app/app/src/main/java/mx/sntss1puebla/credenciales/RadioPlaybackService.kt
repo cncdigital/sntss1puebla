@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.net.Uri
+import android.speech.tts.TextToSpeech
+import java.util.Locale
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -55,6 +57,18 @@ class RadioPlaybackService : MediaLibraryService() {
         }
     }
     private var activeAnnouncement: String? = null
+    private var networkWarningTts: TextToSpeech? = null
+    private var lastNetworkWarningAt = 0L
+    private val networkProbe = object : Runnable {
+        override fun run() {
+            if (::player.isInitialized && player.isPlaying) {
+                catalogExecutor.execute {
+                    if (probeConnectionIsSlow()) mainHandler.post { announceConnectionWarning() }
+                }
+            }
+            mainHandler.postDelayed(this, 30_000)
+        }
+    }
     @Volatile private var songs: List<MediaItem> = emptyList()
     private lateinit var httpFactory: DefaultHttpDataSource.Factory
     private lateinit var player: ExoPlayer
@@ -232,6 +246,37 @@ class RadioPlaybackService : MediaLibraryService() {
         librarySession = MediaLibrarySession.Builder(this, player, callback)
             .setSessionActivity(openApp)
             .build()
+    }
+
+    private fun probeConnectionIsSlow(): Boolean {
+        val started = System.nanoTime()
+        val connection = runCatching {
+            (URL("${RadioCatalog.ORIGIN}/api/radio/catalog?probe=${System.currentTimeMillis()}").openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                connectTimeout = 2_500
+                readTimeout = 2_500
+                setRequestProperty("Accept", "application/json")
+                inputStream.use { stream ->
+                    val buffer = ByteArray(512)
+                    stream.read(buffer)
+                }
+            }
+        }.getOrNull() ?: return true
+        connection.disconnect()
+        return (System.nanoTime() - started) / 1_000_000 > 2_500
+    }
+
+    private fun announceConnectionWarning() {
+        val now = System.currentTimeMillis()
+        if (now - lastNetworkWarningAt < 120_000 || !::player.isInitialized || !player.isPlaying) return
+        val tts = networkWarningTts ?: return
+        lastNetworkWarningAt = now
+        tts.speak(
+            "La conexión a internet parece lenta o inestable. La reproducción podría verse afectada por esta causa.",
+            TextToSpeech.QUEUE_FLUSH,
+            null,
+            "radio-network-warning",
+        )
     }
 
     private fun announceIfDue(item: MediaItem) {

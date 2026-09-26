@@ -5,6 +5,7 @@ import { apiResponseError, readJsonResponse } from "./api-response";
 import { readId3FromFile } from "./id3-metadata";
 import { LiveRadioAnnouncer } from "./radio-live-announcer";
 import { findDuplicateMp3 } from "./news/mp3-duplicate";
+import { calculateRadioNormalizationGain, RADIO_NORMALIZATION_PROFILE } from "./news/audio-normalization";
 
 type Mp3Encoder = {
   encodeBuffer(left: Int16Array, right?: Int16Array): Int8Array;
@@ -226,44 +227,69 @@ async function requestNewsAdminSettings() {
 
 type VariantBitrate = 96 | 192;
 
-async function encodeMp3Variant(file: File, bitrate: VariantBitrate) {
+async function encodeAudioBuffer(decoded: AudioBuffer, bitrate: number) {
   const lamejs = await loadLameJs();
+  const channels = Math.min(2, decoded.numberOfChannels);
+  const encoder = new lamejs.Mp3Encoder(channels, decoded.sampleRate, bitrate);
+  const left = decoded.getChannelData(0);
+  const right = channels === 2 ? decoded.getChannelData(1) : left;
+  const blockSize = 1152;
+  const chunks: Int8Array[] = [];
+  const toInt16 = (source: Float32Array, start: number, end: number) => {
+    const result = new Int16Array(end - start);
+    for (let index = start; index < end; index += 1) {
+      const sample = Math.max(-1, Math.min(1, source[index]));
+      result[index - start] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+    }
+    return result;
+  };
+  for (let offset = 0; offset < decoded.length; offset += blockSize) {
+    const end = Math.min(offset + blockSize, decoded.length);
+    const encoded = channels === 2
+      ? encoder.encodeBuffer(toInt16(left, offset, end), toInt16(right, offset, end))
+      : encoder.encodeBuffer(toInt16(left, offset, end));
+    if (encoded.length) chunks.push(encoded);
+  }
+  const flushed = encoder.flush();
+  if (flushed.length) chunks.push(flushed);
+  return new Blob(chunks, { type: "audio/mpeg" });
+}
+
+async function encodeMp3Variant(file: File, bitrate: VariantBitrate) {
   const audioContext = new AudioContext();
   try {
-    const decoded = await audioContext.decodeAudioData(await file.arrayBuffer());
-    const channels = Math.min(2, decoded.numberOfChannels);
-    const encoder = new lamejs.Mp3Encoder(channels, decoded.sampleRate, bitrate);
-    const left = decoded.getChannelData(0);
-    const right = channels === 2 ? decoded.getChannelData(1) : left;
-    const blockSize = 1152;
-    const chunks: Int8Array[] = [];
-    const toInt16 = (source: Float32Array, start: number, end: number) => {
-      const result = new Int16Array(end - start);
-      for (let index = start; index < end; index += 1) {
-        const sample = Math.max(-1, Math.min(1, source[index]));
-        result[index - start] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
-      }
-      return result;
-    };
-    for (let offset = 0; offset < decoded.length; offset += blockSize) {
-      const end = Math.min(offset + blockSize, decoded.length);
-      const encoded = channels === 2
-        ? encoder.encodeBuffer(toInt16(left, offset, end), toInt16(right, offset, end))
-        : encoder.encodeBuffer(toInt16(left, offset, end));
-      if (encoded.length) chunks.push(encoded);
-    }
-    const flushed = encoder.flush();
-    if (flushed.length) chunks.push(flushed);
-    return new Blob(chunks, { type: "audio/mpeg" });
+    return await encodeAudioBuffer(await audioContext.decodeAudioData(await file.arrayBuffer()), bitrate);
   } finally {
     await audioContext.close();
+  }
+}
+
+async function normalizeMp3ForRadio(file: File) {
+  const decodeContext = new AudioContext();
+  try {
+    const decoded = await decodeContext.decodeAudioData(await file.arrayBuffer());
+    const channels = Math.min(2, decoded.numberOfChannels);
+    const samples = Array.from({ length: channels }, (_, index) => decoded.getChannelData(index));
+    const gain = calculateRadioNormalizationGain(samples);
+    const offline = new OfflineAudioContext(channels, decoded.length, decoded.sampleRate);
+    const source = offline.createBufferSource();
+    source.buffer = decoded;
+    const gainNode = offline.createGain();
+    gainNode.gain.value = gain;
+    source.connect(gainNode);
+    gainNode.connect(offline.destination);
+    source.start();
+    const normalized = await offline.startRendering();
+    return encodeAudioBuffer(normalized, 320);
+  } finally {
+    await decodeContext.close();
   }
 }
 
 async function uploadMp3Blob(
   blob: Blob,
   fileName: string,
-  options: { title?: string; artist?: string; album?: string; lyrics?: string; variantOf?: string; trackId?: number; bitrate?: VariantBitrate; replaceTrackId?: number; kind?: "commercial" } = {},
+  options: { title?: string; artist?: string; album?: string; lyrics?: string; variantOf?: string; trackId?: number; bitrate?: VariantBitrate; replaceTrackId?: number; kind?: "commercial"; normalizationProfile?: string } = {},
 ) {
   let uploadId = "";
   let key = "";
@@ -271,7 +297,7 @@ async function uploadMp3Blob(
     const initResponse = await fetch("/api/admin/news/mp3", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: "init", fileName, size: blob.size, title: options.title, artist: options.artist, variantOf: options.variantOf, trackId: options.trackId, bitrate: options.bitrate, replaceTrackId: options.replaceTrackId, kind: options.kind }),
+      body: JSON.stringify({ action: "init", fileName, size: blob.size, title: options.title, artist: options.artist, variantOf: options.variantOf, trackId: options.trackId, bitrate: options.bitrate, replaceTrackId: options.replaceTrackId, kind: options.kind, normalizationProfile: options.normalizationProfile }),
     });
     const init = await readJsonResponse<{ uploadId?: string; key?: string; replaceKey?: string; error?: string }>(initResponse);
     if (!initResponse.ok || !init?.uploadId || !init.key)
@@ -294,7 +320,7 @@ async function uploadMp3Blob(
     const completeResponse = await fetch("/api/admin/news/mp3", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: "complete", uploadId, key, parts, fileName, size: blob.size, title: options.title, artist: options.artist, album: options.album, lyrics: options.lyrics, variantOf: options.variantOf, trackId: options.trackId, bitrate: options.bitrate, replaceTrackId: options.replaceTrackId, replaceKey: init.replaceKey, kind: options.kind }),
+      body: JSON.stringify({ action: "complete", uploadId, key, parts, fileName, size: blob.size, title: options.title, artist: options.artist, album: options.album, lyrics: options.lyrics, variantOf: options.variantOf, trackId: options.trackId, bitrate: options.bitrate, replaceTrackId: options.replaceTrackId, replaceKey: init.replaceKey, kind: options.kind, normalizationProfile: options.normalizationProfile }),
     });
     const complete = await readJsonResponse<{ tracks?: NewsMp3Track[]; trackId?: number; error?: string }>(completeResponse);
     if (!completeResponse.ok || !complete) throw new Error(apiResponseError(completeResponse, complete, "No fue posible completar la carga del MP3."));
@@ -439,7 +465,7 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
       const title = commercialTitle.trim() || commercialFile.name.replace(/\.mp3$/i, "");
       if (commercials.some((item) => item.title.toLocaleLowerCase() === title.toLocaleLowerCase() || item.fileName === commercialFile.name))
         throw new Error("Este comercial ya está en la biblioteca. Retíralo antes de cargar una nueva versión.");
-      await uploadMp3Blob(commercialFile, commercialFile.name, { title, kind: "commercial" });
+      const normalized = await normalizeMp3ForRadio(commercialFile);\n      await uploadMp3Blob(normalized, commercialFile.name, { title, kind: "commercial", normalizationProfile: RADIO_NORMALIZATION_PROFILE.label });
       const updated = await requestNewsAdminSettings();
       setCommercials(updated.commercials || []);
       setCommercialFile(null); setCommercialTitle("");
@@ -483,7 +509,7 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
         setError("La biblioteca cambió. Revisa de nuevo la canción antes de subirla.");
         return;
       }
-      const uploaded = await uploadMp3Blob(mp3File, mp3File.name, { title: mp3Title.trim(), artist: mp3Artist.trim(), album: mp3Album.trim(), lyrics: mp3Lyrics.trim(), replaceTrackId: duplicate?.id });
+      const normalized = await normalizeMp3ForRadio(mp3File);\n      const normalizedFile = new File([normalized], mp3File.name, { type: "audio/mpeg" });\n      const uploaded = await uploadMp3Blob(normalized, mp3File.name, { title: mp3Title.trim(), artist: mp3Artist.trim(), album: mp3Album.trim(), lyrics: mp3Lyrics.trim(), replaceTrackId: duplicate?.id, normalizationProfile: RADIO_NORMALIZATION_PROFILE.label });
       let coverFailed = false;
       if (mp3Cover && uploaded.trackId) {
         try { await uploadCover(uploaded.trackId, mp3Cover); }
@@ -508,7 +534,7 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
       for (const bitrate of [192, 96] as const) {
         try {
           setNotice(`MP3 original agregado. Generando versión de ${bitrate} kbps…`);
-          const variant = await encodeMp3Variant(mp3File, bitrate);
+          const variant = await encodeMp3Variant(normalizedFile, bitrate);
           await uploadMp3Blob(variant, mp3File.name.replace(/\.mp3$/i, `.${bitrate}.mp3`), { variantOf: uploaded.key, bitrate });
           generated += 1;
         } catch {
@@ -594,6 +620,40 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
     const response = await fetch("/api/admin/news/mp3/cover", { method: "POST", body });
     const result = await readJsonResponse<{ error?: string }>(response);
     if (!response.ok) throw new Error(apiResponseError(response, result, "No fue posible guardar la portada."));
+  };
+
+  const normalizeLibrary = async () => {
+    if (!tracks.length || !window.confirm(`Se normalizarán ${tracks.length} canciones y sus calidades a ${RADIO_NORMALIZATION_PROFILE.label}. El proceso puede tardar y requiere mantener esta ventana abierta. ¿Continuar?`)) return;
+    setMp3Saving(true); setError(""); setNotice("");
+    let done = 0;
+    try {
+      for (const track of tracks) {
+        setNotice(`Normalizando ${done + 1} de ${tracks.length}: ${track.title}`);
+        const response = await fetch(track.url, { cache: "no-store" });
+        if (!response.ok) throw new Error(`No se pudo leer la canción N.º ${track.displayId}.`);
+        const source = new File([await response.blob()], track.fileName || `${track.title}.mp3`, { type: "audio/mpeg" });
+        const normalized = await normalizeMp3ForRadio(source);
+        const normalizedFile = new File([normalized], source.name, { type: "audio/mpeg" });
+        const uploaded = await uploadMp3Blob(normalized, source.name, {
+          title: track.title, artist: track.artist, album: track.album, lyrics: track.lyrics,
+          replaceTrackId: track.id, normalizationProfile: RADIO_NORMALIZATION_PROFILE.label,
+        });
+        if (uploaded.trackId && track.availableQualities?.includes(320)) {
+          for (const bitrate of [192, 96] as const) {
+            const variant = await encodeMp3Variant(normalizedFile, bitrate);
+            await uploadMp3Blob(variant, source.name.replace(/\.mp3$/i, `.${bitrate}.mp3`), {
+              variantOf: uploaded.key, bitrate, normalizationProfile: RADIO_NORMALIZATION_PROFILE.label,
+            });
+          }
+        }
+        done += 1;
+      }
+      const data = await requestNewsAdminSettings();
+      setTracks(data.tracks || []);
+      setNotice(`Biblioteca normalizada: ${done}/${tracks.length} canciones a ${RADIO_NORMALIZATION_PROFILE.label}.`);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "La normalización se detuvo. Puedes continuar desde la canción pendiente.");
+    } finally { setMp3Saving(false); }
   };
 
   const generateVariants = async (track: NewsMp3Track) => {
@@ -684,7 +744,7 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
           <div className="radioCommercialList">{commercials.map((commercial) => <div key={commercial.id}><span><b>{commercial.title}</b><small>MP3 · {commercial.fileName} · {savedCommercialInterval ? `en cola cada ${savedCommercialInterval} min` : "programación desactivada"}</small></span><button className="button tiny" type="button" disabled={mp3Saving} onClick={() => void removeCommercial(commercial.id)}>Retirar</button></div>)}</div>
         </section>}
         {mode === "radio" && <form className="newsAdminSection" onSubmit={uploadMp3}>
-          <span className="newsAdminState connected">Carga protegida · {tracks.length} MP3</span>
+          <span className="newsAdminState connected">Carga protegida · {tracks.length} MP3</span>\n          <button className="button secondary" type="button" onClick={() => void normalizeLibrary()} disabled={mp3Saving || loading || !tracks.length}>Normalizar biblioteca a {RADIO_NORMALIZATION_PROFILE.label}</button>
           <h3>Biblioteca sindical</h3>
           <p>Sube canciones MP3 directamente al portal. Solo Administrador y Prensa pueden alimentar o retirar esta biblioteca.</p>
           <label className="field"><span>Nombre de la canción (opcional)</span><input value={mp3Title} onChange={(event) => { setMp3Title(event.target.value); setReplaceConfirmedId(null); }} maxLength={180} placeholder="Se toma del nombre del archivo si lo dejas vacío" /></label>
