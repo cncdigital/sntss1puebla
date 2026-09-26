@@ -46,3 +46,22 @@ next-env.d.ts
 /private-training/
 *.chatbase-export.json
 devi-training-candidates*.json
+
+# secrets / signing material
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.key
+*.crt
+*.cer
+*.der
+*.mobileprovision
+*.provisionprofile
+password.txt
+**/password.txt
+*.credentials.json
+*service-account*.json
+*service_account*.json
+*.secret
+*.secrets
