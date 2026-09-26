@@ -205,6 +205,7 @@ type CredentialResponse = {
   reviewNotes?: string | null;
   email?: string | null;
   passwordConfigured?: boolean;
+  mustChangePassword?: boolean;
   credentials?: Credential[];
 };
 type DocumentItem = {
@@ -2629,7 +2630,7 @@ function secureGeneratedPassword() {
 
 function PasswordSecurity({ data }: { data: CredentialResponse }) {
   const [configured, setConfigured] = useState(Boolean(data.passwordConfigured));
-  const [editing, setEditing] = useState(!data.passwordConfigured);
+  const [editing, setEditing] = useState(!data.passwordConfigured || Boolean(data.mustChangePassword));
   const [email, setEmail] = useState(data.email || "");
   const [curp, setCurp] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -2928,7 +2929,7 @@ function CredentialPanel({
       </div>
       {credentialValid && (
         <PasswordSecurity
-          key={`${data.passwordConfigured ? "configured" : "new"}:${data.email || ""}`}
+          key={`${data.passwordConfigured ? "configured" : "new"}:${data.mustChangePassword ? "temporary" : "normal"}:${data.email || ""}`}
           data={data}
         />
       )}
@@ -3837,7 +3838,7 @@ function AdminPanel({ privilege }: { privilege: Privilege }) {
   };
   const manageActiveCredential = async (
     credential: ActiveCredentialItem,
-    action: "restart_validation" | "reset_password",
+    action: "restart_validation" | "reset_password" | "issue_temporary_password",
   ) => {
     let reason = "";
     if (action === "restart_validation") {
@@ -3857,9 +3858,16 @@ function AdminPanel({ privilege }: { privilege: Privilege }) {
         )
       )
         return;
+    } else if (action === "reset_password") {
+      if (
+        !window.confirm(
+          `¿Restablecer la contraseña de la matrícula ${credential.matricula}? Se cerrarán sus sesiones y deberá crear una nueva cuando su credencial sea válida.`,
+        )
+      )
+        return;
     } else if (
       !window.confirm(
-        `¿Restablecer la contraseña de la matrícula ${credential.matricula}? Se cerrarán sus sesiones y podrá entrar nuevamente solo con su matrícula.`,
+        `¿Generar una contraseña temporal para ${readableName(credential.fullName)}? Será válida durante 24 horas, cerrará sus sesiones y deberá cambiarla al entrar.`,
       )
     ) {
       return;
@@ -3877,10 +3885,24 @@ function AdminPanel({ privilege }: { privilege: Privilege }) {
           reason,
         }),
       });
-      const data = await readJsonResponse<{ error?: string; message?: string }>(response);
+      const data = await readJsonResponse<{
+        error?: string;
+        message?: string;
+        temporaryPassword?: string;
+        expiresAt?: string;
+      }>(response);
       if (!response.ok || !data)
         throw new Error(apiResponseError(response, data, "No fue posible completar la acción."));
-      setMessage(data.message || "Acción completada correctamente.");
+      if (data.temporaryPassword) {
+        const expiry = data.expiresAt
+          ? new Date(data.expiresAt).toLocaleString("es-MX")
+          : "en 24 horas";
+        setMessage(
+          `Contraseña temporal para ${credential.matricula}: ${data.temporaryPassword}. Vence: ${expiry}. Entrégala por un canal seguro y no la publiques.`,
+        );
+      } else {
+        setMessage(data.message || "Acción completada correctamente.");
+      }
       await Promise.all([loadActiveCredentials(credentialSearch, true), loadApplications(true)]);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "No fue posible completar la acción.");
@@ -4278,6 +4300,7 @@ function AdminPanel({ privilege }: { privilege: Privilege }) {
             {activeCredentials.length ? activeCredentials.map((credential) => {
               const restartBusy = credentialAction === `${credential.applicationId}:restart_validation`;
               const passwordBusy = credentialAction === `${credential.applicationId}:reset_password`;
+              const temporaryPasswordBusy = credentialAction === `${credential.applicationId}:issue_temporary_password`;
               const validationBusy = credentialAction === `${credential.applicationId}:admin_validate`;
               return (
                 <article className={`activeCredentialRow ${credential.credentialValid ? "validCredential" : "invalidCredential"}`} key={credential.applicationId}>
@@ -4303,6 +4326,13 @@ function AdminPanel({ privilege }: { privilege: Privilege }) {
                   </div>
                   <div className="activeCredentialActions">
                     {credential.credentialValid ? <>
+                      <button
+                        className="button gold"
+                        onClick={() => void manageActiveCredential(credential, "issue_temporary_password")}
+                        disabled={Boolean(credentialAction) || !privilege.canAdmin}
+                      >
+                        {temporaryPasswordBusy ? "Generando…" : "Dar contraseña temporal"}
+                      </button>
                       <button
                         className="button secondary"
                         onClick={() => void manageActiveCredential(credential, "reset_password")}
@@ -4393,7 +4423,7 @@ function AdminPanel({ privilege }: { privilege: Privilege }) {
               <label><input type="checkbox" checked={roleForm.canManageScholarships} onChange={(event) => setRoleForm({ ...roleForm, canManageScholarships: event.target.checked, designation: event.target.checked && ["Representante sindical", "Trabajador/a IMSS"].includes(roleForm.designation) ? "Asuntos Técnicos" : roleForm.designation })} /> Asuntos Técnicos · Becas Sinabeth</label>
               <label><input type="checkbox" checked={roleForm.canViewFacilityCalendar} onChange={(event) => setRoleForm({ ...roleForm, canViewFacilityCalendar: event.target.checked, designation: event.target.checked && ["Representante sindical", "Trabajador/a IMSS"].includes(roleForm.designation) ? "Secretario de Deportes" : roleForm.designation })} /> Secretario de Deportes · ver calendario</label>
               <label><input type="checkbox" checked={roleForm.canManageSportsCalendar} onChange={(event) => setRoleForm({ ...roleForm, canManageSportsCalendar: event.target.checked, canViewFacilityCalendar: event.target.checked || roleForm.canViewFacilityCalendar, designation: event.target.checked && ["Representante sindical", "Trabajador/a IMSS"].includes(roleForm.designation) ? "Administrador del Deportivo" : roleForm.designation })} /> Administrador del Deportivo · calendarizar</label>
-              <label><input type="checkbox" checked={roleForm.canManageUnionCalendar} onChange={(event) => setRoleForm({ ...roleForm, canManageUnionCalendar: event.target.checked, canViewFacilityCalendar: event.target.checked || roleForm.canViewFacilityCalendar, designation: event.target.checked && ["Representante sindical", "Trabajador/a IMSS"].includes(roleForm.designation) ? "Secretario de Cultura" : roleForm.designation })} /> Secretario de Cultura · Casa del Arte</label>
+              <label><input type="checkbox" checked={roleForm.canManageUnionCalendar} onChange={(event) => setRoleForm({ ...roleForm, canManageUnionCalendar: event.target.checked, canViewFacilityCalendar: event.target.checked || roleForm.canViewFacilityCalendar, designation: event.target.checked && ["Representante sindical", "Trabajador/a IMSS"].includes(roleForm.designation) ? "Administrador del SNTSS" : roleForm.designation })} /> Secretario de Cultura · Casa del Arte</label>
               <label><input type="checkbox" checked={roleForm.canChat} onChange={(event) => setRoleForm({ ...roleForm, canChat: event.target.checked, designation: event.target.checked && ["Representante sindical", "Trabajador/a IMSS"].includes(roleForm.designation) ? "Chat sindical" : roleForm.designation })} /> Chat sindical privado</label>
             </div>
             <span className="fieldLabel">Instalaciones autorizadas</span>
@@ -4408,7 +4438,7 @@ function AdminPanel({ privilege }: { privilege: Privilege }) {
             {roles.map((role) => (
               <article className="roleRow" key={role.matricula}>
                 <span className={`styleDot ${role.credentialStyle}`} />
-                <div><b>{readableName(role.fullName || role.matricula)}</b><p>{role.designation} · Mat. {role.matricula}</p><small>{[role.canAdmin && "Administrador", role.canReview && "Verificador", role.canScan && "Lector QR", role.canTrainDevi && "Entrenador DeVi", role.canManageActs && "Actas y Acuerdos", role.canManageScholarships && "Asuntos Técnicos · Becas Sinabeth", role.canViewFacilityCalendar && "Consulta de calendario", role.canManageSportsCalendar && "Admin. Deportivo", role.canManageUnionCalendar && "Secretario de Cultura · Casa del Arte", role.canChat && "Chat privado"].filter(Boolean).join(" · ") || "Sin rol de acceso"}</small></div>
+                <div><b>{readableName(role.fullName || role.matricula)}</b><p>{role.designation} · Mat. {role.matricula}</p><small>{[role.canAdmin && "Administrador", role.canReview && "Verificador", role.canScan && "Lector QR", role.canTrainDevi && "Entrenador DeVi", role.canManageActs && "Actas y Acuerdos", role.canManageScholarships && "Asuntos Técnicos · Becas Sinabeth", role.canViewFacilityCalendar && "Consulta de calendario", role.canManageSportsCalendar && "Admin. Deportivo", role.canManageUnionCalendar && "Administrador del SNTSS · calendarizar", role.canChat && "Chat privado"].filter(Boolean).join(" · ") || "Sin rol de acceso"}</small></div>
                 <StatusPill status={role.active ? "verified" : "rejected"} />
               </article>
             ))}

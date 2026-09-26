@@ -127,7 +127,7 @@ test("stale application assets recover without leaving DeVi blank", () => {
   assert.match(page, /PanelLoadBoundary/);
   assert.match(page, /refreshStaleApplication/);
   assert.match(page, /Estamos verificando tu credencial y tus permisos/);
-  assert.match(serviceWorker, /sntss1puebla-portal-shell-v66/);
+  assert.match(serviceWorker, /sntss1puebla-portal-shell-v67/);
   assert.match(serviceWorker, /client\?\.navigate\(refreshUrl\.href\)/);
   assert.match(serviceWorker, /fetch\(request, \{ cache: "no-store" \}\)/);
   assert.match(serviceWorker, /const cached = await caches\.match\(request\)/);
@@ -199,7 +199,7 @@ test("primary feature panels load on demand and remain protected from a blank sc
   assert.match(page, /unavailableProtectedView/);
   assert.match(page, /<PanelLoadBoundary>[\s\S]*<HomeContent \/>/);
   assert.match(serviceWorker, /fetch\(request, \{ cache: "no-store" \}\)/);
-  assert.match(serviceWorker, /clients\.matchAll\(\{ type: "window", includeUncontrolled: true \}\)/);
+  assert.match(serviceWorker, /clients\s*\.matchAll\(\{ type: "window", includeUncontrolled: true \}\)/);
 });
 
 test("the service worker that refreshes installed apps is valid JavaScript", () => {

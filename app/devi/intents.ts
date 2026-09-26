@@ -1,5 +1,5 @@
-import { sourcesById, type DeviSource } from "./knowledge";
-import { normalizeSearchText } from "./relevance";
+import { sourcesById, type DeviSource } from "./knowledge.ts";
+import { normalizeSearchText } from "./relevance.ts";
 
 type SourceSpec = {
   id: string;

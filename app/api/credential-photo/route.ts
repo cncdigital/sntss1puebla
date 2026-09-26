@@ -23,6 +23,9 @@ export async function GET(request: Request) {
       "cache-control": "private, no-store, max-age=0",
       "content-disposition": "inline",
       "x-content-type-options": "nosniff",
+      "cross-origin-resource-policy": "same-site",
+      "referrer-policy": "no-referrer",
+      "x-robots-tag": "noindex, nofollow, noarchive",
     },
   });
 }

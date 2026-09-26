@@ -3,7 +3,18 @@ import { effectiveQrFacilities } from "../role-policy";
 import { isMasterAdministrator } from "../master-admin";
 import { canCoachProgressLists } from "../devi/progress-access";
 
-const OWNER_EMAILS = new Set(["guardiandelallama@gmail.com"]);
+function configuredOwnerEmails() {
+  return new Set(
+    (env.OWNER_EMAILS ?? "")
+      .split(",")
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean),
+  );
+}
+
+function configuredOwnerMatricula() {
+  return (env.OWNER_MATRICULA ?? "").trim();
+}
 export const PRIVILEGED_LOGOUT_COOKIE = "sntss_privileged_logged_out";
 export const WORKER_LOGOUT_COOKIE = "sntss_worker_logged_out";
 
@@ -40,10 +51,10 @@ function cookieValue(request: Request, name: string) {
 export function normalizedPersonName(value: string) {
   return value
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\\u0300-\\u036f]/g, "")
     .replace(/[&]/g, "N")
     .replace(/[^A-Z0-9 ]/gi, " ")
-    .replace(/\s+/g, " ")
+    .replace(/\\s+/g, " ")
     .trim()
     .toUpperCase();
 }
@@ -69,9 +80,11 @@ export function forwardedIdentity(request: Request) {
 
 export function getTrustedOwnerPrivilege(request: Request): Privilege | null {
   const identity = forwardedIdentity(request);
-  if (!OWNER_EMAILS.has(identity.email)) return null;
+  const ownerEmails = configuredOwnerEmails();
+  const ownerMatricula = configuredOwnerMatricula();
+  if (!ownerMatricula || !ownerEmails.has(identity.email)) return null;
   return {
-    matricula: "99222979",
+    matricula: ownerMatricula,
     canAdmin: true,
     canReview: true,
     canScan: true,
@@ -115,7 +128,8 @@ export async function getPrivilege(request: Request): Promise<Privilege | null> 
     FROM privileged_sessions s
     JOIN privileged_accounts p ON p.matricula=s.matricula
     LEFT JOIN role_assignments r ON r.matricula=p.matricula AND r.active=1
-    WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP AND p.active=1`,
+    WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP
+      AND s.created_at>datetime('now','-12 hours') AND p.active=1`,
   )
     .bind(token)
     .first<{
@@ -225,7 +239,10 @@ export async function getWorkerSession(request: Request) {
     `SELECT s.matricula,w.id AS workerId,w.full_name AS fullName,w.unit,w.category,
       w.curp,w.nss,w.email,w.phone
      FROM worker_sessions s JOIN workers w ON w.matricula=s.matricula
-     WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP AND w.active=1`,
+     LEFT JOIN worker_passwords wp ON wp.matricula=s.matricula
+     WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP AND w.active=1
+       AND (COALESCE(wp.must_change_password,0)=0
+         OR wp.temporary_expires_at>CURRENT_TIMESTAMP)`,
   )
     .bind(token)
     .first<{

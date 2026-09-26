@@ -1,11 +1,11 @@
-import knowledge from "./knowledge.generated.json";
-import { DEVI_DIRECTORY_SUMMARY } from "./directory";
+import knowledge from "./knowledge.generated.json" with { type: "json" };
+import { DEVI_DIRECTORY_SUMMARY } from "./directory.ts";
 import {
   buildQueryProfile,
   containsSearchTerm,
   normalizeSearchText,
   type QueryProfile,
-} from "./relevance";
+} from "./relevance.ts";
 
 type KnowledgeDocument = "cct" | "estatutos";
 

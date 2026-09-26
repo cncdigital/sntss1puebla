@@ -40,16 +40,17 @@ export async function GET(request: Request) {
   const [account, password] = await Promise.all([
     getCredentialAccount(session.workerId),
     env.DB.prepare(
-      "SELECT 1 AS configured FROM worker_passwords WHERE matricula=? LIMIT 1",
+      "SELECT 1 AS configured,COALESCE(must_change_password,0) AS mustChangePassword FROM worker_passwords WHERE matricula=? LIMIT 1",
     )
       .bind(session.matricula)
-      .first<{ configured: number }>(),
+      .first<{ configured: number; mustChangePassword: number }>(),
   ]);
   if (!account)
     return Response.json(
       {
         eligible: false,
         configured: Boolean(password),
+        mustChangePassword: Boolean(password?.mustChangePassword),
         email: session.email,
         reason: "Primero completa tu expediente.",
       },
@@ -60,6 +61,7 @@ export async function GET(request: Request) {
     {
       eligible: validity.valid,
       configured: Boolean(password),
+      mustChangePassword: Boolean(password?.mustChangePassword),
       email: account.email,
       reason: validity.valid
         ? "La credencial está validada y puede protegerse con contraseña."
@@ -131,13 +133,15 @@ export async function POST(request: Request) {
     );
   const existing = await env.DB.prepare(
     `SELECT password_hash AS passwordHash,password_salt AS passwordSalt,
-      iterations FROM worker_passwords WHERE matricula=?`,
+      iterations,COALESCE(must_change_password,0) AS mustChangePassword
+      FROM worker_passwords WHERE matricula=?`,
   )
     .bind(session.matricula)
     .first<{
       passwordHash: string;
       passwordSalt: string;
       iterations: number;
+      mustChangePassword: number;
     }>();
   if (existing) {
     if (!currentPassword)
@@ -165,11 +169,12 @@ export async function POST(request: Request) {
   await env.DB.batch([
     env.DB.prepare(
       `INSERT INTO worker_passwords
-        (matricula,password_hash,password_salt,iterations,failed_attempts,locked_until,updated_at)
-       VALUES (?,?,?,?,0,NULL,CURRENT_TIMESTAMP)
+        (matricula,password_hash,password_salt,iterations,failed_attempts,locked_until,must_change_password,temporary_expires_at,updated_at)
+       VALUES (?,?,?,?,0,NULL,0,NULL,CURRENT_TIMESTAMP)
        ON CONFLICT(matricula) DO UPDATE SET
          password_hash=excluded.password_hash,password_salt=excluded.password_salt,
          iterations=excluded.iterations,failed_attempts=0,locked_until=NULL,
+         must_change_password=0,temporary_expires_at=NULL,
          updated_at=CURRENT_TIMESTAMP`,
     ).bind(
       session.matricula,
