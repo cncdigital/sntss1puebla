@@ -239,7 +239,10 @@ export async function getWorkerSession(request: Request) {
     `SELECT s.matricula,w.id AS workerId,w.full_name AS fullName,w.unit,w.category,
       w.curp,w.nss,w.email,w.phone
      FROM worker_sessions s JOIN workers w ON w.matricula=s.matricula
-     WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP AND w.active=1`,
+     LEFT JOIN worker_passwords wp ON wp.matricula=s.matricula
+     WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP AND w.active=1
+       AND (COALESCE(wp.must_change_password,0)=0
+         OR wp.temporary_expires_at>CURRENT_TIMESTAMP)`,
   )
     .bind(token)
     .first<{
