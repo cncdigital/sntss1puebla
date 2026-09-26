@@ -622,6 +622,40 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
     if (!response.ok) throw new Error(apiResponseError(response, result, "No fue posible guardar la portada."));
   };
 
+  const normalizeLibrary = async () => {
+    if (!tracks.length || !window.confirm(`Se normalizarán ${tracks.length} canciones y sus calidades a ${RADIO_NORMALIZATION_PROFILE.label}. El proceso puede tardar y requiere mantener esta ventana abierta. ¿Continuar?`)) return;
+    setMp3Saving(true); setError(""); setNotice("");
+    let done = 0;
+    try {
+      for (const track of tracks) {
+        setNotice(`Normalizando ${done + 1} de ${tracks.length}: ${track.title}`);
+        const response = await fetch(track.url, { cache: "no-store" });
+        if (!response.ok) throw new Error(`No se pudo leer la canción N.º ${track.displayId}.`);
+        const source = new File([await response.blob()], track.fileName || `${track.title}.mp3`, { type: "audio/mpeg" });
+        const normalized = await normalizeMp3ForRadio(source);
+        const normalizedFile = new File([normalized], source.name, { type: "audio/mpeg" });
+        const uploaded = await uploadMp3Blob(normalized, source.name, {
+          title: track.title, artist: track.artist, album: track.album, lyrics: track.lyrics,
+          replaceTrackId: track.id, normalizationProfile: RADIO_NORMALIZATION_PROFILE.label,
+        });
+        if (uploaded.trackId && track.availableQualities?.includes(320)) {
+          for (const bitrate of [192, 96] as const) {
+            const variant = await encodeMp3Variant(normalizedFile, bitrate);
+            await uploadMp3Blob(variant, source.name.replace(/\.mp3$/i, `.${bitrate}.mp3`), {
+              variantOf: uploaded.key, bitrate, normalizationProfile: RADIO_NORMALIZATION_PROFILE.label,
+            });
+          }
+        }
+        done += 1;
+      }
+      const data = await requestNewsAdminSettings();
+      setTracks(data.tracks || []);
+      setNotice(`Biblioteca normalizada: ${done}/${tracks.length} canciones a ${RADIO_NORMALIZATION_PROFILE.label}.`);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "La normalización se detuvo. Puedes continuar desde la canción pendiente.");
+    } finally { setMp3Saving(false); }
+  };
+
   const generateVariants = async (track: NewsMp3Track) => {
     setMp3Saving(true);
     setNotice("");
@@ -710,7 +744,7 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
           <div className="radioCommercialList">{commercials.map((commercial) => <div key={commercial.id}><span><b>{commercial.title}</b><small>MP3 · {commercial.fileName} · {savedCommercialInterval ? `en cola cada ${savedCommercialInterval} min` : "programación desactivada"}</small></span><button className="button tiny" type="button" disabled={mp3Saving} onClick={() => void removeCommercial(commercial.id)}>Retirar</button></div>)}</div>
         </section>}
         {mode === "radio" && <form className="newsAdminSection" onSubmit={uploadMp3}>
-          <span className="newsAdminState connected">Carga protegida · {tracks.length} MP3</span>
+          <span className="newsAdminState connected">Carga protegida · {tracks.length} MP3</span>\n          <button className="button secondary" type="button" onClick={() => void normalizeLibrary()} disabled={mp3Saving || loading || !tracks.length}>Normalizar biblioteca a {RADIO_NORMALIZATION_PROFILE.label}</button>
           <h3>Biblioteca sindical</h3>
           <p>Sube canciones MP3 directamente al portal. Solo Administrador y Prensa pueden alimentar o retirar esta biblioteca.</p>
           <label className="field"><span>Nombre de la canción (opcional)</span><input value={mp3Title} onChange={(event) => { setMp3Title(event.target.value); setReplaceConfirmedId(null); }} maxLength={180} placeholder="Se toma del nombre del archivo si lo dejas vacío" /></label>
