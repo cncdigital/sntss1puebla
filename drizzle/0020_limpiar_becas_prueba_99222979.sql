@@ -1,2 +1,0 @@
--- Limpieza de datos de prueba omitida del espejo público.
--- Las operaciones sobre registros reales se ejecutan únicamente en el entorno privado.

@@ -1,2 +1,0 @@
--- Padrón omitido del espejo público.
--- La carga real de trabajadores se conserva únicamente en el entorno privado.

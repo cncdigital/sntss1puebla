@@ -1,2 +1,0 @@
--- Cuenta administrativa omitida del espejo público.
--- La provisiona el entorno privado mediante secretos y procedimientos controlados.
