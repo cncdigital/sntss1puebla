@@ -5,7 +5,7 @@ import {
   createPasswordSalt,
   derivePasswordHash,
   PASSWORD_ITERATIONS,
-} from "../password-crypto";
+} from "../../worker/password-crypto";
 
 const NO_STORE_HEADERS = {
   "cache-control": "private, no-store, max-age=0",
