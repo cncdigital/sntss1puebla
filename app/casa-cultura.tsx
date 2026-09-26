@@ -1,36 +1,132 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import "./casa-cultura.css";
+import { useCallback, useEffect, useState } from "react";
+import { cultureSlides, type CultureEntry, type CultureKind } from "./culture-data";
 
-type CasaItem = { id:string; title:string; kind:"publicación"|"curso"|"turismo"|"convenio"; text:string; schedule?:string; level?:string; image?:string; };
-const DEFAULT_ITEMS: CasaItem[] = [
-  {id:"arte",kind:"publicación",title:"Arte, cultura y comunidad",text:"Un espacio para desarrollar la creatividad, aprender nuevas disciplinas y fortalecer la convivencia sindical.",image:"/casa-cultura-arte.svg"},
-  {id:"idiomas",kind:"curso",title:"Idiomas",text:"Inglés, francés y alemán para niñas, niños, adolescentes, adultos y jubilados.",schedule:"Consulta horarios y grupos disponibles.",level:"Todos los niveles",image:"/casa-cultura-idiomas.svg"},
-  {id:"musica",kind:"curso",title:"Música",text:"Guitarra, rondalla, coro, batería y guitarra eléctrica.",schedule:"Clases entre semana y sábados.",level:"Inicial e intermedio",image:"/casa-cultura-musica.svg"},
-  {id:"artes",kind:"curso",title:"Artes escénicas y visuales",text:"Teatro, danza, folclórica, arte y pintura, fotografía y amigurumis.",schedule:"Horarios sujetos a apertura de grupos.",level:"Niñas, niños, jóvenes, adultos y jubilados",image:"/casa-cultura-artes.svg"},
-  {id:"turismo",kind:"turismo",title:"Turismo sindical",text:"Próximamente encontrarás recorridos, destinos, actividades culturales y promociones para disfrutar Puebla y México.",schedule:"Publicaremos calendario, costos y cupos en este espacio.",image:"/casa-cultura-portada.svg"},
+type SavedEntry = Omit<CultureEntry, "id"> & { id: number; updatedAt: string };
+type Entry = CultureEntry & { recordId?: number };
+const sections: Array<[CultureKind, string]> = [
+  ["curso", "Talleres y horarios"],
+  ["publicacion", "Publicaciones"],
+  ["convenio", "Convenios culturales"],
+  ["turismo", "Turismo"],
 ];
+const emptyForm = { id: 0, sourcePage: 0, kind: "curso" as CultureKind, title: "", description: "", schedule: "", linkUrl: "" };
 
-export function CasaCulturaPanel({ canManage=false }: { canManage?: boolean }) {
-  const [items,setItems]=useState<CasaItem[]>(DEFAULT_ITEMS);
-  const [active,setActive]=useState<"todos"|CasaItem["kind"]>("todos");
-  const [editing,setEditing]=useState<CasaItem|null>(null);
-  const [notice,setNotice]=useState("");
-  useEffect(()=>{ let active=true; fetch("/api/casa-cultura",{cache:"no-store"}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{if(active&&Array.isArray(data.items)&&data.items.length)setItems(data.items)}).catch(()=>{}); return()=>{active=false}; },[]);
-  const visible=useMemo(()=>active==="todos"?items:items.filter(i=>i.kind===active),[active,items]);
-  const submit=async(event:React.FormEvent)=>{event.preventDefault(); if(!editing)return; try { const response=await fetch("/api/casa-cultura",{method:editing.id?"PUT":"POST",headers:{"content-type":"application/json"},body:JSON.stringify(editing)}); const data=await response.json(); if(!response.ok) throw new Error(data.error||"No fue posible publicar."); setItems(data.items); setEditing(null); setNotice("Contenido publicado para SNTSS1PUEBLA y Credenciales."); } catch(error){setNotice(error instanceof Error?error.message:"No fue posible publicar.");} setTimeout(()=>setNotice(""),4000);};
-  return <main className="casaCultura">
-    <section className="casaHero">
-      <div><span className="casaEyebrow">SNTSS · SECCIÓN I PUEBLA</span><h1>Casa de Cultura del Arte</h1><p>Un espacio para aprender, crear, convivir y descubrir nuevos destinos.</p><div className="casaPills"><span>Arte</span><span>Cultura</span><span>Turismo</span></div></div>
-      <img src="/casa-cultura-portada.svg" alt="Casa de Cultura del Arte del SNTSS" />
+export function CasaCulturaPanel({ canManage }: { canManage: boolean }) {
+  const [saved, setSaved] = useState<SavedEntry[]>([]);
+  const [section, setSection] = useState<CultureKind>("curso");
+  const [form, setForm] = useState(emptyForm);
+  const [image, setImage] = useState<File | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [lightbox, setLightbox] = useState<Entry | null>(null);
+
+  const refresh = useCallback(async () => {
+    const response = await fetch("/api/culture", { cache: "no-store" });
+    const body = await response.json() as { entries?: SavedEntry[]; error?: string };
+    if (!response.ok || !Array.isArray(body.entries)) throw new Error(body.error || "No se pudo cargar el contenido.");
+    setSaved(body.entries);
+  }, []);
+  useEffect(() => { void refresh().catch((cause) => setError(cause instanceof Error ? cause.message : "No se pudo cargar el contenido.")); }, [refresh]);
+
+  const slides = cultureSlides.flatMap((slide) => {
+    const override = saved.find((item) => item.sourcePage === slide.sourcePage);
+    if (override?.hidden) return [];
+    return [{ ...slide, ...(override ? {
+      kind: override.kind,
+      title: override.title,
+      description: override.description,
+      schedule: override.schedule,
+      linkUrl: override.linkUrl,
+      imageUrl: override.imageUrl || slide.imageUrl,
+      recordId: override.id,
+    } : {}) }];
+  });
+  const created = saved.filter((item) => !item.sourcePage && !item.hidden).map((item) => ({
+    ...item,
+    id: `registro-${item.id}`,
+    recordId: item.id,
+  }));
+  const entries = [...slides, ...created].filter((item) => item.kind === section);
+
+  function startEdit(entry: Entry) {
+    setForm({ id: entry.recordId || 0, sourcePage: entry.sourcePage || 0, kind: entry.kind, title: entry.title, description: entry.description, schedule: entry.schedule, linkUrl: entry.linkUrl });
+    setImage(null);
+    setEditing(true);
+    setError("");
+    document.getElementById("culture-editor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function startNew(kind: CultureKind) {
+    setForm({ ...emptyForm, kind });
+    setImage(null);
+    setEditing(true);
+    setError("");
+    document.getElementById("culture-editor")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  async function save(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      const payload = new FormData();
+      Object.entries(form).forEach(([key, value]) => payload.set(key, String(value)));
+      if (image) payload.set("image", image);
+      const response = await fetch("/api/culture", { method: form.id || form.sourcePage ? "PATCH" : "POST", body: payload });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error || "No fue posible guardar la publicación.");
+      await refresh();
+      setEditing(false);
+      setImage(null);
+      setMessage("Contenido publicado correctamente.");
+      setSection(form.kind);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "No fue posible guardar el contenido."); }
+    finally { setBusy(false); }
+  }
+  async function remove(entry: Entry) {
+    if (!window.confirm(`¿Retirar «${entry.title}» de la Casa de Cultura?`)) return;
+    setBusy(true);
+    setError("");
+    try {
+      const response = await fetch("/api/culture", { method: "DELETE", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: entry.recordId || 0, sourcePage: entry.sourcePage || 0 }) });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error || "No fue posible retirar la publicación.");
+      await refresh();
+      setMessage("Publicación retirada.");
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "No fue posible retirar la publicación."); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <section className="culturePage">
+      <div className="cultureHero">
+        <img src="/casa-cultura/lamina-01.jpg" alt="Fachada y emblema de la Casa de Cultura y del Arte del SNTSS Sección I Puebla" />
+        <div><span className="cultureEyebrow">SNTSS · SECCIÓN I PUEBLA</span><h1>Casa de Cultura<br /><em>del Arte</em></h1><p>Explora los talleres, las actividades y las publicaciones de nuestra Casa de Cultura.</p><span className="cultureHeroAddress">4 Sur #1305, colonia El Carmen · Puebla</span><a href="tel:+522216572812">Informes: 221 657 2812</a></div>
+      </div>
+      <div className="cultureTabs" role="tablist" aria-label="Contenido de Casa de Cultura">
+        {sections.map(([kind, label]) => <button type="button" role="tab" aria-selected={section === kind} key={kind} className={section === kind ? "selected" : ""} onClick={() => { setSection(kind); setMessage(""); }}>{label}</button>)}
+      </div>
+      <p className="cultureSourceNote">Los carteles provienen del material de la Casa de Cultura. Confirma horarios, cupos y costos antes de asistir; pueden cambiar.</p>
+      {canManage && <div className="cultureManage"><span>Gestión de Cultura</span><button className="button primary" type="button" onClick={() => startNew(section)}>+ Agregar {section === "curso" ? "curso" : section === "convenio" ? "convenio" : section === "turismo" ? "actividad de turismo" : "publicación"}</button></div>}
+      {error && <p className="cultureFeedback error" role="alert">{error} <button type="button" onClick={() => void refresh().catch(() => undefined)}>Reintentar</button></p>}
+      {message && <p className="cultureFeedback" role="status">{message}</p>}
+      {editing && canManage && <form id="culture-editor" className="cultureEditor" onSubmit={(event) => void save(event)}>
+        <div className="cultureEditorHeading"><h2>{form.id || form.sourcePage ? "Editar contenido" : "Nueva publicación"}</h2><button type="button" onClick={() => setEditing(false)} aria-label="Cerrar editor">✕</button></div>
+        <label>Sección<select value={form.kind} onChange={(event) => setForm({ ...form, kind: event.target.value as CultureKind })}>{sections.map(([kind, label]) => <option key={kind} value={kind}>{label}</option>)}</select></label>
+        <label>Título<input required maxLength={130} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} /></label>
+        <label>Descripción<textarea rows={4} maxLength={3000} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></label>
+        <label>Horarios o fechas<textarea rows={2} maxLength={550} value={form.schedule} onChange={(event) => setForm({ ...form, schedule: event.target.value })} placeholder="Escribe únicamente horarios confirmados" /></label>
+        <label>Enlace del convenio o actividad (opcional)<input type="url" placeholder="https://" value={form.linkUrl} onChange={(event) => setForm({ ...form, linkUrl: event.target.value })} /></label>
+        <label>Imagen JPG, PNG o WebP (máximo 5 MB)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setImage(event.target.files?.[0] || null)} /></label>
+        <button type="submit" className="button primary" disabled={busy}>{busy ? "Guardando…" : "Publicar cambios"}</button>
+      </form>}
+      {entries.length ? <div className="cultureGrid">{entries.map((entry) => <article className="cultureCard" key={entry.id}>
+        {entry.imageUrl ? <button type="button" className="cultureArt" onClick={() => setLightbox(entry)} aria-label={`Ampliar cartel de ${entry.title}`}><img loading="lazy" src={entry.imageUrl} alt={`Cartel de ${entry.title}`} /></button> : <div className="cultureArt noArt">Casa de Cultura</div>}
+        <div className="cultureCardBody"><span className="cultureCardKind">{sections.find(([kind]) => kind === entry.kind)?.[1]}</span><h2>{entry.title}</h2>{entry.description && <p>{entry.description}</p>}{entry.schedule && <small>{entry.schedule}</small>}{entry.linkUrl && <a href={entry.linkUrl} target="_blank" rel="noopener noreferrer">Consultar información →</a>}{canManage && <div className="cultureActions"><button type="button" onClick={() => startEdit(entry)}>Editar datos y cartel</button><button type="button" disabled={busy} onClick={() => void remove(entry)}>Retirar</button></div>}</div>
+      </article>)}</div> : <div className="cultureEmpty"><h2>{section === "convenio" ? "Convenios culturales" : "Actividades de turismo"}</h2><p>Aquí se publicarán las próximas {section === "convenio" ? "colaboraciones culturales" : "actividades y visitas"} confirmadas.</p></div>}
+      {lightbox && <div className="cultureLightbox" role="presentation" onClick={() => setLightbox(null)}><div role="dialog" aria-modal="true" aria-label={`Cartel de ${lightbox.title}`} onClick={(event) => event.stopPropagation()}><button type="button" onClick={() => setLightbox(null)} aria-label="Cerrar cartel">✕ Cerrar</button><img src={lightbox.imageUrl} alt={`Cartel completo de ${lightbox.title}`} /></div></div>}
     </section>
-    <section className="casaIntro"><div><span className="casaEyebrow">TODOS JUNTOS TODOS FUERTES</span><h2>Talento que se organiza, comunidad que crece.</h2></div><p>Consulta publicaciones, cursos, horarios, convenios y actividades culturales de la Sección I Puebla.</p></section>
-    <div className="casaFilters" role="tablist">{(["todos","publicación","curso","turismo","convenio"] as const).map(k=><button key={k} className={active===k?"active":""} onClick={()=>setActive(k)}>{k==="todos"?"Todo":k[0].toUpperCase()+k.slice(1)}</button>)}</div>
-    <section className="casaGrid">{visible.map(item=><article className="casaCard" key={item.id}>{item.image&&<img src={item.image} alt="" /> }<div className="casaCardBody"><span className="casaTag">{item.kind}</span><h3>{item.title}</h3><p>{item.text}</p>{item.level&&<small><b>Niveles:</b> {item.level}</small>}{item.schedule&&<small><b>Horarios:</b> {item.schedule}</small>}{canManage&&<button className="casaEdit" onClick={()=>setEditing(item)}>Editar contenido</button>}</div></article>)}</section>
-    <section className="casaCallout"><div><span className="casaEyebrow">MÁS INFORMACIÓN</span><h2>Costos, promociones e inscripciones</h2><p>La Secretaría de Cultura publicará aquí convocatorias, cupos, horarios y cursos. Consulta siempre la versión más reciente.</p></div><div className="casaContact">📞 <b>221 657 2812</b><small>Casa de Cultura del Arte</small></div></section>
-    {canManage&&<section className="casaManager"><div><span className="casaEyebrow">SECRETARIO DE CULTURA</span><h2>Administrar Casa de Cultura</h2><p>Agrega publicaciones, cursos, convenios, horarios y turismo.</p></div><button className="casaPrimary" onClick={()=>setEditing({id:"",title:"",kind:"publicación",text:"",schedule:"",level:"",image:""})}>+ Nueva publicación</button></section>}
-    {notice&&<div className="casaNotice" role="status">{notice}</div>}
-    {editing&&<div className="casaModal"><form onSubmit={submit}><button type="button" className="casaClose" onClick={()=>setEditing(null)}>×</button><h2>{editing.id?"Editar contenido":"Nuevo contenido"}</h2><label>Título<input required value={editing.title} onChange={e=>setEditing({...editing,title:e.target.value})}/></label><label>Tipo<select value={editing.kind} onChange={e=>setEditing({...editing,kind:e.target.value as CasaItem["kind"]})}><option>publicación</option><option>curso</option><option>turismo</option><option>convenio</option></select></label><label>Descripción<textarea required value={editing.text} onChange={e=>setEditing({...editing,text:e.target.value})}/></label><label>Horario<input value={editing.schedule||""} onChange={e=>setEditing({...editing,schedule:e.target.value})}/></label><label>Niveles<input value={editing.level||""} onChange={e=>setEditing({...editing,level:e.target.value})}/></label><label>Imagen URL<input value={editing.image||""} onChange={e=>setEditing({...editing,image:e.target.value})}/></label><button className="casaPrimary" type="submit">Guardar contenido</button></form></div>}
-  </main>;
+  );
 }

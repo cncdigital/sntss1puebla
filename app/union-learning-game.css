@@ -42,9 +42,15 @@
 .unionGameModes button { min-height: 48px; border: 0; border-radius: 10px; background: transparent; color: #52687c; font-size: .9rem; font-weight: 850; }
 .unionGameModes button.active { background: var(--navy-800); color: white; box-shadow: 0 7px 18px rgba(7,29,54,.18); }
 .unionGameModes button span { margin-right: 5px; }
+.unionGameModes button:focus-visible,.unionQuizOptions button:focus-visible,.unionPuzzleList button:focus-visible,.unionDifficultyControl select:focus-visible { outline: 3px solid #159bd2; outline-offset: 2px; }
+.unionDifficultyControl { display: flex; align-items: center; justify-content: flex-end; gap: 9px; margin-top: 13px; }
+.unionDifficultyControl label { color: #52687c; font-size: .78rem; font-weight: 850; }
+.unionDifficultyControl select { min-height: 42px; border: 1px solid #bdccd8; border-radius: 10px; background: white; padding: 7px 34px 7px 11px; color: var(--navy-800); font: inherit; font-size: .83rem; font-weight: 750; }
 .unionQuestionMeta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 26px 0 10px; }
+.unionQuestionMeta > div { display: flex; flex-wrap: wrap; gap: 6px; }
 .unionQuestionMeta span,.unionQuestionMeta b { border-radius: 40px; padding: 7px 11px; font-size: .76rem; font-weight: 900; }
 .unionQuestionMeta span { background: var(--electric-soft); color: #0b6d98; }
+.unionQuestionMeta span + span { background: #eef1f4; color: #52687c; }
 .unionQuestionMeta b { background: var(--gold-soft); color: #72510a; }
 .unionGameArena h2 { margin: 0 0 20px; color: var(--navy-900); font: 750 clamp(1.5rem, 3vw, 2.15rem)/1.15 Georgia, serif; letter-spacing: -.025em; }
 .unionPracticeNotice { margin: 0 0 13px; border: 1px solid #e9cc7a; border-radius: 11px; background: #fff9e8; padding: 10px 12px; color: #725714; font-size: .82rem; line-height: 1.45; }
@@ -63,6 +69,7 @@
 .unionPuzzleList li > div { display: flex; gap: 5px; }
 .unionPuzzleList button { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid #c7d5df; border-radius: 9px; background: white; color: var(--navy-800); font-size: 1.1rem; font-weight: 950; }
 .unionPuzzleList button:disabled { cursor: not-allowed; opacity: .35; }
+.unionPuzzleHelp { margin: -8px 0 12px; color: #66798a; font-size: .82rem; line-height: 1.45; }
 
 .unionGameActions { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 20px; border-top: 1px solid #e2e9ef; padding-top: 17px; }
 .unionGameActions .button { min-height: 48px; padding-inline: 22px; font-size: .9rem; }
@@ -74,6 +81,7 @@
 .unionAnswerResult strong { display: block; font-size: 1rem; }
 .unionAnswerResult p { margin: 7px 0 0; font-size: .9rem; line-height: 1.5; }
 .unionAnswerResult small { display: block; margin-top: 8px; color: inherit; font-size: .76rem; font-weight: 800; opacity: .78; }
+.unionAnswerResult:focus { outline: 3px solid currentColor; outline-offset: 3px; }
 .unionGameLoading,.unionGameError { display: grid; min-height: 360px; align-content: center; justify-items: center; gap: 10px; color: var(--navy-700); text-align: center; }
 .unionGameError p { max-width: 440px; margin: 0 0 8px; color: var(--muted); font-size: .9rem; }
 
@@ -97,6 +105,7 @@
 .unionLeaderboard details { margin: 12px 16px 17px; border: 1px solid #d7e2ea; border-radius: 10px; background: #f8fbfd; }
 .unionLeaderboard summary { cursor: pointer; padding: 10px 12px; color: var(--navy-700); font-size: .78rem; font-weight: 850; }
 .unionLeaderboard details p { margin: 0; border-top: 1px solid #dce5ec; padding: 10px 12px; color: #66798a; font-size: .76rem; line-height: 1.45; }
+.unionEducationNote { margin: 0 16px 18px; color: #6e7f8e; font-size: .7rem; line-height: 1.45; }
 
 @media (max-width: 900px) {
   .unionGamePage { background: linear-gradient(180deg,#061b32 0 330px,#eef3f7 330px); }
@@ -111,6 +120,8 @@
   .unionGameStats { grid-template-columns: 1fr 1fr; }
   .unionGameStats article:last-child { grid-column: 1 / -1; }
   .unionGameModes { grid-template-columns: 1fr; }
+  .unionDifficultyControl { align-items: stretch; flex-direction: column; }
+  .unionDifficultyControl select { width: 100%; }
   .unionGameArena { min-height: 0; border-radius: 17px; padding: 15px; }
   .unionGameTop h1 { font-size: 2.65rem; }
   .unionGameTop p { font-size: .95rem; }
@@ -126,4 +137,3 @@
 @media (prefers-reduced-motion: reduce) {
   .unionGameLevelBar i,.unionQuizOptions button { transition: none; }
 }
-

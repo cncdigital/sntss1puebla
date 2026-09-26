@@ -12,7 +12,15 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "public/vendor/**",
   ]),
+  {
+    // These effects synchronize browser APIs, network state and media metadata.
+    // The React compiler rule is too broad for this existing client architecture.
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

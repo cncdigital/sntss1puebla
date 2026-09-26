@@ -17,6 +17,54 @@ const APP = "Portal SNTSS1PUEBLA · Función disponible";
 
 export const DEVI_FACTS: readonly DeviFact[] = [
   {
+    id: "cct-99-cambio-consentimiento",
+    category: "PROTECCIÓN",
+    text: "Para un cambio de residencia por necesidades del servicio o promoción escalafonaria, la Cláusula 99 contempla la aceptación del Sindicato y el consentimiento previo del trabajador.",
+    source: `${CCT} · Cláusula 99`,
+  },
+  {
+    id: "cct-99-cambio-apoyos",
+    category: "PRESTACIÓN",
+    text: "Si procede el cambio de lugar previsto en la Cláusula 99, el CCT incluye pasaje en primera clase, transporte del menaje de casa y el importe de 60 días de sueldo.",
+    source: `${CCT} · Cláusula 99`,
+  },
+  {
+    id: "cct-100-viaticos-actualizacion",
+    category: "PROTECCIÓN",
+    text: "La cifra diaria de viáticos de la Cláusula 100 se incrementa con el porcentaje de aumento del salario mínimo general de la zona señalada en el CCT; conviene verificar su monto actualizado.",
+    source: `${CCT} · Cláusula 100`,
+  },
+  {
+    id: "cct-105-descuento-sueldo",
+    category: "PROTECCIÓN",
+    text: "Las deducciones por inasistencias o retardos injustificados previstas en la Cláusula 105 se hacen únicamente del sueldo.",
+    source: `${CCT} · Cláusula 105`,
+  },
+  {
+    id: "cct-105-reintegro",
+    category: "DERECHO",
+    text: "Si la Comisión Mixta comprueba que un descuento por retardo o inasistencia fue improcedente, debe reintegrarse en un plazo no mayor a un mes desde esa comprobación.",
+    source: `${CCT} · Cláusula 105`,
+  },
+  {
+    id: "cct-106-pension-alimenticia",
+    category: "PROTECCIÓN",
+    text: "Las pensiones alimenticias decretadas por los tribunales figuran entre las deducciones salariales contempladas expresamente en el CCT.",
+    source: `${CCT} · Cláusula 106`,
+  },
+  {
+    id: "cct-150-estacionamiento",
+    category: "PROTECCIÓN",
+    text: "El IMSS debe procurar estacionamientos para el personal en unidades de nueva creación, de acuerdo con sus posibilidades económicas y físicas; la cláusula no asigna un cajón individual.",
+    source: `${CCT} · Cláusula 150`,
+  },
+  {
+    id: "cct-152-seguro-beneficiarios",
+    category: "PRESTACIÓN",
+    text: "El seguro de vida de la Cláusula 152 se entrega a los beneficiarios del pliego testamentario o a quienes designe la autoridad competente, con independencia de otras prestaciones contractuales.",
+    source: `${CCT} · Cláusula 152`,
+  },
+  {
     id: "cct-44-licencia",
     category: "DERECHO",
     text: "La licencia sin goce de sueldo puede concederse de forma continua o discontinua hasta por un año, si se cuenta con al menos un año de antigüedad.",

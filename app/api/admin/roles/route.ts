@@ -1,8 +1,10 @@
 import { env } from "cloudflare:workers";
 import { audit, requirePrivilege } from "../../authz";
-import { sha256 } from "../../reader/auth";
-import { effectiveQrFacilities } from "../../../role-policy";
 import { isMasterAdministrator } from "../../../master-admin";
+import {
+  createPrivilegedPinCredential,
+  privilegedPinValidationError,
+} from "../../privileged/pin-crypto";
 
 const STYLES = new Set([
   "standard",
@@ -27,6 +29,7 @@ export async function GET(request: Request) {
       r.can_manage_sports_calendar AS canManageSportsCalendar,
       r.can_manage_union_calendar AS canManageUnionCalendar,
       r.can_chat AS canChat,
+      r.can_manage_culture AS canManageCulture,
       r.facilities_json AS facilitiesJson,r.active,r.updated_at AS updatedAt
      FROM role_assignments r LEFT JOIN workers w ON w.matricula=r.matricula
      ORDER BY r.can_admin DESC,r.can_train_devi DESC,r.can_review DESC,canScan DESC,r.matricula`,
@@ -41,7 +44,7 @@ export async function GET(request: Request) {
         } catch {
           facilities = [];
         }
-        return effectiveQrFacilities(String(role.credentialStyle || "standard"), facilities);
+        return facilities;
       })(),
     })),
   });
@@ -65,6 +68,7 @@ export async function POST(request: Request) {
     canManageSportsCalendar?: boolean;
     canManageUnionCalendar?: boolean;
     canChat?: boolean;
+    canManageCulture?: boolean;
     facilities?: string[];
     temporaryPin?: string;
     active?: boolean;
@@ -105,9 +109,10 @@ export async function POST(request: Request) {
   const canManageUnionCalendar =
     masterAdministrator || Boolean(payload.canManageUnionCalendar);
   const canChat = masterAdministrator || Boolean(payload.canChat);
+  const canManageCulture = masterAdministrator || Boolean(payload.canManageCulture);
   const facilities = masterAdministrator
     ? ["*"]
-    : effectiveQrFacilities(style, (payload.facilities ?? []).slice(0, 30));
+    : (payload.facilities ?? []).slice(0, 30);
   const needsLogin = Boolean(
     canAdmin ||
       canReview ||
@@ -118,24 +123,45 @@ export async function POST(request: Request) {
       canViewFacilityCalendar ||
       canManageSportsCalendar ||
       canManageUnionCalendar ||
-      canChat,
+      canChat ||
+      canManageCulture,
   );
   const existing = needsLogin
     ? await env.DB.prepare(
-        "SELECT pin_hash AS pinHash FROM privileged_accounts WHERE matricula=?",
+        `SELECT pin_hash AS pinHash,pin_salt AS pinSalt,
+          pin_iterations AS pinIterations
+         FROM privileged_accounts WHERE matricula=?`,
       )
         .bind(matricula)
-        .first<{ pinHash: string }>()
+        .first<{
+          pinHash: string;
+          pinSalt: string | null;
+          pinIterations: number | null;
+        }>()
     : null;
-  if (needsLogin && !existing && !/^\d{4,12}$/.test(payload.temporaryPin ?? ""))
+  if (
+    needsLogin &&
+    !existing &&
+    privilegedPinValidationError(payload.temporaryPin ?? "")
+  )
     return Response.json(
-      { error: "Asigna un PIN temporal de 4 a 12 dígitos para el nuevo rol." },
+      { error: "Asigna un PIN temporal de 6 a 12 dígitos para el nuevo rol." },
+      { status: 400 },
+    );
+  if (
+    needsLogin &&
+    existing &&
+    payload.temporaryPin &&
+    privilegedPinValidationError(payload.temporaryPin)
+  )
+    return Response.json(
+      { error: "El PIN temporal debe tener de 6 a 12 dígitos." },
       { status: 400 },
     );
   await env.DB.prepare(
     `INSERT INTO role_assignments
-      (matricula,designation,credential_style,can_admin,can_review,can_scan,can_train_devi,can_manage_acts,can_manage_scholarships,can_view_facility_calendar,can_manage_sports_calendar,can_manage_union_calendar,can_chat,facilities_json,active,updated_at)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
+      (matricula,designation,credential_style,can_admin,can_review,can_scan,can_train_devi,can_manage_acts,can_manage_scholarships,can_view_facility_calendar,can_manage_sports_calendar,can_manage_union_calendar,can_chat,can_manage_culture,facilities_json,active,updated_at)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)
      ON CONFLICT(matricula) DO UPDATE SET designation=excluded.designation,
        credential_style=excluded.credential_style,can_admin=excluded.can_admin,
        can_review=excluded.can_review,can_scan=excluded.can_scan,
@@ -146,6 +172,7 @@ export async function POST(request: Request) {
        can_manage_sports_calendar=excluded.can_manage_sports_calendar,
        can_manage_union_calendar=excluded.can_manage_union_calendar,
        can_chat=excluded.can_chat,
+       can_manage_culture=excluded.can_manage_culture,
        facilities_json=excluded.facilities_json,active=excluded.active,updated_at=CURRENT_TIMESTAMP`,
   )
     .bind(
@@ -164,28 +191,39 @@ export async function POST(request: Request) {
       canManageSportsCalendar ? 1 : 0,
       canManageUnionCalendar ? 1 : 0,
       canChat ? 1 : 0,
+      canManageCulture ? 1 : 0,
       JSON.stringify(facilities),
       masterAdministrator || payload.active !== false ? 1 : 0,
     )
     .run();
   if (needsLogin) {
-    const pinHash = payload.temporaryPin
-      ? await sha256(payload.temporaryPin)
-      : existing!.pinHash;
+    const credential = payload.temporaryPin
+      ? await createPrivilegedPinCredential(payload.temporaryPin)
+      : {
+          pinHash: existing!.pinHash,
+          pinSalt: existing!.pinSalt,
+          pinIterations: existing!.pinIterations,
+        };
     await env.DB.prepare(
       `INSERT INTO privileged_accounts
-        (matricula,pin_hash,can_admin,can_reader,active,must_change_pin)
-       VALUES (?,?,?,?,?,1)
+        (matricula,pin_hash,pin_salt,pin_iterations,can_admin,can_reader,active,must_change_pin)
+       VALUES (?,?,?,?,?,?,?,1)
        ON CONFLICT(matricula) DO UPDATE SET pin_hash=CASE WHEN ? THEN excluded.pin_hash ELSE privileged_accounts.pin_hash END,
+         pin_salt=CASE WHEN ? THEN excluded.pin_salt ELSE privileged_accounts.pin_salt END,
+         pin_iterations=CASE WHEN ? THEN excluded.pin_iterations ELSE privileged_accounts.pin_iterations END,
          can_admin=excluded.can_admin,can_reader=excluded.can_reader,active=excluded.active,
          must_change_pin=CASE WHEN ? THEN 1 ELSE privileged_accounts.must_change_pin END`,
     )
       .bind(
         matricula,
-        pinHash,
+        credential.pinHash,
+        credential.pinSalt,
+        credential.pinIterations,
         canAdmin ? 1 : 0,
         canScan ? 1 : 0,
         masterAdministrator || payload.active !== false ? 1 : 0,
+        payload.temporaryPin ? 1 : 0,
+        payload.temporaryPin ? 1 : 0,
         payload.temporaryPin ? 1 : 0,
         payload.temporaryPin ? 1 : 0,
       )

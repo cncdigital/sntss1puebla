@@ -1,25 +1,23 @@
 import { env } from "cloudflare:workers";
 import {
-  hashPrivilegedPin,
-  isLegacyPinHash,
-  verifyPrivilegedPin,
-} from "../pin-crypto";
-import {
   getPrivilege,
   getTrustedOwnerPrivilege,
   PRIVILEGED_LOGOUT_COOKIE,
 } from "../../authz";
-import { effectiveQrFacilities } from "../../../role-policy";
 import { isMasterAdministrator } from "../../../master-admin";
 import { canCoachProgressLists } from "../../../devi/progress-access";
 import { sharedPortalCookieDomain } from "../../worker/identity-auth";
+import {
+  createPrivilegedPinCredential,
+  verifyPrivilegedPin,
+} from "../pin-crypto";
 
 const NO_STORE_HEADERS = {
   "cache-control": "private, no-store, max-age=0",
   pragma: "no-cache",
 };
 
-const PERSISTENT_SESSION_SECONDS = 12 * 60 * 60;
+const PERSISTENT_SESSION_SECONDS = 400 * 24 * 60 * 60;
 
 function privilegedSessionCookie(
   token: string,
@@ -109,7 +107,7 @@ export async function GET(request: Request) {
   if (token) {
     try {
       await env.DB.prepare(
-        "UPDATE privileged_sessions SET expires_at=datetime('now','+12 hours') WHERE token=?",
+        "UPDATE privileged_sessions SET expires_at=datetime('now','+400 days') WHERE token=?",
       )
         .bind(token)
         .run();
@@ -147,10 +145,39 @@ export async function POST(request: Request) {
     );
   const ownerPrivilege = getTrustedOwnerPrivilege(request);
   if (ownerPrivilege && clean === ownerPrivilege.matricula) {
+    const ownerAccount = await env.DB.prepare(
+      "SELECT matricula FROM privileged_accounts WHERE matricula=? AND active=1 AND can_admin=1",
+    )
+      .bind(ownerPrivilege.matricula)
+      .first<{ matricula: string }>()
+      .catch(() => null);
+    if (!ownerAccount) return databaseBusyResponse();
+    const ownerToken = `${crypto.randomUUID()}${crypto.randomUUID()}`;
+    try {
+      await env.DB.batch([
+        env.DB.prepare(
+          "DELETE FROM privileged_sessions WHERE expires_at<=CURRENT_TIMESTAMP",
+        ),
+        env.DB.prepare(
+          "INSERT INTO privileged_sessions (token,matricula,expires_at) VALUES (?,?,datetime('now','+400 days'))",
+        ).bind(ownerToken, ownerPrivilege.matricula),
+      ]);
+    } catch (error) {
+      console.error("privileged-owner-session.create-failed", error);
+      return databaseBusyResponse();
+    }
     const headers = new Headers({
       "content-type": "application/json",
       ...NO_STORE_HEADERS,
     });
+    headers.append(
+      "set-cookie",
+      privilegedSessionCookie(
+        ownerToken,
+        PERSISTENT_SESSION_SECONDS,
+        request,
+      ),
+    );
     for (const cookie of privilegedLogoutCookieVariants("", 0, request))
       headers.append("set-cookie", cookie);
     return new Response(
@@ -168,6 +195,8 @@ export async function POST(request: Request) {
           canManageSportsCalendar: ownerPrivilege.canManageSportsCalendar,
           canManageUnionCalendar: ownerPrivilege.canManageUnionCalendar,
           canChat: ownerPrivilege.canChat,
+          canManageNews: ownerPrivilege.canManageNews,
+          canManageCulture: ownerPrivilege.canManageCulture,
           canCoachProgress: ownerPrivilege.canCoachProgress,
           mustChangePin: ownerPrivilege.mustChangePin,
           facilities: ownerPrivilege.facilities,
@@ -198,6 +227,8 @@ export async function POST(request: Request) {
   let account: {
     matricula: string;
     pinHash: string;
+    pinSalt: string | null;
+    pinIterations: number | null;
     mustChangePin: number;
     canAdmin: number;
     canReview: number;
@@ -209,12 +240,15 @@ export async function POST(request: Request) {
     canManageSportsCalendar: number;
     canManageUnionCalendar: number;
     canChat: number;
+    canManageCulture: number;
+    designation: string;
     credentialStyle: string;
     facilitiesJson: string;
   } | null;
   try {
     account = await env.DB.prepare(
-      `SELECT p.matricula,p.pin_hash AS pinHash,p.must_change_pin AS mustChangePin,
+      `SELECT p.matricula,p.pin_hash AS pinHash,p.pin_salt AS pinSalt,
+        p.pin_iterations AS pinIterations,p.must_change_pin AS mustChangePin,
         COALESCE(r.can_admin,p.can_admin,0) AS canAdmin,
         COALESCE(r.can_review,p.can_admin,0) AS canReview,
         COALESCE(r.can_scan,p.can_reader,0) AS canScan,
@@ -225,6 +259,8 @@ export async function POST(request: Request) {
         COALESCE(r.can_manage_sports_calendar,p.can_admin,0) AS canManageSportsCalendar,
         COALESCE(r.can_manage_union_calendar,p.can_admin,0) AS canManageUnionCalendar,
         COALESCE(r.can_chat,p.can_admin,0) AS canChat,
+        COALESCE(r.can_manage_culture,p.can_admin,0) AS canManageCulture,
+        COALESCE(r.designation,'') AS designation,
         COALESCE(r.credential_style,'standard') AS credentialStyle,
         COALESCE(r.facilities_json,'[]') AS facilitiesJson
        FROM privileged_accounts p
@@ -237,7 +273,10 @@ export async function POST(request: Request) {
     console.error("privileged-session.lookup-failed", error);
     return databaseBusyResponse();
   }
-  if (!account || !(await verifyPrivilegedPin(pin, account.pinHash))) {
+  const pinVerification = account
+    ? await verifyPrivilegedPin(pin, account)
+    : { valid: false, needsUpgrade: false };
+  if (!account || !pinVerification.valid) {
     const failedAttempts = Number(loginSecurity?.failedAttempts || 0) + 1;
     const lockedUntil =
       failedAttempts >= 5
@@ -278,6 +317,27 @@ export async function POST(request: Request) {
       },
     );
   }
+  if (pinVerification.needsUpgrade) {
+    try {
+      const upgraded = await createPrivilegedPinCredential(pin);
+      await env.DB.prepare(
+        `UPDATE privileged_accounts
+         SET pin_hash=?,pin_salt=?,pin_iterations=?
+         WHERE matricula=? AND pin_hash=? AND pin_salt IS NULL`,
+      )
+        .bind(
+          upgraded.pinHash,
+          upgraded.pinSalt,
+          upgraded.pinIterations,
+          account.matricula,
+          account.pinHash,
+        )
+        .run();
+    } catch (error) {
+      console.error("privileged-pin.upgrade-failed", error);
+      return databaseBusyResponse();
+    }
+  }
   await env.DB.prepare(
     `INSERT INTO privileged_login_security
       (matricula,failed_attempts,locked_until,last_success_at,updated_at)
@@ -311,7 +371,7 @@ export async function POST(request: Request) {
   }
   facilities = masterAdministrator
     ? ["*"]
-    : effectiveQrFacilities(account.credentialStyle, facilities);
+    : facilities;
   const headers = new Headers({
     "content-type": "application/json",
     ...NO_STORE_HEADERS,
@@ -341,6 +401,11 @@ export async function POST(request: Request) {
         canManageUnionCalendar:
           masterAdministrator || Boolean(account.canManageUnionCalendar),
         canChat: masterAdministrator || Boolean(account.canChat),
+        canManageCulture: masterAdministrator || Boolean(account.canManageCulture),
+        canManageNews:
+          masterAdministrator ||
+          Boolean(account.canAdmin) ||
+          /prensa/i.test(account.designation || ""),
         canCoachProgress: canCoachProgressLists(
           account.matricula,
           masterAdministrator || Boolean(account.canAdmin),

@@ -6,6 +6,8 @@ type DeviceVoiceCallbacks = {
   onError?: () => void;
 };
 
+type DeviceVoiceOptions = { style?: "radio" };
+
 const FEMININE_SPANISH_NAMES = [
   "paulina",
   "dalia",
@@ -21,7 +23,7 @@ const FEMININE_SPANISH_NAMES = [
   "maria",
 ];
 
-function voiceScore(voice: SpeechSynthesisVoice) {
+function voiceScore(voice: SpeechSynthesisVoice, style: DeviceVoiceOptions["style"]) {
   const language = voice.lang.toLowerCase();
   const name = voice.name.toLowerCase();
   let score = 0;
@@ -31,7 +33,10 @@ function voiceScore(voice: SpeechSynthesisVoice) {
   else if (language.startsWith("es")) score += 60;
   if (FEMININE_SPANISH_NAMES.some((candidate) => name.includes(candidate)))
     score += 25;
-  if (voice.localService) score += 5;
+  if (style === "radio") {
+    if (/neural|natural|premium|enhanced|google/.test(name)) score += 70;
+    if (!voice.localService) score += 12;
+  } else if (voice.localService) score += 5;
   return score;
 }
 
@@ -43,6 +48,7 @@ export function cancelDeviceVoice() {
 export function speakWithDeviceVoice(
   value: unknown,
   callbacks: DeviceVoiceCallbacks = {},
+  options: DeviceVoiceOptions = {},
 ) {
   if (
     typeof window === "undefined" ||
@@ -58,11 +64,11 @@ export function speakWithDeviceVoice(
   const preferredVoice = synthesis
     .getVoices()
     .filter((voice) => voice.lang.toLowerCase().startsWith("es"))
-    .sort((left, right) => voiceScore(right) - voiceScore(left))[0];
+    .sort((left, right) => voiceScore(right, options.style) - voiceScore(left, options.style))[0];
   utterance.lang = preferredVoice?.lang || "es-MX";
   utterance.voice = preferredVoice || null;
-  utterance.rate = 0.96;
-  utterance.pitch = 1.03;
+  utterance.rate = options.style === "radio" ? 1.02 : 1.05;
+  utterance.pitch = options.style === "radio" ? 1.0 : 1.1;
   utterance.volume = 1;
   utterance.onstart = () => callbacks.onStart?.();
   utterance.onend = () => callbacks.onEnd?.();

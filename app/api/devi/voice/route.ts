@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 import { getPrivilege, getWorkerSession } from "../../authz";
 import { DEVI_FACTS } from "../../../devi-facts";
+import { RADIO_INTRO_STYLE_COUNT, deviSongIntroduction } from "../../../news/dj-announcement";
 import { narrationText } from "../../../devi/voice-text";
 import {
   deviCredentialRequiredResponse,
@@ -9,12 +10,16 @@ import {
 
 const DEFAULT_TTS_MODEL = "gpt-4o-mini-tts";
 const DEFAULT_TTS_VOICE = "marin";
+const DEFAULT_RADIO_VOICE = "marin";
 const TTS_INSTRUCTIONS =
-  "Habla en español de México con una voz femenina adulta, cálida, clara, cercana y muy natural. Mantén un ritmo pausado pero ágil, con entonación humana y sin sonar robótica ni exagerada. Toda cantidad indicada como pesos mexicanos debe pronunciarse literalmente como pesos mexicanos, nunca como dólares. Solo di dólares estadounidenses cuando el texto lo indique de forma expresa. Pronuncia DeVi como Devi, IMSS como imss, SNTSS como sindicato y CCT como contrato colectivo de trabajo.";
+  "Habla en español de México con una voz femenina adulta joven, fresca, cálida y cercana. Mantén un ritmo ligeramente más vivo, entonación expresiva y natural, y una energía amable; articula con claridad los nombres, cifras y referencias jurídicas. Evita sonar infantil, caricaturesca, apresurada o robótica. Toda cantidad indicada como pesos mexicanos debe pronunciarse literalmente como pesos mexicanos, nunca como dólares. Solo di dólares estadounidenses cuando el texto lo indique de forma expresa. Pronuncia DeVi como Devi, IMSS como imss, SNTSS como sindicato y CCT como contrato colectivo de trabajo.";
+const RADIO_TTS_INSTRUCTIONS =
+  "Habla en español de México como una locutora musical cálida y espontánea. Prioriza que cada palabra se entienda con claridad en un teléfono, automóvil o altavoz pequeño. Mantén un ritmo ligeramente lento y estable, articula con precisión títulos, artistas, siglas y números, y deja pausas breves entre la presentación, la canción y cada idea. Sonríe al hablar y varía ligeramente la entonación sin bajar el volumen ni correr. Di únicamente el texto proporcionado, sin agregar datos ni imitar a una persona real. Evita la cadencia mecánica, la exageración, las pausas largas y los efectos de sonido. Pronuncia DeVi como Devi, IMSS como imss, SNTSS como sindicato y CCT como contrato colectivo de trabajo.";
 
 type DeviVoiceRuntimeEnv = {
   OPENAI_API_KEY?: string;
   OPENAI_DEVI_TTS_MODEL?: string;
+  OPENAI_RADIO_TTS_VOICE?: string;
 };
 
 type DeviVoiceRequest = {
@@ -40,6 +45,8 @@ async function synthesizeVoice(
   text: string,
   runtime: DeviVoiceRuntimeEnv,
   cacheControl: string,
+  instructions = TTS_INSTRUCTIONS,
+  selectedVoice = DEFAULT_TTS_VOICE,
 ) {
   const apiKey = runtime.OPENAI_API_KEY?.trim() || "";
   if (!apiKey)
@@ -59,9 +66,9 @@ async function synthesizeVoice(
       },
       body: JSON.stringify({
         model,
-        voice: DEFAULT_TTS_VOICE,
+        voice: selectedVoice,
         input: text,
-        instructions: TTS_INSTRUCTIONS,
+        instructions,
         response_format: "mp3",
       }),
       signal: AbortSignal.timeout(25_000),
@@ -119,16 +126,43 @@ export async function GET(request: Request) {
   if (!(await authorized(request)))
     return Response.json({ error: "Sesión no autorizada" }, { status: 401 });
 
-  const factId = new URL(request.url).searchParams.get("factId")?.trim() || "";
+  const params = new URL(request.url).searchParams;
+  const trackId = params.get("trackId")?.trim() || "";
+  const factId = params.get("factId")?.trim() || "";
+  const styleParam = params.get("style") || "0";
+  const style = /^\d{1,2}$/.test(styleParam) ? Number(styleParam) % RADIO_INTRO_STYLE_COUNT : 0;
+  const runtime = voiceEnvironment();
+  const radioVoice = ["coral", "nova", "shimmer", "marin"].includes(runtime.OPENAI_RADIO_TTS_VOICE || "")
+    ? runtime.OPENAI_RADIO_TTS_VOICE! : DEFAULT_RADIO_VOICE;
+  if (trackId) {
+    if (!/^[1-9]\d{0,9}$/.test(trackId))
+      return Response.json({ error: "Canción no encontrada" }, { status: 404 });
+    const track = await env.DB.prepare(
+      "SELECT id,title,artist,album FROM news_mp3_library WHERE id=? AND active=1 AND kind='song'",
+    ).bind(Number(trackId)).first<{ id: number; title: string; artist: string; album: string }>();
+    if (!track)
+      return Response.json({ error: "Canción no encontrada" }, { status: 404 });
+    const fact = factId ? DEVI_FACTS.find((item) => item.id === factId && /CCT|Estatutos|Reglamento Interior/.test(item.source || "")) : null;
+    if (factId && !fact)
+      return Response.json({ error: "Dato de DeVi no encontrado" }, { status: 404 });
+    return synthesizeVoice(
+      narrationText(`${fact ? `¿Sabías que? ${fact.text} ` : ""}${deviSongIntroduction({ ...track, displayId: track.id }, style)}`),
+      runtime,
+      "private, no-store",
+      RADIO_TTS_INSTRUCTIONS,
+      radioVoice,
+    );
+  }
   const fact = DEVI_FACTS.find((item) => item.id === factId);
   if (!fact)
     return Response.json({ error: "Dato de DeVi no encontrado" }, { status: 404 });
 
-  const runtime = voiceEnvironment();
   return synthesizeVoice(
     narrationText(`¿Sabías que? ${fact.text}`),
     runtime,
-    "private, max-age=604800, immutable",
+    params.get("radio") === "1" ? "private, no-store" : "private, max-age=604800, immutable",
+    params.get("radio") === "1" ? RADIO_TTS_INSTRUCTIONS : TTS_INSTRUCTIONS,
+    params.get("radio") === "1" ? radioVoice : DEFAULT_TTS_VOICE,
   );
 }
 

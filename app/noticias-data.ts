@@ -32,6 +32,34 @@ export function mergeSectionNews(remoteNews: readonly NewsItem[]) {
 
 export const SECTION_NEWS: readonly NewsItem[] = [
   {
+    id: "transmision-oficial-2026-09-21",
+    date: "21 de septiembre de 2026",
+    dateTime: "2026-09-21",
+    day: "21",
+    month: "SEP",
+    category: "VIDA SINDICAL",
+    title: "La Sección I Puebla realizó una transmisión oficial en vivo",
+    summary:
+      "La página oficial de la Sección I Puebla transmitió en vivo una jornada de 1 hora con 35 minutos. Consulta la grabación completa directamente en Facebook.",
+    sourceUrl: "https://www.facebook.com/SeccionIPuebla/videos/1450252833614919/",
+    origin: "facebook",
+    featured: true,
+  },
+  {
+    id: "dia-mundial-alzheimer-2026-09-21",
+    date: "21 de septiembre de 2026",
+    dateTime: "2026-09-21",
+    day: "21",
+    month: "SEP",
+    category: "SALUD Y BIENESTAR",
+    title: "Día Mundial del Alzheimer: conciencia, respeto y acompañamiento",
+    summary:
+      "La Sección I Puebla llamó a fortalecer la comprensión, el respeto y el acompañamiento digno de quienes viven con Alzheimer, así como a reconocer la dedicación de sus familias y personas cuidadoras.",
+    sourceUrl:
+      "https://www.facebook.com/SeccionIPuebla/posts/pfbid0QXsiWqAQs6v4nBSwzoUXb51nYVpys6ovhyTNhE7kRHJP4hG7oPqurK3yYgt5MEsbl",
+    origin: "facebook",
+  },
+  {
     id: "la-voz-resiliencia-2026-09-20",
     date: "20 de septiembre de 2026",
     dateTime: "2026-09-20",
@@ -44,7 +72,6 @@ export const SECTION_NEWS: readonly NewsItem[] = [
     sourceUrl:
       "https://www.facebook.com/SeccionIPuebla/posts/pfbid0kcvnqf32sUrGzFLFpionV7qjESVRUGd5pLceARrRnFJex3f6SqAQDxKc8FqWixYyl",
     origin: "editorial",
-    featured: true,
   },
   {
     id: "dia-jubilado-2026-09-20",

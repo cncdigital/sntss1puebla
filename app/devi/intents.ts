@@ -1,5 +1,5 @@
-import { sourcesById, type DeviSource } from "./knowledge.ts";
-import { normalizeSearchText } from "./relevance.ts";
+import { sourcesById, type DeviSource } from "./knowledge";
+import { normalizeSearchText } from "./relevance";
 
 type SourceSpec = {
   id: string;
@@ -173,15 +173,15 @@ const SECTION_INFORMATION_SOURCES: Record<string, DeviSource> = {
       "Página 382 del PDF oficial · texto vigente con última reforma DOF 14-05-2026",
     sourceKind: "official",
   },
-  "portal-access-worldwide": {
-    id: "portal-access-worldwide",
+  "portal-access-mexico": {
+    id: "portal-access-mexico",
     document: "Configuración operativa del portal SNTSS Sección I Puebla",
     page: 1,
-    section: "Acceso global",
-    heading: "Acceso mundial sin bloqueo geográfico",
+    section: "Control geográfico de acceso",
+    heading: "Acceso permitido únicamente desde México",
     excerpt:
-      "El portal no aplica una restricción geográfica por país. SNTSS1PUEBLA, Credenciales y DeVi pueden abrirse desde México o desde el extranjero; un error 403 no debe atribuirse automáticamente a la ubicación de la persona usuaria.",
-    locator: "Configuración vigente del portal",
+      "El portal valida el país asociado a la dirección IP y rechaza con código 403 las conexiones identificadas fuera de México. Una VPN o red corporativa puede hacer que una conexión ubicada físicamente en México aparezca como extranjera.",
+    locator: "Regla activa de seguridad del portal",
     sourceKind: "official",
   },
 };
@@ -220,15 +220,15 @@ const COMMON_INTENTS: CommonIntent[] = [
         has(text, /\b(no\s+(?:puedo\s+)?(?:entrar|abrir|acceder)|portal|pagina|sitio)\b/)),
     answer: () =>
       direct(
-        "El portal **no tiene una restricción geográfica activa por país**. SNTSS1PUEBLA, Credenciales y DeVi pueden abrirse desde México o desde el extranjero.",
-        "Si aparece un **403**, no lo atribuyas automáticamente al país. Abre el portal desde su dominio oficial, actualiza la página y evita enlaces incrustados o intermediarios. Si persiste, reporta una captura del error y la hora aproximada, sin compartir contraseñas ni datos personales sensibles.",
+        "El portal sólo permite conexiones cuya dirección IP sea identificada en México. Si estás en otro país, el bloqueo con código **403** es el comportamiento esperado; el módulo de DeVi tampoco podrá abrirse porque forma parte del mismo portal.",
+        "Si estás en México, desactiva cualquier VPN o proxy y vuelve a intentar. Si continúa el bloqueo, cambia entre Wi-Fi y datos móviles. Para reportarlo, envía al soporte una captura del error, la hora aproximada y el nombre de tu proveedor de internet, sin compartir contraseñas ni datos personales sensibles.",
       ),
-    referralMatter: () => "soporte tecnico portal acceso mundial error 403",
-    sourceQuery: "portal acceso mundial sin bloqueo geografico error 403",
+    referralMatter: () => "soporte tecnico portal acceso desde mexico error 403",
+    sourceQuery: "portal acceso Mexico bloqueo pais VPN error 403",
     sourceSpecs: [
       {
-        id: "portal-access-worldwide",
-        heading: "Acceso mundial sin bloqueo geográfico",
+        id: "portal-access-mexico",
+        heading: "Control geográfico de acceso al portal",
       },
     ],
   },
@@ -324,12 +324,48 @@ const COMMON_INTENTS: CommonIntent[] = [
           "DeVi puede explicarte cada opción por separado, pero no afirmará compatibilidad, autorización o monto sin la revisión formal correspondiente.",
         );
 
-      if (vehicleLoan && !savingsBankLoan)
-        return direct(
-          "El CCT sí contempla un **crédito para adquisición de vehículos automotores** en la Cláusula 146; no corresponde a la Cláusula 97, a vivienda ni a la Caja de Ahorro.",
-          "Para trabajadores de base con antigüedad no menor a cinco años, la cláusula establece créditos de hasta **24 meses de salario mensual integrado** y recuperación de hasta **120 quincenas**. Una parte de los créditos se otorga prioritariamente a trabajadores con mejores índices de asistencia y antigüedad no menor a tres años.",
-          "La asignación depende de disponibilidad y del trámite vigente; DeVi no debe prometer autorización ni sustituir la convocatoria o revisión del expediente.",
+      if (vehicleLoan && !savingsBankLoan) {
+        const asksUsedVehicle = has(
+          text,
+          /\b(usad\w*|seminuev\w*|nuev\w*|modelo|antiguedad\s+(?:del\s+)?(?:auto|vehiculo|carro)|anos?\s+de\s+uso)\b/,
         );
+        const asksJointCredit = has(
+          text,
+          /\b(mancomunad\w*|conyuge|espos\w*|hij\w*|pareja|junt\w*)\b/,
+        );
+        const asksRetirementOrDeath = has(
+          text,
+          /\b(jubil\w*|pension\w*|fallec\w*|muerte|saldo\s+insoluto|finiquito)\b/,
+        );
+
+        if (asksUsedVehicle)
+          return direct(
+            "La Cláusula 146 permite financiar vehículos **nuevos o hasta con ocho años de uso**, mediante convenios con fabricantes o vendedores para procurar precios especiales y las mejores condiciones posibles.",
+            "Como regla general, contempla 12,000 créditos durante la vigencia del CCT para personal de base con antigüedad no menor a cinco años. De ellos, 4,500 se otorgan prioritariamente a quienes tengan mejores índices de asistencia y antigüedad no menor a tres años.",
+            "El texto no garantiza que cualquier modelo, vendedor o precio sea aceptado; la disponibilidad y las condiciones concretas deben comprobarse en la convocatoria y autorización vigentes. No compartas en el chat cotizaciones completas, matrícula, CURP, placas ni datos bancarios.",
+          );
+
+        if (asksJointCredit)
+          return direct(
+            "La Cláusula 146 permite un crédito **mancomunado entre la persona trabajadora y su cónyuge o un hijo**, siempre que ambas personas sean trabajadoras del IMSS.",
+            "La categoría máxima que puede servir de base para el crédito es la de **Médico Familiar de 8.0 horas**. Esta modalidad no significa autorización automática: deben verificarse la relación, la calidad de trabajadores y el trámite aplicable por el conducto oficial.",
+            "Para recibir orientación basta describir la modalidad; no publiques nombres, matrículas, CURP, recibos de nómina ni documentos familiares.",
+          );
+
+        if (asksRetirementOrDeath)
+          return direct(
+            "Al jubilarse o pensionarse, la Cláusula 146 permite: liquidar todo el saldo con el finiquito; trasladarlo a la nómina de jubilados y pensionados conservando el porcentaje y plazo pactados, con la póliza de vida correspondiente; o recuperar hasta 60% del saldo con el finiquito y cubrir el resto por nómina sin ampliar el plazo original.",
+            "Si fallece la persona titular del crédito, la cláusula dispone que el **saldo insoluto queda extinguido**.",
+            "La aplicación de estas opciones requiere el estado oficial del crédito. No compartas aquí finiquitos, estados de cuenta, actas, datos de beneficiarios ni información bancaria.",
+          );
+
+        return direct(
+          "El CCT contempla un **crédito para adquisición de vehículos automotores** en la Cláusula 146; es distinto de la Cláusula 97, los créditos de vivienda y la Caja de Ahorro.",
+          "Para personal de base con la antigüedad aplicable, el monto puede ser de hasta **24 meses de salario mensual integrado** y recuperarse hasta en **120 quincenas**. Para este crédito, salario mensual integrado significa sueldo tabular más la Ayuda de Renta del inciso b) de la Cláusula 63 Bis, más 20% de esa suma por prestaciones.",
+          "Los descuentos se calculan sobre el salario mensual integrado vigente de la categoría que sirvió de base: **40% el primer año, 39% el segundo, 38% el tercero, 37% el cuarto y 36% el quinto**. Puede solicitarse un monto menor o un plazo menor o igual a 120 quincenas, ajustando proporcionalmente el descuento.",
+          "DeVi no debe prometer autorización ni calcular una cifra personal sin el sueldo y la resolución oficiales. No compartas matrícula, CURP, recibos de nómina completos, cotizaciones ni datos bancarios.",
+        );
+      }
 
       if (downPayment)
         return direct(
@@ -645,6 +681,186 @@ const COMMON_INTENTS: CommonIntent[] = [
     ],
   },
   {
+    id: "partner-parent-emergency-permit",
+    matches: (text) =>
+      has(text, /\b(?:padre|madre|papa|mama|padres|papas|mamas)\s+de\s+(?:(?:mi|mis|el|la)\s+)?(?:espos\w*|marid\w*|conyuge|pareja|concubin\w*)\b/) &&
+      has(text, /\b(fallec\w*|murio|muerte|defuncion|deceso|hospital\w*|intern\w*|cirug\w*|quirurg\w*|operaron|operacion|accidente\w*|enferm\w*)\b/),
+    answer: (text) =>
+      direct(
+        has(text, /\b(fallec\w*|murio|muerte|defuncion|deceso)\b/)
+          ? "Si se trata del padre o la madre de tu pareja, el artículo 65 del Reglamento Interior de Trabajo no asigna automáticamente los tres días previstos por fallecimiento del padre o la madre de la propia persona trabajadora."
+          : "Si se trata del padre o la madre de tu pareja, el artículo 65 del Reglamento Interior de Trabajo no asigna automáticamente los tres días previstos por hospitalización, cirugía o accidente grave del padre o la madre de la propia persona trabajadora.",
+        "La Cláusula 39 contempla permisos económicos de hasta tres días con goce cuando una causa personal o familiar de fuerza mayor haga indispensable ausentarse. Presenta una solicitud por escrito para que se valore el caso: el parentesco político por sí solo no garantiza los tres días. Conserva la respuesta por escrito y entrega comprobantes únicamente por el canal institucional; no compartas nombres, actas ni diagnósticos en este chat.",
+      ),
+    referralMatter: (text) => contractualMatter(text, "permiso economico fuerza mayor familiar parentesco politico"),
+    sourceQuery: "Clausula 39 permisos economicos fuerza mayor articulo 65 fallecimiento hospitalizacion padres hijos conyuge",
+    sourceSpecs: [
+      { id: "cct-31", heading: "Cláusula 39.- Permisos Económicos" },
+      { id: "cct-403", heading: "Reglamento Interior de Trabajo, artículo 65.- Permisos Económicos" },
+    ],
+  },
+  {
+    id: "child-marriage-permit",
+    matches: (text) =>
+      has(text, /\b(hij\w*)\b/) &&
+      has(text, /\b(matrimonio|boda|casamient\w*|se\s+casa|va\s+a\s+casar)\b/) &&
+      !has(text, /\b(me\s+caso|me\s+voy\s+a\s+casar|mi\s+matrimonio|mi\s+boda)\b/),
+    answer: () =>
+      direct(
+        "Por matrimonio de una hija o un hijo, el artículo 65, fracción II, inciso h), del Reglamento Interior de Trabajo contempla un permiso económico de **uno a tres días laborables con goce de salario**. No es el supuesto de tres días por matrimonio de la propia persona trabajadora.",
+        "La solicitud y la autorización deben constar por escrito. Conserva el comprobante del evento y una copia recibida de tu solicitud; no se puede prometer de antemano el máximo de tres días.",
+      ),
+    referralMatter: (text) => contractualMatter(text, "permiso matrimonio de hijos articulo 65 reglamento interior"),
+    sourceQuery: "Reglamento Interior Trabajo articulo 65 fraccion II inciso h matrimonio de hijos uno a tres dias",
+    sourceSpecs: [{ id: "cct-404", heading: "RIT, artículo 65, fracción II, inciso h).- Matrimonio de hijos" }],
+  },
+  {
+    id: "daycare-adaptation-permit",
+    matches: (text) =>
+      has(text, /\b(guarderia\w*|estancia\s+infantil)\b/) &&
+      has(text, /\b(adaptacion|adaptar\w*|periodo\s+de\s+adaptacion)\b/),
+    answer: () =>
+      direct(
+        "Si la guardería del Instituto requiere a la persona trabajadora para el proceso de adaptación de una hija o un hijo **entre los 45 días y los 12 meses de nacido**, el artículo 65, fracción II, inciso n), del Reglamento Interior de Trabajo contempla un permiso económico de **uno a tres días laborables con goce de salario**.",
+        "Solicita y obtiene la autorización por escrito y conserva el aviso de la guardería. La duración concreta se determina dentro de ese margen; no es una incapacidad médica ni procede automáticamente para cualquier estancia infantil.",
+      ),
+    referralMatter: (text) => contractualMatter(text, "permiso adaptacion guarderia articulo 65 reglamento interior"),
+    sourceQuery: "Reglamento Interior Trabajo articulo 65 fraccion II inciso n adaptacion guarderia 45 dias 12 meses",
+    sourceSpecs: [{ id: "cct-404", heading: "RIT, artículo 65, fracción II, inciso n).- Adaptación en guardería del Instituto" }],
+  },
+  {
+    id: "daycare-rejection-permit",
+    matches: (text) =>
+      has(text, /\b(guarderia\w*|estancia\s+infantil)\b/) &&
+      has(text, /\b(no\s+(?:(?:lo|la|los|las)\s+)?(?:(?:fue|fueron)\s+)?(?:recib\w*|acept\w*)|rechaz\w*|no\s+admit\w*)\b/) &&
+      has(text, /\b(hij\w*|bebe|menor)\b/),
+    answer: () =>
+      direct(
+        "Cuando una hija o un hijo no es recibido por enfermedad o por cualquier motivo atribuible al Instituto en una **guardería del IMSS**, el artículo 65, fracción II, inciso l), del Reglamento Interior de Trabajo contempla un permiso económico de **uno a tres días laborables con goce de salario**.",
+        "La solicitud y la autorización deben constar por escrito. Conserva el aviso o constancia de la guardería; esta regla no convierte el caso en una incapacidad de la persona trabajadora ni permite asegurar de antemano el máximo de tres días.",
+      ),
+    referralMatter: (text) => contractualMatter(text, "permiso rechazo guarderia IMSS articulo 65 reglamento interior"),
+    sourceQuery: "Reglamento Interior Trabajo articulo 65 fraccion II inciso l hijos no recibidos enfermedad guarderias Instituto",
+    sourceSpecs: [{ id: "cct-404", heading: "RIT, artículo 65, fracción II, inciso l).- Menor no recibido en guardería" }],
+  },
+  {
+    id: "sibling-surgery-permit",
+    matches: (text) =>
+      has(text, /\b(herman\w*)\b/) &&
+      has(text, /\b(intervencion\s+quirurgica|operacion|cirugia|quirurg\w*)\b/) &&
+      has(text, /\b(permiso|faltar|ausentar\w*|dias?|dan|correspon\w*)\b/),
+    answer: () =>
+      direct(
+        "Por una intervención quirúrgica de una hermana o un hermano, el artículo 65, fracción II, inciso a), del Reglamento Interior de Trabajo contempla un permiso económico de **uno a tres días laborables con goce de salario**.",
+        "Solicita y obtiene la autorización por escrito, adjunta el comprobante médico y conserva una copia recibida. La norma fija un margen de uno a tres días; no permite prometer automáticamente los tres.",
+      ),
+    referralMatter: (text) => contractualMatter(text, "permiso cirugia hermano articulo 65 reglamento interior"),
+    sourceQuery: "Reglamento Interior Trabajo articulo 65 fraccion II inciso a intervenciones quirurgicas hermanos",
+    sourceSpecs: [{ id: "cct-404", heading: "RIT, artículo 65, fracción II, inciso a).- Cirugía de hermanos" }],
+  },
+  {
+    id: "judicial-or-property-robbery-permit",
+    matches: (text) =>
+      has(text, /\b(diligencia\w*\s+(?:judicial\w*|ministerial\w*)|ministerio\s+publico|organo\s+interno\s+de\s+control|funcion\s+publica|robo\w*\s+(?:a|de|en)\s+(?:mi\s+)?(?:casa|hogar|automovil|auto|vehiculo)|(?:me\s+)?robaron\s+(?:(?:la|mi)\s+casa|(?:el|mi)\s+(?:auto|automovil|vehiculo)))\b/) &&
+      has(text, /\b(permiso|faltar|ausentar\w*|dias?|goce|salario|cita|citatorio|denuncia|denuncie|denunciar|puedo)\b/),
+    answer: (text) => {
+      const robbery = has(text, /\b(rob\w*|denuncia)\b/) && has(text, /\b(casa|hogar|automovil|auto|vehiculo|patrimonio)\b/);
+      return direct(
+        robbery
+          ? "Si la persona trabajadora es víctima de robo a su patrimonio —casa o automóvil— y presenta la denuncia ante el Ministerio Público, el artículo 65, fracción II, inciso f), del Reglamento Interior de Trabajo contempla un permiso económico de **uno a tres días laborables con goce de salario**."
+          : "Por asistir a diligencias judiciales o ministeriales para las que la persona trabajadora haya recibido cita o haya denunciado, el artículo 65, fracción II, inciso f), del Reglamento Interior de Trabajo contempla un permiso económico de **uno a tres días laborables con goce de salario**. La misma disposición incluye diligencias de la Secretaría de la Función Pública o del Órgano Interno de Control en el IMSS.",
+        "Solicita y obtiene la autorización por escrito y conserva únicamente para el canal oficial el citatorio, denuncia o comprobante. No compartas aquí domicilios, números de carpeta, matrículas ni documentos completos.",
+      );
+    },
+    referralMatter: (text) => contractualMatter(text, "permiso diligencia judicial ministerial robo patrimonio articulo 65"),
+    sourceQuery: "Reglamento Interior Trabajo articulo 65 fraccion II inciso f diligencias judiciales ministeriales robo patrimonio denuncia",
+    sourceSpecs: [{ id: "cct-404", heading: "RIT, artículo 65, fracción II, inciso f).- Diligencias y robo al patrimonio" }],
+  },
+  {
+    id: "disaster-or-transport-suspension-permit",
+    matches: (text) =>
+      has(text, /\b(desastre\w*\s+naturales?|inundacion\w*|huracan\w*|sismo\w*|terremoto\w*|suspension\s+(?:del|de)\s+(?:servicio\s+de\s+)?transporte\w*|suspendieron\s+(?:el|los)\s+transporte\w*)\b/) &&
+      has(text, /\b(no\s+(?:pude|puedo)\s+(?:llegar|traslad\w*)|impid\w*|faltar|ausen\w*|permiso|trabaj\w*)\b/),
+    answer: () =>
+      direct(
+        "Cuando un desastre natural o la suspensión de los servicios de transporte impide el traslado al centro de labores, el artículo 65, fracción II, inciso g), del Reglamento Interior de Trabajo contempla un permiso económico de **uno a tres días laborables con goce de salario**.",
+        "Avisa de inmediato y solicita la autorización por escrito. Conserva la evidencia oficial del evento o de la suspensión y una copia recibida; debe acreditarse que realmente impidió el traslado y no se puede prometer de antemano el máximo de tres días.",
+      ),
+    referralMatter: (text) => contractualMatter(text, "permiso desastre natural suspension transporte articulo 65 reglamento interior"),
+    sourceQuery: "Reglamento Interior Trabajo articulo 65 fraccion II inciso g desastres naturales suspension transportes impedir traslado",
+    sourceSpecs: [{ id: "cct-404", heading: "RIT, artículo 65, fracción II, inciso g).- Desastre natural o suspensión de transporte" }],
+  },
+  {
+    id: "sibling-force-majeure-permit",
+    matches: (text) =>
+      has(text, /\b(herman\w*)\b/) &&
+      has(text, /\b(accidente\s+grave|privacion\s+de\s+la\s+libertad|privar\w*\s+de\s+la\s+libertad|detenid\w*|encarcel\w*|arrest\w*|desaparec\w*|desaparicion)\b/) &&
+      has(text, /\b(permiso|faltar|ausentar\w*|dias?|dan|correspon\w*|puedo)\b/),
+    answer: (text) => {
+      const event = has(text, /\b(accidente\s+grave)\b/)
+        ? "accidente grave"
+        : has(text, /\b(privacion\s+de\s+la\s+libertad|privar\w*\s+de\s+la\s+libertad|detenid\w*|encarcel\w*|arrest\w*)\b/)
+          ? "privación de la libertad"
+          : "desaparición";
+      return direct(
+        `Por ${event} de una hermana o un hermano, el artículo 65, fracción II, del Reglamento Interior de Trabajo contempla un permiso económico de **uno a tres días laborables con goce de salario**.`,
+        "Solicita y obtiene la autorización por escrito y presenta el comprobante únicamente por el canal oficial. La norma fija un margen de uno a tres días; no permite asegurar de antemano el máximo ni requiere compartir aquí nombres, domicilios o documentos completos.",
+      );
+    },
+    referralMatter: (text) => contractualMatter(text, "permiso accidente detencion desaparicion hermano articulo 65"),
+    sourceQuery: "Reglamento Interior Trabajo articulo 65 fraccion II accidentes graves privacion libertad desaparicion hermanos",
+    sourceSpecs: [{ id: "cct-404", heading: "RIT, artículo 65, fracción II.- Fuerza mayor respecto de hermanos" }],
+  },
+  {
+    id: "home-incident-permit",
+    matches: (text) =>
+      has(text, /\b(siniestro|incendio|explosion|derrumbe|inundacion)\b/) &&
+      has(text, /\b(mi\s+(?:casa|hogar|domicilio)|casa|hogar|domicilio)\b/) &&
+      has(text, /\b(permiso|faltar|ausentar\w*|dias?|goce|salario|puedo|afect\w*)\b/),
+    answer: () =>
+      direct(
+        "Cuando un siniestro afecta el hogar de la persona trabajadora, el artículo 65, fracción I, inciso f), del Reglamento Interior de Trabajo contempla **tres días laborables con goce de salario**.",
+        "Avisa de inmediato y solicita la autorización por escrito. Conserva la evidencia oficial o constancia del siniestro para el trámite institucional; no compartas aquí domicilio, pólizas, fotografías del hogar ni documentos completos.",
+      ),
+    referralMatter: (text) => contractualMatter(text, "permiso siniestro hogar articulo 65 reglamento interior"),
+    sourceQuery: "Reglamento Interior Trabajo articulo 65 fraccion I inciso f siniestro afecte hogar trabajador tres dias",
+    sourceSpecs: [{ id: "cct-403", heading: "RIT, artículo 65, fracción I, inciso f).- Siniestro que afecta el hogar" }],
+  },
+  {
+    id: "family-disappearance-permit",
+    matches: (text) =>
+      has(text, /\b(desaparec\w*|desaparicion)\b/) &&
+      has(text, /\b(padre|madre|mama|papa|hij\w*|conyuge|espos\w*|concubin\w*)\b/) &&
+      has(text, /\b(permiso|faltar|ausentar\w*|dias?|dan|correspon\w*|puedo|tengo)\b/),
+    answer: (text) => {
+      const criminalWithDeclaration = has(text, /\b(delincuencial|delito|declaracion\s+especial\s+de\s+ausencia)\b/) && has(text, /\b(padre|madre|mama|papa)\b/);
+      return direct(
+        criminalWithDeclaration
+          ? "Cuando la desaparición de padre o madre deriva de un acto delincuencial y existe Declaración Especial de Ausencia conforme a la legislación aplicable, el artículo 65, fracción II, inciso m), del Reglamento Interior de Trabajo contempla **uno a tres días laborables con goce de salario**."
+          : "El artículo 65, fracción I, inciso h), del Reglamento Interior de Trabajo contempla **tres días laborables con goce de salario** por desaparición de hijas, hijos, padre, madre o cónyuge **que vivan con la persona trabajadora**. Si no existe esa convivencia, no es seguro afirmar que este supuesto específico proceda.",
+        "La solicitud y la autorización deben hacerse por escrito. Entrega la constancia correspondiente sólo en el canal institucional y no compartas aquí nombres, domicilios, carpetas de investigación ni documentos completos.",
+      );
+    },
+    referralMatter: (text) => contractualMatter(text, "permiso desaparicion familiar articulo 65 reglamento interior"),
+    sourceQuery: "Reglamento Interior Trabajo articulo 65 desaparicion hijos padres conyuge vivan trabajador declaracion especial ausencia",
+    sourceSpecs: (text) => [{ id: has(text, /\b(delincuencial|delito|declaracion\s+especial\s+de\s+ausencia)\b/) ? "cct-404" : "cct-403", heading: "RIT, artículo 65.- Permiso por desaparición familiar" }],
+  },
+  {
+    id: "change-of-home-permit",
+    matches: (text) =>
+      has(text, /\b(cambio|cambiar\w*|mudar\w*|mudanza)\b/) &&
+      has(text, /\b(domicilio|casa|hogar)\b/) &&
+      has(text, /\b(permiso|faltar|ausentar\w*|dias?|dan|correspon\w*|puedo|tengo)\b/),
+    answer: () =>
+      direct(
+        "Por cambio de domicilio de la propia persona trabajadora, el artículo 65, fracción II, inciso i), del Reglamento Interior de Trabajo contempla un permiso económico de **uno a tres días laborables con goce de salario**.",
+        "La solicitud y la autorización deben hacerse por escrito. Presenta el comprobante únicamente en el canal oficial y conserva una copia recibida; no compartas aquí tu domicilio ni documentos completos.",
+      ),
+    referralMatter: (text) => contractualMatter(text, "permiso cambio domicilio articulo 65 reglamento interior"),
+    sourceQuery: "Reglamento Interior Trabajo articulo 65 fraccion II inciso i cambio domicilio trabajador uno tres dias",
+    sourceSpecs: [{ id: "cct-404", heading: "RIT, artículo 65, fracción II, inciso i).- Cambio de domicilio" }],
+  },
+  {
     id: "family-force-majeure-permit",
     matches: (text) =>
       (has(text, /\b(det(?:en|ien|uv)\w*|privacion\s+de\s+la\s+libertad|encarcel\w*|arrest\w*)\b/) &&
@@ -751,6 +967,247 @@ const COMMON_INTENTS: CommonIntent[] = [
       { id: "cct-29", heading: "Cláusula 31.- Detención relacionada con el servicio" },
       { id: "cct-78", heading: "Cláusula 154.- Privación de la libertad por causa ajena" },
       { id: "cct-79", heading: "Cláusula 154.- Restitución posterior a la liberación" },
+    ],
+  },
+  {
+    id: "employment-separation-benefits",
+    matches: (text) =>
+      !has(text, /\bliquidacion\s+quincenal\b|\btarjeton\b/) &&
+      has(
+        text,
+        /\b(despid\w*|corr\w*|ces\w*|separ\w*|renunci\w*|finiquito|liquidacion)\b/,
+      ) &&
+      (has(
+        text,
+        /\b(injustificad\w*|justificad\w*|invalidez|renunci\w*|reinstal\w*|indemniz\w*|finiquito|liquidacion|prestacion\w*|cuanto\s+me\s+(?:pagan|toca|corresponde))\b/,
+      ) ||
+        has(text, /\b(me\s+despidieron|me\s+corrieron|me\s+cesaron)\b/)),
+    answer: (text) => {
+      const invalidity = has(text, /\binvalidez\b/);
+      const resignation = has(text, /\brenunci\w*\b/);
+      const unjustified =
+        has(text, /\binjustificad\w*\b/) ||
+        (has(text, /\b(me\s+despidieron|me\s+corrieron|me\s+cesaron)\b/) &&
+          !has(text, /\bjustificad\w*\b/));
+      const justified = has(text, /\bjustificad\w*\b/) && !unjustified;
+
+      if (invalidity)
+        return direct(
+          "Si la separación es por invalidez, la Cláusula 57 dispone el pago de **190 días de sueldo tabular**, además de las prestaciones económicas contractuales que se adeuden y la prima de antigüedad prevista en la Ley Federal del Trabajo.",
+          "Ese pago es independiente de las prestaciones que correspondan conforme a la Ley del Seguro Social y al Régimen de Jubilaciones y Pensiones. La invalidez debe estar formalmente determinada; DeVi no puede sustituir el dictamen ni calcular un monto sin la documentación oficial.",
+        );
+      if (resignation)
+        return direct(
+          "Para una persona trabajadora de base que renuncia, la Cláusula 59 reconoce **12 días de salario por cada año efectivo de servicios**, más la parte proporcional de vacaciones y aguinaldo.",
+          "Con más de 15 años de antigüedad, la cláusula no fija el tope de tres meses. Con menos de 15 años, el pago por antigüedad no puede exceder de **tres meses de salario**. El cálculo requiere salario aplicable y antigüedad reconocida; no compartas aquí tarjetones, CURP, matrícula ni datos bancarios.",
+        );
+      if (unjustified)
+        return direct(
+          "Si la separación es injustificada y la persona opta por indemnización en lugar de reinstalación, la Cláusula 56 establece **150 días de salario de la última categoría**, más **50 días por cada año de servicios** o la parte proporcional, además de vacaciones, aguinaldo y demás prestaciones económicas adeudadas.",
+          "Mientras no se paguen la indemnización y la antigüedad, la cláusula reconoce salarios vencidos. Si se demanda reinstalación, el CCT prevé el cumplimiento de la resolución y **90 días de sueldo tabular**. La calificación de un despido como injustificado requiere el procedimiento o resolución correspondiente; conserva avisos, citatorios y acuses y acude de inmediato al Sindicato.",
+        );
+      if (justified)
+        return direct(
+          "En un despido justificado, la Cláusula 58 ordena pagar lo adeudado por vacaciones, aguinaldo, salarios, horas extra y las demás prestaciones generadas hasta la separación, además de la prima de antigüedad prevista en la Ley Federal del Trabajo.",
+          "DeVi no puede dar por justificada la separación sólo porque así la nombre un aviso. Conserva el documento recibido y solicita revisión sindical del procedimiento y de las cantidades, sin publicar datos personales en el chat.",
+        );
+      return direct(
+        "Las prestaciones por separación cambian según la causa: despido injustificado, despido justificado, invalidez o renuncia. No es seguro calcular un finiquito sin identificar primero cuál de esos supuestos aparece en la documentación oficial.",
+        "Indica únicamente el tipo de separación y tu antigüedad aproximada, sin compartir matrícula, CURP, tarjetones, datos bancarios ni fotografías de identificaciones.",
+      );
+    },
+    referralMatter: (text) =>
+      contractualMatter(
+        text,
+        "separacion laboral despido renuncia invalidez indemnizacion prestaciones",
+      ),
+    sourceQuery:
+      "Clausulas 56 57 58 59 indemnizacion separacion invalidez despido justificado renuncia",
+    sourceSpecs: (text) => {
+      if (has(text, /\binvalidez\b/))
+        return [{ id: "cct-43", heading: "Cláusula 57.- Separación por Invalidez" }];
+      if (has(text, /\brenunci\w*\b/))
+        return [{ id: "cct-43", heading: "Cláusula 59.- Renuncias" }];
+      if (
+        has(text, /\binjustificad\w*\b/) ||
+        (has(text, /\b(me\s+despidieron|me\s+corrieron|me\s+cesaron)\b/) &&
+          !has(text, /\bjustificad\w*\b/))
+      )
+        return [
+          { id: "cct-42", heading: "Cláusula 56.- Indemnización" },
+          {
+            id: "cct-43",
+            heading: "Cláusula 56.- Reinstalación y prestaciones",
+          },
+        ];
+      return [{ id: "cct-43", heading: "Cláusula 58.- Despido Justificado" }];
+    },
+  },
+  {
+    id: "annual-savings-fund",
+    matches: (text) =>
+      has(text, /\bfondo\s+(?:de\s+)?ahorro\b/) &&
+      !has(text, /\b(caja\s+de\s+ahorro|cpasntss|fondo\s+(?:de\s+)?retiro)\b/),
+    answer: () =>
+      direct(
+        "La Cláusula 144 establece que el **Fondo de Ahorro se paga en la segunda quincena de julio de cada año**.",
+        "Se integra con **39 días de sueldo tabular**, más **cinco días adicionales** relacionados con los meses del año que tienen más de 30 días, y **dos días adicionales de sueldo tabular**. En conjunto, la prestación contractual equivale a **46 días de sueldo tabular**.",
+        "La cantidad es **libre de impuestos** y se paga proporcionalmente al tiempo laborado dentro del periodo comprendido del **1 de julio al 30 de junio** del año siguiente. La cláusula no contiene una fórmula de nómina suficiente para que DeVi calcule un importe neto individual sin el sueldo tabular y el tiempo reconocido por el Instituto.",
+        "Este Fondo de Ahorro es distinto del Fondo de Retiro y de la Caja de Ahorro del SNTSS. Para revisar una diferencia basta indicar el periodo laborado y el nombre del concepto; no compartas matrícula, CURP, datos bancarios ni el tarjetón completo.",
+      ),
+    referralMatter: (text) =>
+      contractualMatter(
+        text,
+        "fondo de ahorro anual pago segunda quincena julio sueldo tabular proporcionalidad",
+      ),
+    sourceQuery:
+      "Clausula 144 Fondo Ahorro segunda quincena julio 39 dias cinco dias dos dias sueldo tabular libre impuestos proporcional 1 julio 30 junio",
+    sourceSpecs: [
+      { id: "cct-75", heading: "Cláusula 144.- Fondo de Ahorro" },
+    ],
+  },
+  {
+    id: "vacation-centers-and-family-programs",
+    matches: (text) =>
+      (has(
+        text,
+        /\b(oaxtepec|metepec|la\s+trinidad|la\s+malinche|centro\w*\s+vacacional\w*)\b/,
+      ) &&
+        has(
+          text,
+          /\b(descuent\w*|hosped\w*|balneario\w*|campamento\w*|servicio\w*|porcentaje|conyuge|espos\w*|hij\w*)\b/,
+        )) ||
+      has(
+        text,
+        /\b(programa\s+vacacional\s+de\s+verano|sabados?\s+de\s+integracion\s+familiar)\b/,
+      ),
+    answer: (text) => {
+      const asksProgram = has(
+        text,
+        /\b(programa\s+vacacional\s+de\s+verano|sabados?\s+de\s+integracion\s+familiar)\b/,
+      );
+
+      if (asksProgram)
+        return direct(
+          "La Cláusula 147 contempla un **Programa Vacacional de Verano** para hijas e hijos de trabajadores: de **6 a 11 años** en programas infantiles —incluidas las personas menores con discapacidad— y de **12 a 14 años** en programas juveniles. También prevé los **Sábados de Integración Familiar**.",
+          "Los programas se elaboran de común acuerdo entre el Instituto y el Sindicato. La cláusula no fija fechas, cupos, sedes ni documentos para cada edición; esos datos deben confirmarse en la convocatoria oficial vigente.",
+          "No compartas en el chat nombres de menores, CURP, actas de nacimiento, constancias escolares ni documentos de discapacidad; entrégalos únicamente por el conducto oficial si la convocatoria los requiere.",
+        );
+
+      return direct(
+        "La Cláusula 147 concede a la persona trabajadora, su cónyuge y sus hijas e hijos **menores de 21 años** un **50% de descuento** en servicios de balneario y campamento.",
+        "En hospedaje, el descuento es de **25%** en los Centros Vacacionales **Oaxtepec, Metepec y La Trinidad**. En el Centro Vacacional **La Malinche**, el descuento es de **50% en todos sus servicios**.",
+        "La cláusula no garantiza disponibilidad ni describe el procedimiento vigente de reservación; confirma fechas, tarifas base y requisitos por el canal oficial antes de pagar. No compartas en el chat matrícula, CURP, documentos familiares, comprobantes de reservación ni datos bancarios.",
+      );
+    },
+    referralMatter: (text) =>
+      contractualMatter(
+        text,
+        "programas recreativos culturales deportivos centros vacacionales descuentos hospedaje familia",
+      ),
+    sourceQuery:
+      "Clausula 147 programas recreativos culturales deportivos Programa Vacacional Verano Sabados Integracion Familiar descuentos Oaxtepec Metepec La Trinidad La Malinche",
+    sourceSpecs: [
+      {
+        id: "cct-77",
+        heading: "Cláusula 147.- Programas recreativos, culturales y deportivos",
+      },
+    ],
+  },
+  {
+    id: "retirement-fund-rules",
+    matches: (text) =>
+      has(text, /\bfondo\s+(?:de\s+)?retiro\b/),
+    answer: (text) => {
+      const asksEligibility = has(
+        text,
+        /\b(quien\w*|ingres\w*|inscri\w*|alta|requisit\w*|particip\w*|incorpor\w*)\b/,
+      );
+      const asksWithdrawal = has(
+        text,
+        /\b(retirar|retiro\s+(?:mi|el)|sacar|disponer|separarme|separacion|devolver|devolucion)\b/,
+      );
+      const asksRetirement = has(
+        text,
+        /\b(jubil\w*|pension\w*|invalidez|incapacidad\s+permanente)\b/,
+      );
+
+      if (asksEligibility)
+        return direct(
+          "El ingreso al **Fondo de Retiro es voluntario** para trabajadores de base y de confianza con una antigüedad mínima de **30 días de servicio**.",
+          "La solicitud se presenta por escrito, indicando el grupo de aportación elegido, y debe acompañarse de la carta de beneficiarios. Esa designación puede modificarse posteriormente; por privacidad, los nombres y datos de las personas beneficiarias deben entregarse sólo por el conducto oficial, no en este chat.",
+          "A cada participante se le abre una cuenta individual que registra sus aportaciones, los estímulos agregados por el Instituto y los intereses generados por ambos conceptos.",
+        );
+
+      if (asksRetirement)
+        return direct(
+          "Cuando una persona aportadora se jubila por edad avanzada o recibe pensión por invalidez, el Reglamento dispone que, al operar la jubilación o la invalidez, se le entreguen **sus aportaciones, los estímulos del Instituto y los intereses acumulados**.",
+          "La liquidación debe acompañarse de un estado detallado de aportaciones, estímulos e intereses. Si existe desacuerdo, la inconformidad puede presentarse ante el Comité Administrador dentro de los **60 días hábiles** siguientes a la notificación de la liquidación.",
+        );
+
+      if (asksWithdrawal)
+        return direct(
+          "Sí es posible retirar el Fondo y continuar trabajando en el Instituto cuando se haya completado un mínimo de **cinco años de aportaciones**, conforme al artículo 25 del Reglamento.",
+          "Si la separación del Fondo ocurre antes de 30 mensualidades, se devuelven las aportaciones propias y sus intereses, pero no los estímulos del Instituto. Con más de 30 mensualidades puede revocarse el descuento: las aportaciones se devuelven de inmediato y los estímulos e intereses se pagan al separarse del Instituto o al cumplirse cinco años desde la primera aportación.",
+          "La respuesta depende de la antigüedad dentro del Fondo, no sólo de la antigüedad laboral; conviene solicitar el estado de cuenta por el conducto oficial antes de iniciar la separación.",
+        );
+
+      return direct(
+        "El **Fondo de Retiro es voluntario** y forma un capital individual con las aportaciones mensuales de la persona trabajadora, los estímulos que agrega el Instituto y los intereses que generan ambos conceptos.",
+        "Pueden incorporarse trabajadores de base y de confianza con al menos 30 días de servicio, mediante solicitud escrita y carta de beneficiarios. A cada participante se le abre una cuenta individual.",
+        "Las reglas de devolución cambian según las mensualidades aportadas y la causa de separación. Si la persona permanece en el Instituto, puede retirar el Fondo al completar un mínimo de cinco años de aportaciones; por jubilación o pensión por invalidez se entregan aportaciones, estímulos e intereses acumulados.",
+      );
+    },
+    referralMatter: (text) =>
+      contractualMatter(text, "fondo de retiro aportaciones liquidacion jubilacion"),
+    sourceQuery:
+      "Reglamento Fondo Retiro articulos 1 3 4 5 6 7 19 20 25 27 29 31 ingreso retiro jubilacion liquidacion",
+    sourceSpecs: [
+      {
+        id: "cct-357",
+        heading: "Fondo de Retiro, artículos 1 a 8.- Ingreso y cuenta individual",
+      },
+      {
+        id: "cct-359",
+        heading: "Fondo de Retiro, artículos 18 y 19.- Separación y devolución",
+      },
+      {
+        id: "cct-360",
+        heading: "Fondo de Retiro, artículos 20 a 27.- Retiro y liquidación",
+      },
+      {
+        id: "cct-361",
+        heading: "Fondo de Retiro, artículos 27 a 32.- Jubilación e inconformidad",
+      },
+    ],
+  },
+  {
+    id: "mandatory-guard-scheduling",
+    matches: (text) =>
+      has(text, /\bguardia\w*\b/) &&
+      has(
+        text,
+        /\b(rol\w*|program\w*|anticip\w*|avis\w*|firm\w*|acept\w*|neg\w*|rechaz\w*|potestativ\w*|antiguedad|anos?\s+de\s+servicio|sustitut\w*|justific\w*|cuando\s+(?:me\s+)?pag\w*|fecha\s+de\s+pago)\b/,
+      ),
+    answer: () =>
+      direct(
+        "La Cláusula 45 establece que los roles de guardia en días de descanso obligatorio deben elaborarse de común acuerdo entre las partes **con al menos 45 días de anticipación** y comunicarse de inmediato a las personas trabajadoras para firma de aceptación. El personal sustituto debe cubrir la guardia comprendida en el contrato que se le asigne.",
+        "Si existe una causa excusable para no cubrir una guardia ya designada, debe justificarse **como máximo 24 horas antes** para que las partes nombren a quien la sustituya. Para quien tiene **más de 20 años de servicios** es potestativo realizar guardias; entre **15 y 20 años** también es potestativo, salvo que todo el personal del servicio esté en ese rango, caso en el que la guardia corresponde a quienes tengan menor antigüedad.",
+        "Como regla general, el pago de la guardia se efectúa conforme a la Cláusula 33 en la **quincena anterior** al día en que se laborará. La propia Cláusula 45 contempla una regla distinta para servicios que abran en un día de guardia, pagadera dos quincenas después; por eso debe revisarse el tipo de servicio y el rol concreto antes de reclamar una fecha de pago.",
+      ),
+    referralMatter: (text) =>
+      contractualMatter(text, "rol guardia descanso obligatorio antiguedad pago"),
+    sourceQuery:
+      "Clausula 45 guardias rol cuarenta y cinco dias antiguedad potestativo pago quincena",
+    sourceSpecs: [
+      {
+        id: "cct-36",
+        heading: "Cláusula 45.- Roles, aceptación, sustitución y pago de guardias",
+      },
+      {
+        id: "cct-30",
+        heading: "Cláusula 33.- Pago en efectivo de guardias",
+      },
     ],
   },
   {
@@ -925,6 +1382,78 @@ const COMMON_INTENTS: CommonIntent[] = [
     ],
   },
   {
+    id: "temporary-work-location-movement",
+    matches: (text) =>
+      has(
+        text,
+        /\b(movimiento\w*\s+temporal\w*|traslad\w*\s+temporal\w*|comision\w*\s+temporal\w*|me\s+(?:mandaron|mandan|enviaron|envian|comisionaron|comisionan|movieron|mueven))\b/,
+      ) &&
+      has(
+        text,
+        /\b(otra\s+(?:adscripcion|unidad|ciudad|localidad)|otro\s+lugar|fuera\s+de\s+(?:mi\s+)?adscripcion|necesidades\s+del\s+servicio|cambio\s+de\s+lugar|pasajes?|viatic\w*|salario|tiempo\s+extra)\b/,
+      ),
+    answer: (text) => {
+      const asksAmount = has(
+        text,
+        /\b(cuanto|monto|importe|por\s+dia|diario|tarifa)\b/,
+      );
+      return direct(
+        "Cuando el movimiento temporal es ordenado por el Instituto y aceptado por el Sindicato y la persona trabajadora, la Cláusula 99 obliga al Instituto a pagar **salarios, pasajes en primera clase y viáticos**.",
+        "Esta regla no se aplica a permutas ni a traslados solicitados por la propia persona trabajadora. Por eso DeVi debe distinguir una comisión o movilización por necesidades del servicio de una solicitud voluntaria de cambio de adscripción, turno, rama o residencia.",
+        "En viajes cortos fuera de la localidad de adscripción, la Cláusula 100 también reconoce como tiempo extra el que exceda de la jornada ordinaria cuando, con motivo del viaje, sea necesario laborar durante ese tiempo. Los viáticos deben pagarse por adelantado según los días u horas programados y la comisión debe estar oficialmente autorizada.",
+        asksAmount
+          ? "El CCT contiene una base de $2,514.00 diarios sujeta a incrementos vinculados al salario mínimo y, en su caso, al alto costo de vida; no es seguro tratarla como una cantidad congelada sin comprobar la actualización aplicable."
+          : "Conserva el oficio o pliego de comisión, fechas, destino y comprobantes de pago. Para revisar el caso basta describir esos datos sin compartir matrícula, CURP, cuenta bancaria ni documentos completos.",
+      );
+    },
+    referralMatter: (text) =>
+      contractualMatter(
+        text,
+        "problema de trabajo movimiento temporal comision fuera adscripcion viaticos pasajes salario",
+      ),
+    sourceQuery:
+      "Clausulas 99 100 movimiento temporal necesidades servicio salarios pasajes primera clase viaticos adelantado tiempo extra",
+    sourceSpecs: [
+      {
+        id: "cct-62",
+        heading: "Cláusulas 99 y 100.- Movimientos temporales y viáticos",
+      },
+      {
+        id: "cct-63",
+        heading: "Cláusula 100.- Pago anticipado y viajes cortos",
+      },
+    ],
+  },
+  {
+    id: "daily-travel-allowance",
+    matches: (text) =>
+      has(text, /\bviatic\w*\b/) &&
+      has(
+        text,
+        /\b(cuanto|monto|importe|diario|por\s+dia|pag\w*|adelant\w*|comision\w*|correspon\w*|dan|recibo)\b/,
+      ),
+    answer: () =>
+      direct(
+        "La Cláusula 100 fija una base contractual de **$2,514.00 diarios** por viáticos para las personas trabajadoras comprendidas en la Cláusula 11 que, por necesidades del servicio, deban desplazarse y cubrir alimentos y alojamiento fuera de su domicilio.",
+        "Ese importe debe incrementarse en el mismo porcentaje en que aumente el salario mínimo general de la Ciudad y Valle de México; en lugares clasificados como de alto costo de vida también se incrementa conforme a la Cláusula 98. Por eso DeVi no debe presentar los $2,514.00 como una cantidad congelada si ya existe una actualización aplicable en nómina.",
+        "Los viáticos se pagan **por adelantado**, considerando los días previstos o las horas programadas para la comisión. Si se trata de personal de transportes, el cálculo además considera el recorrido de ida y vuelta y la fórmula de kilometraje de la propia Cláusula 100.",
+      ),
+    referralMatter: (text) =>
+      contractualMatter(text, "viaticos comision fuera domicilio pago pasajes"),
+    sourceQuery:
+      "Clausula 100 viaticos 2514 diarios pago adelantado alto costo kilometraje",
+    sourceSpecs: [
+      {
+        id: "cct-62",
+        heading: "Cláusula 100.- Monto y actualización de viáticos",
+      },
+      {
+        id: "cct-63",
+        heading: "Cláusula 100.- Pago anticipado y viajes cortos",
+      },
+    ],
+  },
+  {
     id: "union-testamentary-form",
     matches: (text) =>
       has(text, /\b(pliego\s+testamentario|testamento\s+sindical)\b/) &&
@@ -975,6 +1504,28 @@ const COMMON_INTENTS: CommonIntent[] = [
     sourceSpecs: [
       { id: "cct-56", heading: "Cláusula 85.- Muerte" },
       { id: "cct-58", heading: "Cláusula 89.- Indemnizaciones por riesgo de trabajo" },
+    ],
+  },
+  {
+    id: "worker-life-insurance",
+    matches: (text) =>
+      has(text, /\b(seguro\s+de\s+vida|clausula\s*152|muerte\s+accidental\s+colectiva)\b/) &&
+      has(
+        text,
+        /\b(cuanto|monto|paga\w*|pag\w*|cobr\w*|beneficiari\w*|muerte|fallec\w*|natural|accidental|colectiva|correspon\w*)\b/,
+      ),
+    answer: () =>
+      direct(
+        "La Cláusula 152 establece un seguro de vida de **$45,000 por muerte natural**, **$50,000 por muerte accidental** y **$65,000 por muerte accidental colectiva**.",
+        "El Instituto debe entregarlo a las personas beneficiarias señaladas en el pliego testamentario sindical o a quienes designe la autoridad competente. Este seguro es **independiente** de las prestaciones e indemnizaciones previstas en las Cláusulas 85 y 89; DeVi no debe sustituir ni sumar conceptos sin identificar primero la causa del fallecimiento.",
+        "Para orientación no compartas nombres de beneficiarios, CURP, porcentajes, actas, certificados médicos ni el pliego testamentario. El trámite y la acreditación deben realizarse únicamente por el canal sindical o institucional autorizado.",
+      ),
+    referralMatter: () =>
+      "seguro de vida fallecimiento trabajador beneficiarios pliego testamentario prevision social",
+    sourceQuery:
+      "Clausula 152 seguro vida 45000 muerte natural 50000 muerte accidental 65000 muerte accidental colectiva beneficiarios",
+    sourceSpecs: [
+      { id: "cct-78", heading: "Cláusula 152.- Seguro de vida" },
     ],
   },
   {
@@ -1177,6 +1728,84 @@ const COMMON_INTENTS: CommonIntent[] = [
     ],
   },
   {
+    id: "fortnightly-payroll-claim",
+    matches: (text) =>
+      has(
+        text,
+        /\b(quincena\w*|tarjeton\w*|nomina\w*|liquidacion\s+quincenal|salarios?\s+devengad\w*)\b/,
+      ) &&
+      has(
+        text,
+        /\b(pag\w*\s+mal|pago\s+incorrect\w*|error\w*|falt\w*|no\s+me\s+pag\w*|no\s+estoy\s+de\s+acuerdo|reclam\w*|inconform\w*|descuento\w*\s+(?:indebid\w*|incorrect\w*)|no\s+me\s+contest\w*)\b/,
+      ) &&
+      !has(
+        text,
+        /\b(viatic\w*|prestamo\w*|credito\w*|infectocontag\w*|emanacion\w*\s+radiactiv\w*|estimulo\w*)\b/,
+      ),
+    answer: () =>
+      direct(
+        "Si no estás de acuerdo con las cantidades de tu **liquidación quincenal por salarios devengados**, el artículo 54 del Reglamento Interior de Trabajo indica que debes presentar la reclamación **a través del Sindicato** en la dependencia administrativa de tu adscripción. Esa oficina debe darle trámite inmediato para que resuelva la autoridad institucional competente.",
+        "Si la reclamación se considera improcedente, deben comunicarlo **por escrito** a la persona trabajadora y al Sindicato dentro de los **30 días** siguientes a su presentación. Si transcurren 30 días sin respuesta, el Reglamento establece que la reclamación se considera procedente y resuelta favorablemente.",
+        "Cuando la reclamación es justificada, el pago debe incorporarse en la nómina que corresponda conforme al plazo del propio artículo. La reclamación escrita interrumpe la prescripción; conserva el escrito, el acuse, el tarjetón cuestionado y los comprobantes, sin publicar aquí datos personales o bancarios.",
+      ),
+    referralMatter: (text) =>
+      contractualMatter(text, "reclamacion pago quincenal salario devengado problema de trabajo"),
+    sourceQuery:
+      "RIT articulo 54 reclamacion liquidacion quincenal salarios devengados treinta dias silencio favorable prescripcion",
+    sourceSpecs: [
+      {
+        id: "cct-397",
+        heading: "RIT, artículo 54.- Reclamación por liquidación quincenal",
+      },
+    ],
+  },
+  {
+    id: "salary-deductions",
+    matches: (text) =>
+      has(
+        text,
+        /\b(deduccion\w*|desc(?:ont|uent)\w*|retuv\w*|que\s+me\s+pueden\s+descontar)\b/,
+      ) &&
+      has(
+        text,
+        /\b(salario|sueldo|nomina|tarjeton|inasistencia\w*|falt\w*|retardo\w*|aguinaldo|permitid\w*|autoriza\w*|legal\w*)\b/,
+      ) &&
+      !has(
+        text,
+        /\b(prestamo\w*|credito\w*|caja\s+de\s+ahorro|cpasntss|fondo\s+de\s+retiro)\b/,
+      ),
+    answer: (text) => {
+      const attendanceDeduction = has(
+        text,
+        /\b(inasistencia\w*|falt\w*|retardo\w*|lleg\w*\s+tarde)\b/,
+      );
+      if (attendanceDeduction)
+        return direct(
+          "La Cláusula 105 dispone que los descuentos por **inasistencias o retardos injustificados** se hagan únicamente del sueldo. El CCT no fija en esa cláusula una fórmula suficiente para que DeVi invente el importe exacto.",
+          "Si consideras improcedente la deducción, puedes acudir personalmente o por medio de tu representación sindical ante la Comisión Nacional Mixta Disciplinaria o la Subcomisión correspondiente. Si se comprueba la improcedencia, la medida debe revocarse o modificarse y la cantidad descontada debe reintegrarse en un plazo máximo de **un mes**.",
+          "Conserva el tarjetón, el registro de asistencia y el escrito con acuse. No publiques en el chat matrícula, CURP, datos bancarios ni el tarjetón completo.",
+        );
+      return direct(
+        "La Cláusula 106 limita las deducciones que el Instituto puede hacer **sin petición sindical** a: responsabilidades determinadas por resolución de la Comisión o Subcomisión Mixta Disciplinaria; adeudos con la Comisión Nacional Paritaria de Protección al Salario y Tiendas IMSS-SNTSS; anticipos de sueldo de la Cláusula 97; y pensiones alimenticias ordenadas por tribunal.",
+        "A petición del Sindicato también pueden descontarse cantidades autorizadas para lotes y construcciones, certificados de aportación de cooperativas, cuotas sindicales y otras cuotas extraordinarias notificadas por escrito.",
+        "Para revisar una deducción concreta, identifica solamente el nombre del concepto y la quincena. No compartas matrícula, CURP, cuenta bancaria ni una imagen completa del tarjetón.",
+      );
+    },
+    referralMatter: (text) =>
+      contractualMatter(
+        text,
+        "problema de trabajo deduccion salario inasistencia retardo reclamacion descuento",
+      ),
+    sourceQuery:
+      "Clausulas 105 106 descuentos inasistencias retardos injustificados deducciones salario reintegro un mes",
+    sourceSpecs: [
+      {
+        id: "cct-65",
+        heading: "Cláusulas 105 y 106.- Descuentos y deducciones del salario",
+      },
+    ],
+  },
+  {
     id: "salary-definition-clause-1",
     matches: (text) =>
       has(text, /\bclausula\s*1\b/) &&
@@ -1192,6 +1821,94 @@ const COMMON_INTENTS: CommonIntent[] = [
       { id: "cct-14", heading: "Cláusula 1.- Definiciones de salario y sueldo" },
       { id: "cct-59", heading: "Cláusula 93.- Integración del salario" },
     ],
+  },
+  {
+    id: "worker-parking-scope",
+    matches: (text) =>
+      has(text, /\b(estacionamiento\w*|cajon\w*\s+(?:de\s+)?estacionamiento|lugar\s+para\s+estacionar)\b/) &&
+      has(
+        text,
+        /\b(derecho|oblig\w*|deben|correspon\w*|trabajador\w*|unidad|imss|instituto|construir|suficiente|no\s+hay|sin\s+estacionamiento|darme|asignar)\b/,
+      ),
+    answer: () =>
+      direct(
+        "La Cláusula 150 **no concede automáticamente un cajón individual** ni garantiza estacionamiento en todas las unidades. El texto obliga al Instituto a **procurar**, dentro de sus posibilidades económicas y físicas, la construcción de estacionamientos suficientes en las unidades de nueva creación para las personas trabajadoras que laboren en ellas.",
+        "El alcance importa: se refiere expresamente a unidades de nueva creación y está condicionado por las posibilidades económicas y físicas. Por eso DeVi no debe convertir esta cláusula en una promesa de espacio personal, acceso permanente o estacionamiento inmediato en una unidad existente.",
+        "Para plantear una gestión, identifica la unidad y si es de nueva creación, y solicita respuesta por escrito mediante la representación sindical. No compartas en el chat placas, tarjeta de circulación, fotografías del vehículo ni datos personales.",
+      ),
+    referralMatter: (text) =>
+      contractualMatter(
+        text,
+        "problema de trabajo estacionamiento unidad nueva condiciones laborales",
+      ),
+    sourceQuery:
+      "Clausula 150 estacionamientos posibilidades economicas fisicas unidades nueva creacion trabajadores",
+    sourceSpecs: [
+      {
+        id: "cct-78",
+        heading: "Cláusula 150.- Estacionamientos",
+      },
+    ],
+  },
+  {
+    id: "health-teaching-compensation",
+    matches: (text) =>
+      has(
+        text,
+        /\b(sobresueldo\w*|compensacion\w*|porcentaje\w*|cuanto\w*\s+(?:me\s+)?pagan|pago\w*|docencia|docente\w*|enseñanza|investigacion|titulo\w*|cedula\w*)\b/,
+      ) &&
+      has(
+        text,
+        /\b(enfermer\w*|psicolog\w*|nutri(?:cion\w*|olog\w*)|trabaj\w*\s+social|terapista\w*|fonoaudiolog\w*|puericultur\w*|educador\w*)\b/,
+      ),
+    answer: (text) => {
+      if (has(text, /\benfermer\w*\b/))
+        return direct(
+          "La Cláusula 151 reconoce al personal comprendido en las categorías autónomas y escalafonarias de la **Rama de Enfermería** una compensación del **31% sobre el sueldo tabular** por su participación en actividades docentes, de enseñanza y de investigación, en los términos del convenio del 14 de agosto de 1987.",
+          "El porcentaje se calcula sobre el sueldo tabular, no sobre todo el salario integrado. Para confirmar que una plaza concreta está comprendida, debe revisarse la denominación oficial de la categoría; no es seguro inferirla solo por las funciones realizadas.",
+          "Si necesitas revisar un pago, comparte únicamente el nombre del concepto y la categoría, sin matrícula, CURP, NSS ni tarjetón completo.",
+        );
+      if (has(text, /\bpsicolog\w*\b/))
+        return direct(
+          "La Cláusula 153 establece para la categoría de **Psicólogo Clínico** una compensación del **3% sobre el sueldo tabular** por la participación en actividades docentes, de enseñanza y de investigación dirigidas al personal del Instituto y a derechohabientes.",
+          "DeVi no debe extender este porcentaje a otras denominaciones de psicología sin comprobar la categoría oficial de la plaza.",
+          "Para revisar el pago basta indicar categoría y nombre del concepto; no compartas matrícula, CURP, NSS ni tarjetón completo.",
+        );
+      if (has(text, /\bnutri(?:cion\w*|olog\w*)\b/))
+        return direct(
+          "La Cláusula 153 Bis reconoce a las categorías de **Nutricionista Dietista, Especialista en Nutrición y Dietética y Nutriólogo Clínico Especializado** una compensación del **5% sobre el sueldo tabular** por actividades docentes, de enseñanza y de investigación.",
+          "Cuando la persona comprendida en esas categorías cuenta con **título y cédula profesional**, la compensación es del **20% sobre el sueldo tabular**. La denominación de la plaza y ambos documentos deben comprobarse; DeVi no debe asumirlos.",
+          "No compartas en el chat la cédula completa, matrícula, CURP, NSS ni imágenes del tarjetón.",
+        );
+      if (has(text, /\b(puericultur\w*|educador\w*)\b/))
+        return direct(
+          "La Cláusula 155 reconoce a las categorías de **Oficial de Puericultura, Técnico en Puericultura y Educadora** una compensación del **20% sobre el sueldo tabular** por su participación en actividades docentes, de enseñanza y de investigación.",
+          "La denominación oficial de la categoría debe coincidir; DeVi no debe asignar el porcentaje solo por actividades similares.",
+          "Para revisar el concepto basta indicar categoría y quincena, sin matrícula, CURP, NSS ni tarjetón completo.",
+        );
+      return direct(
+        "La Cláusula 155 reconoce una compensación del **5% sobre el sueldo tabular** a Auxiliar de Trabajo Social, Trabajador Social y Trabajador Social Clínico por su participación en actividades docentes, de enseñanza y de investigación.",
+        "Para **Trabajador Social, Trabajador Social Clínico, Terapista Físico, Terapista Ocupacional y Fonoaudiólogo**, la compensación es del **20% sobre el sueldo tabular cuando cuentan con título y cédula profesional**. DeVi no debe asumir la categoría ni la acreditación profesional.",
+        "Para revisar el pago comparte solo la categoría y el nombre del concepto, sin matrícula, CURP, NSS, cédula completa ni tarjetón.",
+      );
+    },
+    referralMatter: (text) =>
+      contractualMatter(
+        text,
+        "problema de trabajo sobresueldo compensacion docencia enseñanza investigacion categoria profesional",
+      ),
+    sourceQuery:
+      "Clausulas 151 153 153 Bis 155 sobresueldo compensacion enfermeria psicologia nutricion trabajo social puericultura docencia enseñanza investigacion titulo cedula",
+    sourceSpecs: (text) =>
+      has(text, /\b(trabaj\w*\s+social|terapista\w*|fonoaudiolog\w*|puericultur\w*|educador\w*)\b/)
+        ? [{ id: "cct-79", heading: "Cláusula 155.- Compensaciones profesionales" }]
+        : [
+            {
+              id: "cct-78",
+              heading:
+                "Cláusulas 151, 153 y 153 Bis.- Compensaciones por docencia, enseñanza e investigación",
+            },
+          ],
   },
   {
     id: "salary-review",
@@ -1306,6 +2023,39 @@ const COMMON_INTENTS: CommonIntent[] = [
       {
         id: "cct-32",
         heading: "Cláusula 40.- Tratamiento, rehabilitación y faltas justificadas",
+      },
+    ],
+  },
+  {
+    id: "mental-health-addictions-commission",
+    matches: (text) =>
+      has(
+        text,
+        /\b(salud\s+mental|adiccion\w*|comision\s+bilateral)\b/,
+      ) &&
+      has(
+        text,
+        /\b(clausula\s*156|cct|contrato|que\s+(?:dice|contempla|establece)|comision\s+bilateral|apoyo|programa\w*|atencion|prevencion|derecho\w*)\b/,
+      ),
+    answer: (text) => {
+      const asksCommission = has(text, /\bcomision\s+bilateral\b/);
+      return direct(
+        asksCommission
+          ? "La **Cláusula 156** establece una Comisión Bilateral integrada por el Instituto y el Sindicato para atender la salud mental y las adicciones de las personas trabajadoras del IMSS."
+          : "La **Cláusula 156** establece que el Instituto y el Sindicato convienen en integrar una Comisión Bilateral para la atención de la salud mental y las adicciones de las personas trabajadoras del IMSS.",
+        "Su objetivo contractual es desarrollar e implementar acciones de **prevención y atención integral** para mejorar la calidad de vida y el bienestar de las y los trabajadores.",
+        "La cláusula no publica por sí misma un teléfono, calendario, procedimiento de ingreso, plazo, licencia, incapacidad ni tratamiento individual garantizado. DeVi no debe inventar esos datos ni confundir esta Comisión con otras comisiones bilaterales del CCT. Para conocer la ruta vigente puede pedirse orientación a la representación sindical y a la Secretaría de Previsión Social.",
+        "Para una orientación inicial basta indicar si buscas información sobre prevención, atención institucional o una incidencia laboral. No compartas en el chat diagnósticos, expedientes clínicos, recetas, estudios, matrícula, CURP ni datos de terceros.",
+      );
+    },
+    referralMatter: () =>
+      "prestacion de prevision social salud mental adicciones atencion institucional",
+    sourceQuery:
+      "Clausula 156 Comision Bilateral salud mental adicciones prevencion atencion integral trabajadores",
+    sourceSpecs: [
+      {
+        id: "cct-79",
+        heading: "Cláusula 156.- Comisión Bilateral de Salud Mental y Adicciones",
       },
     ],
   },
@@ -1690,6 +2440,26 @@ const COMMON_INTENTS: CommonIntent[] = [
     sourceSpecs: [{ id: "cct-50", heading: "Cláusula 75.- Anteojos" }],
   },
   {
+    id: "personal-protective-equipment",
+    matches: (text) =>
+      has(text, /\b(equipo\s+de\s+proteccion(?:\s+personal)?|epp|proteccion\s+personal)\b/) &&
+      has(text, /\b(trabaj\w*|labor\w*|imss|instituto|entreg\w*|proporcion\w*|falt\w*|neg\w*|seguridad|riesgo\w*|uso|usar|necesit\w*)\b/),
+    answer: () =>
+      direct(
+        "El **artículo 63, fracción XXVIII, del Reglamento Interior de Trabajo** incluido en el CCT reconoce el derecho a que el Instituto proporcione equipo de protección personal de calidad **cuando sea necesario para desempeñar las labores**. La misma fracción contempla ropa especial y uniformes.",
+        "Si falta equipo necesario o las condiciones no son seguras, comunica qué labor y riesgo se presentan a la autoridad de tu unidad y solicita la revisión de la **Comisión Local Mixta de Seguridad e Higiene**. La Cláusula 64 del CCT establece estas comisiones y el Reglamento de la Comisión dispone que las locales comuniquen las deficiencias y den seguimiento a las medidas propuestas.",
+        "La disposición no fija en estas páginas una lista universal de piezas o cantidades para todas las categorías. Para orientar el caso, describe la actividad y el equipo faltante sin compartir matrícula, CURP ni fotografías con datos personales.",
+      ),
+    referralMatter: (text) => contractualMatter(text, "seguridad e higiene equipo de proteccion personal riesgo de trabajo"),
+    sourceQuery: "Reglamento Interior artículo 63 fracción XXVIII equipo de protección personal calidad Cláusula 64 Comisión Mixta Seguridad e Higiene",
+    sourceSpecs: [
+      { id: "cct-400", heading: "Reglamento Interior de Trabajo, artículo 63, fracción XXVIII" },
+      { id: "cct-401", heading: "Reglamento Interior de Trabajo, artículo 63, fracción XXVIII (continuación)" },
+      { id: "cct-46", heading: "Cláusula 64.- Comisión Nacional Mixta de Seguridad e Higiene" },
+      { id: "cct-518", heading: "Reglamento de Seguridad e Higiene, artículo 18.- Comisiones Locales" },
+    ],
+  },
+  {
     id: "missing-uniform-delivery",
     matches: (text) =>
       has(
@@ -1726,9 +2496,12 @@ const COMMON_INTENTS: CommonIntent[] = [
       );
       const familyRelation = has(
         text,
-        /\b(familiar\w*|padre|madre|mama|papa|hijo\w*|conyuge|espos\w*|concubin\w*|herman\w*)\b/,
+        /\b(familiar\w*|padre|madre|mama|papa|hijo\w*|conyuge|espos\w*|concubin\w*|herman\w*|abuel\w*|suegr\w*|tio|tia|niet\w*)\b/,
       );
-      const asksForLeave = has(text, /\b(permiso\w*|cuantos? dias?|dan dias?)\b/);
+      const asksForLeave = has(
+        text,
+        /\b(permiso\w*|cuantos? dias?|dan dias?|correspon\w* dias?|dias? con goce|tengo derecho)\b/,
+      );
       const workerBenefit = has(
         text,
         /\b(trabajador\w*|beneficiari\w*|pliego testamentario|gastos? de funeral|inhumacion|cremacion|indemnizacion)\b/,
@@ -1736,6 +2509,11 @@ const COMMON_INTENTS: CommonIntent[] = [
       return death && (familyRelation || (asksForLeave && !workerBenefit));
     },
     answer: (text) => {
+      if (has(text, /\b(abuel\w*|suegr\w*|tio|tia|niet\w*)\b/))
+        return direct(
+          "El artículo 65 del Reglamento Interior de Trabajo **no asigna un número automático de días** por fallecimiento de abuela, abuelo, suegra, suegro, tía, tío, nieta o nieto. Los parentescos que enumera son padre, madre, hijas, hijos, cónyuge, concubina o concubinario, y hermanas o hermanos.",
+          "La Cláusula 39 permite solicitar por escrito un permiso económico de hasta tres días cuando exista una causa personal o familiar de fuerza mayor que haga indispensable la ausencia, pero DeVi no puede prometer su autorización ni su duración para un parentesco no enumerado. Presenta la solicitud y el comprobante únicamente por el canal institucional; no compartas actas, nombres ni documentos personales en el chat.",
+        );
       if (has(text, /\bherman\w*\b/))
         return direct(
           "Por fallecimiento de una hermana o un hermano, el Reglamento Interior de Trabajo prevé de uno a tres días laborables con goce de salario.",
@@ -1769,6 +2547,12 @@ const COMMON_INTENTS: CommonIntent[] = [
         id: "cct-404",
         heading: "RIT, artículo 65.- Fallecimiento de hermanos",
       };
+      if (has(text, /\b(abuel\w*|suegr\w*|tio|tia|niet\w*)\b/))
+        return [
+          { id: "cct-31", heading: "Cláusula 39.- Permisos económicos por fuerza mayor" },
+          immediate,
+          sibling,
+        ];
       if (has(text, /\bherman\w*\b/)) return [sibling];
       if (
         has(
@@ -1792,12 +2576,17 @@ const COMMON_INTENTS: CommonIntent[] = [
       direct(
         "Ante la muerte de una persona trabajadora, la Cláusula 85 prevé —salvo el supuesto especial de la Cláusula 89— una indemnización de 180 días del último salario, más 50 días por cada año de servicios y la parte proporcional por fracción de año.",
         "También deben cubrirse prestaciones adeudadas, prima de antigüedad y, contra factura de inhumación o cremación, 125 días de salario por gastos de funeral. La designación del pliego testamentario sindical es clave para identificar a las personas beneficiarias.",
+        "Además, la Cláusula 152 contempla por separado el seguro de vida: $45,000 por muerte natural, $50,000 por muerte accidental y $65,000 por muerte accidental colectiva. No debe confundirse con la indemnización ni con los gastos funerarios.",
+        "Para orientar el caso no compartas nombres, CURP, actas, certificados médicos ni el pliego testamentario; basta identificar si la causa fue natural, accidental o un riesgo de trabajo.",
       ),
     referralMatter: () =>
       "fondo de ayuda sindical defuncion pliego testamentario prevision social",
     sourceQuery:
-      "Clausula 85 muerte trabajador 180 dias salario 50 dias cada ano servicios funeral 125 dias pliego testamentario",
-    sourceSpecs: [{ id: "cct-56", heading: "Cláusula 85.- Muerte" }],
+      "Clausulas 85 152 muerte trabajador 180 dias salario 50 dias cada ano servicios funeral seguro vida pliego testamentario",
+    sourceSpecs: [
+      { id: "cct-56", heading: "Cláusula 85.- Muerte" },
+      { id: "cct-78", heading: "Cláusula 152.- Seguro de vida" },
+    ],
   },
   {
     id: "administrative-investigation",
@@ -1857,6 +2646,8 @@ const COMMON_INTENTS: CommonIntent[] = [
   {
     id: "economic-leave",
     matches: (text) =>
+      !(has(text, /\b(padre|madre|mama|papa|hij\w*|conyuge|espos\w*|concubin\w*)\b/) &&
+        has(text, /\b(enferm\w*|gripe|gripa|resfriado|fiebre|infeccion\w*|hospital\w*|urgencias?|operacion|cirugia|quirurg\w*|accidente|cuidar|acompan\w*)\b/)) &&
       has(
         text,
         /\b(permiso\w* economico\w*|dias? economico\w*|fuerza mayor|permiso con goce)\b/,
@@ -1908,7 +2699,7 @@ const COMMON_INTENTS: CommonIntent[] = [
       ) &&
       has(
         text,
-        /\b(enferm\w*|hospital\w*|urgencias?|operacion|cirugia|quirurg\w*|accidente|cuidar|acompan\w*)\b/,
+        /\b(enferm\w*|gripe|gripa|resfriado|fiebre|infeccion\w*|hospital\w*|urgencias?|operacion|cirugia|quirurg\w*|accidente|cuidar|acompan\w*)\b/,
       ) &&
       has(text, /\b(permiso|dias?|falt\w*|cuidar|acompan\w*|correspon\w*|dan)\b/),
     answer: (text) => {
@@ -1923,7 +2714,7 @@ const COMMON_INTENTS: CommonIntent[] = [
         );
       return direct(
         "El CCT y el artículo 65 del Reglamento Interior de Trabajo no permiten afirmar un permiso genérico sólo por cuidar a un familiar con una enfermedad común. Sí contemplan **tres días laborables con goce de salario** cuando existe accidente grave, internamiento hospitalario —incluida una estancia en urgencias mayor a seis horas—, intervención quirúrgica o traslado médico foráneo autorizado de padre, madre, hijas, hijos, cónyuge, concubina o concubinario.",
-        "Solicita por escrito la valoración del caso y acompaña el comprobante médico. No confundas este permiso familiar con una incapacidad propia de la persona trabajadora.",
+        "Para hijas o hijos, el artículo 65 también contempla la enfermedad grave debidamente acreditada en las condiciones de edad que indica; una gripe común por sí sola no acredita ese supuesto. Solicita por escrito la valoración del caso y entrega los comprobantes sólo al canal institucional. No compartas diagnósticos ni documentos médicos en este chat. No confundas este permiso familiar con una incapacidad propia de la persona trabajadora.",
       );
     },
     referralMatter: (text) =>
@@ -1994,6 +2785,36 @@ const COMMON_INTENTS: CommonIntent[] = [
     sourceSpecs: [],
   },
   {
+    id: "institutional-medical-exam-work-time",
+    matches: (text) =>
+      has(
+        text,
+        /\b(examen\w*|estudio\w*|laboratorio|gabinete)\b/,
+      ) &&
+      has(text, /\b(medic\w*|dental\w*|profilactic\w*|laboral\w*)\b/) &&
+      has(
+        text,
+        /\b(trabaj\w*|jornada|horas?\s+de\s+labor|tiempo\s+(?:de\s+)?trabajo|tiempo\s+efectivo|descont\w*|mand\w*|envi\w*|program\w*)\b/,
+      ) &&
+      !has(text, /\bexamen\s+profesional\b/),
+    answer: () =>
+      direct(
+        "Los exámenes médicos, dentales y las medidas profilácticas que el Instituto establezca para sus trabajadores deben realizarse **dentro de las horas de labor**, conforme al rol elaborado por la dependencia.",
+        "La unidad debe avisar con anticipación el lugar, la hora y el día. El tiempo utilizado para acudir al examen médico o dental y a los estudios de laboratorio o gabinete se considera **tiempo efectivo de labores**, por lo que no debe tratarse como una ausencia personal.",
+        "Esta regla corresponde a exámenes institucionales establecidos para la persona trabajadora; no convierte automáticamente cualquier consulta o estudio médico particular en tiempo laborado. Conserva la indicación, el rol o citatorio y la constancia de asistencia.",
+      ),
+    referralMatter: (text) =>
+      contractualMatter(text, "examen medico laboral tiempo efectivo jornada problema de trabajo"),
+    sourceQuery:
+      "RIT articulo 59 examenes medicos dentales laboratorio gabinete horas labor tiempo efectivo",
+    sourceSpecs: [
+      {
+        id: "cct-398",
+        heading: "RIT, artículo 59.- Exámenes médicos dentro de la jornada",
+      },
+    ],
+  },
+  {
     id: "ordinary-medical-appointment-no-automatic-leave",
     matches: (text) =>
       has(
@@ -2043,12 +2864,20 @@ const COMMON_INTENTS: CommonIntent[] = [
   {
     id: "overtime",
     matches: (text) =>
-      has(text, /\b(horas? extra\w*|tiempo extraordinario|guardia\w*)\b/),
-    answer: () =>
-      direct(
-        "El tiempo extraordinario es voluntario para la persona trabajadora, salvo las excepciones del Reglamento Interior, y normalmente requiere orden escrita. Debe pagarse en efectivo; no puede compensarse con tiempo.",
+      has(text, /\b(horas? extra\w*|tiempo extra\w*|tiempo extraordinario|guardia\w*)\b/),
+    answer: (text) => {
+      const asksWhenPaid = has(
+        text,
+        /\b(cuando|fecha|quincena|tard\w*|no\s+me\s+(?:lo\s+)?han\s+pag\w*|no\s+me\s+pag\w*|sin\s+pagar|adeud\w*)\b/,
+      );
+      return direct(
+        "El tiempo extraordinario es voluntario para la persona trabajadora: es potestativo **aceptar o no** laborarlo, salvo las excepciones del Reglamento Interior, y normalmente requiere orden escrita. Debe pagarse en efectivo; no puede compensarse con tiempo.",
         "En día ordinario se paga con 100% adicional y lo que exceda de nueve horas semanales con 200% adicional. Laborar el descanso semanal genera salario triple; si coincide con descanso obligatorio, salario cuádruple.",
-      ),
+        asksWhenPaid
+          ? "La **Cláusula 35** ordena que el pago correlativo se haga en la **nómina única de la segunda quincena de aquella en la que se prestaron los servicios**, sin que pueda demorarse. Si no aparece, conserva la orden, el registro de asistencia y el tarjetón para reclamarlo por escrito mediante la representación sindical."
+          : "La Cláusula 35 establece que el pago correlativo debe hacerse en la nómina única de la segunda quincena de aquella en la que se prestaron los servicios, sin demora.",
+      );
+    },
     referralMatter: (text) =>
       contractualMatter(text, "tiempo extraordinario horas extra problema de trabajo"),
     sourceQuery:
@@ -2087,6 +2916,20 @@ const COMMON_INTENTS: CommonIntent[] = [
       { id: "cct-350", heading: "Escalafón, artículos 45 y 46.- Solicitud y difusión de la permuta" },
       { id: "cct-351", heading: "Escalafón, artículos 47 y 48.- Procedimiento y requisitos" },
     ],
+  },
+  {
+    id: "professional-advancement-confidence-a",
+    matches: (text) =>
+      has(text, /\b(confianza\s*["“”']?a\b|clausula\s*148\b|superacion\s+profesional\b)/) &&
+      has(text, /\b(preferen\w*|contrat\w*|puesto\w*|carta\s+de\s+pasante|titulo\s+profesional|cambio\s+de\s+rama|clausula\s*148\b|superacion\s+profesional\b)/),
+    answer: () =>
+      direct(
+        "La **Cláusula 148 del CCT** prevé preferencia para contratar en puestos de confianza ‘A’ a trabajadores de base con carta de pasante o título profesional que no hayan logrado el cambio de rama o la designación en confianza ‘B’ por los procedimientos normales. La preferencia no equivale a una contratación automática.",
+        "El Instituto debe evaluar antes las características de la especialidad y considerar la vocación institucional. El Sindicato turna al Instituto los antecedentes profesionales y laborales para trámite ante la Dirección Administrativa; esta debe informar al Sindicato el resultado. Consulta el procedimiento con tu representación sindical sin compartir aquí matrícula, CURP ni documentos personales.",
+      ),
+    referralMatter: (text) => contractualMatter(text, "superacion profesional confianza A cambio de rama"),
+    sourceQuery: "Clausula 148 reconocimiento superacion profesional personal de base carta de pasante titulo confianza A",
+    sourceSpecs: [{ id: "cct-77", heading: "Cláusula 148.- Reconocimiento a la Superación Profesional del Personal de Base" }],
   },
   {
     id: "shift-or-branch-change",
@@ -2210,8 +3053,8 @@ const COMMON_INTENTS: CommonIntent[] = [
     matches: (text) => has(text, /\b(guarderia\w*|pago supletorio)\b/),
     answer: () =>
       direct(
-        "La prestación de guardería corresponde para hijas e hijos mayores de 45 días y hasta los seis años o la conclusión del nivel preescolar, durante la jornada laboral, y se reconoce para toda persona trabajadora.",
-        "Cuando no exista cupo en los supuestos contractuales, el CCT prevé un pago supletorio mensual de $1,000 por cada hija o hijo que no pueda recibir el servicio. Para revisar tu caso necesito edad, guardería, motivo del rechazo y documento recibido.",
+        "La Cláusula 76 del CCT reconoce el servicio de guardería para hijas e hijos mayores de 45 días y hasta los seis años o la conclusión del nivel preescolar, durante la jornada laboral. Se otorga a toda persona trabajadora y se prolonga durante el año calendario en que cumplan seis años o concluyan preescolar.",
+        "El CCT prevé **$1,000 mensuales por cada hija o hijo** que no reciba el servicio por falta de cupo, porque no se haya establecido la guardería necesaria o por falta de cupo en una guardería integradora para niñas o niños con discapacidad, según el supuesto aplicable. Para valorar el caso, consulta por el canal institucional sin enviar al chat nombres de menores, diagnósticos ni documentos completos.",
       ),
     referralMatter: (text) =>
       contractualMatter(text, "guarderia pago supletorio igualdad sustantiva"),

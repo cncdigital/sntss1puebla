@@ -27,12 +27,21 @@
 .deviFactVoiceMeta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; color: #617887; font-size: 8px; font-weight: 700; line-height: 1.35; }
 .deviFactVoiceMeta span { flex: 1; }
 .deviFactVoiceMeta b { flex: none; border-radius: 999px; background: #f3f6f8; color: #526d7d; padding: 4px 6px; font-size: 7px; letter-spacing: .02em; text-transform: uppercase; }
+.deviFactVoiceVisualizer { display: flex; align-items: center; gap: 11px; height: 40px; margin-top: 8px; padding: 7px 12px; border: 1px solid #d4e7f0; border-radius: 12px; background: linear-gradient(105deg,#f0f9fc,#e9f4fa); }
+.deviFactVoiceVisualizerIcon { flex: none; color: #17618e; font-size: 20px; line-height: 1; }
+.deviFactVoiceBars { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 3px; height: 24px; }
+.deviFactVoiceBars i { flex: 1; height: 5px; max-width: 9px; border-radius: 4px; background: #6c9db7; transform-origin: center; }
+.deviFactVoiceVisualizer[data-speaking="true"] .deviFactVoiceBars i { background: #17618e; animation: deviFactVoiceDance .75s ease-in-out infinite alternate; }
+.deviFactVoiceVisualizer[data-speaking="true"] .deviFactVoiceBars i:nth-child(3n+1) { animation-delay: -.38s; animation-duration: .62s; background: #d59d29; }
+.deviFactVoiceVisualizer[data-speaking="true"] .deviFactVoiceBars i:nth-child(4n+2) { animation-delay: -.56s; animation-duration: .93s; }
+.deviFactVoiceVisualizer[data-speaking="true"] .deviFactVoiceBars i:nth-child(5n+3) { animation-delay: -.12s; animation-duration: .54s; }
 .deviFactOpenDevi { min-height: 34px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; margin-top: 11px; border: 1px solid #d5aa43; border-radius: 999px; background: #f4c55a; color: #0b3154; padding: 7px 13px; font: 900 10px/1.1 Arial,sans-serif; cursor: pointer; box-shadow: 0 5px 13px rgba(193,139,25,.16); transition: transform .16s ease,background .16s ease,box-shadow .16s ease; }
 .deviFactOpenDevi:hover { transform: translateY(-1px); background: #f7d372; box-shadow: 0 7px 17px rgba(193,139,25,.22); }
 .deviFactOpenDevi:focus-visible { outline: 3px solid #17618e; outline-offset: 2px; }
 .deviFactDeckNote { display: block; margin-top: 10px; border-top: 1px solid #e0e9ef; color: #7a8b98; padding-top: 9px; font-size: 8px; font-weight: 750; }
 @keyframes deviFactOpen { from { opacity: 0; transform: translateY(14px) scale(.94); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes deviFactPulse { 0% { opacity: .75; transform: scale(.94); } 65%,100% { opacity: 0; transform: scale(1.18); } }
+@keyframes deviFactVoiceDance { from { height: 5px; } to { height: 22px; } }
 @media (max-width: 520px) {
   .deviFactWidget { right: max(13px,env(safe-area-inset-right)); bottom: max(14px,env(safe-area-inset-bottom)); }
   .deviFactLauncher { width: 64px; height: 64px; border-radius: 21px; }
@@ -46,7 +55,7 @@
   .deviFactVoiceButton { min-height: 38px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .deviFactLauncher,.deviFactCard { animation: none; transition: none; }
+  .deviFactLauncher,.deviFactCard,.deviFactVoiceBars i { animation: none !important; transition: none; }
   .deviFactLauncher::before { animation: none; }
 }
 @media print { .deviFactWidget { display: none !important; } }

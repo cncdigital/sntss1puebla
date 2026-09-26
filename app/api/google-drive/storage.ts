@@ -317,7 +317,10 @@ export async function saveGoogleDriveOauthClient(input: {
 }
 
 export function googleDriveRedirectUri(request: Request) {
-  return new URL("/api/admin/drive/callback", request.url).toString();
+  // Google OAuth exige una URI idéntica en cada intento. El portal puede
+  // abrirse desde el dominio de Sites o desde el dominio oficial, pero la
+  // integración de Drive siempre debe regresar al dominio oficial.
+  return "https://sntss1puebla.com/api/admin/drive/callback";
 }
 
 export async function getDriveConfiguration() {

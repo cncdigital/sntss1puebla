@@ -29,7 +29,6 @@ export async function GET(request: Request) {
          ORDER BY vd.created_at DESC,vd.id DESC LIMIT 1)) AS profilePhotoKey,
       w.matricula,w.full_name AS fullName,w.unit,w.category,w.nss,w.email,
       EXISTS(SELECT 1 FROM worker_passwords wp WHERE wp.matricula=w.matricula) AS passwordConfigured,
-      COALESCE((SELECT wp.must_change_password FROM worker_passwords wp WHERE wp.matricula=w.matricula),0) AS mustChangePassword,
       COALESCE(r.designation,'Trabajador/a IMSS') AS designation,
       COALESCE(r.credential_style,'standard') AS credentialStyle
      FROM applications a JOIN workers w ON w.id=a.worker_id
@@ -54,7 +53,6 @@ export async function GET(request: Request) {
       nss: string | null;
       email: string | null;
       passwordConfigured: number;
-      mustChangePassword: number;
       designation: string;
       credentialStyle: string;
     }>();
@@ -103,7 +101,6 @@ export async function GET(request: Request) {
       credentialValidationReason: credentialValidity.reason,
       email: application.email,
       passwordConfigured: Boolean(application.passwordConfigured),
-      mustChangePassword: Boolean(application.mustChangePassword),
       credentials: [
         {
           kind: "Titular",

@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { apiResponseError, readJsonResponse } from "./api-response";
 
 type GameMode = "quiz" | "puzzle";
+type GameDifficulty = "all" | "basico" | "intermedio" | "avanzado";
+type GameKind = "trivia" | "caso" | "verdadero-falso" | "secuencia";
 
 type PublicQuestion = {
   id: string;
   mode: GameMode;
-  category: "Contrato Colectivo" | "Estatutos";
+  category: "Contrato Colectivo" | "Estatutos" | "Cultura sindical";
   prompt: string;
   points: number;
+  difficulty: Exclude<GameDifficulty, "all">;
+  kind: GameKind;
   options?: string[];
   items?: string[];
 };
@@ -66,8 +70,23 @@ function moveItem(items: string[], from: number, to: number) {
   return copy;
 }
 
+const DIFFICULTY_LABELS: Record<GameDifficulty, string> = {
+  all: "Todas las dificultades",
+  basico: "Básico",
+  intermedio: "Intermedio",
+  avanzado: "Avanzado",
+};
+
+const KIND_LABELS: Record<GameKind, string> = {
+  trivia: "Trivia",
+  caso: "Caso práctico",
+  "verdadero-falso": "Verdadero o falso",
+  secuencia: "Secuencia",
+};
+
 export function UnionLearningGame() {
   const [mode, setMode] = useState<GameMode>("quiz");
+  const [difficulty, setDifficulty] = useState<GameDifficulty>("all");
   const [game, setGame] = useState<GamePayload | null>(null);
   const [selected, setSelected] = useState("");
   const [orderedItems, setOrderedItems] = useState<string[]>([]);
@@ -75,14 +94,20 @@ export function UnionLearningGame() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const resultRef = useRef<HTMLDivElement>(null);
 
-  const loadQuestion = async (nextMode: GameMode = mode) => {
+  const loadQuestion = async (
+    nextMode: GameMode = mode,
+    nextDifficulty: GameDifficulty = difficulty,
+  ) => {
     setLoading(true);
     setError("");
     setResult(null);
     setSelected("");
     try {
-      const response = await fetch(`/api/union-game?mode=${nextMode}`, {
+      const query = new URLSearchParams({ mode: nextMode });
+      if (nextDifficulty !== "all") query.set("difficulty", nextDifficulty);
+      const response = await fetch(`/api/union-game?${query}`, {
         cache: "no-store",
       });
       const data = await readJsonResponse<GamePayload & { error?: string }>(response);
@@ -100,9 +125,17 @@ export function UnionLearningGame() {
   };
 
   useEffect(() => {
-    void loadQuestion(mode);
+    const request = window.setTimeout(
+      () => void loadQuestion(mode, difficulty),
+      0,
+    );
+    return () => window.clearTimeout(request);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, [mode, difficulty]);
+
+  useEffect(() => {
+    if (result) resultRef.current?.focus();
+  }, [result]);
 
   const submitAnswer = async () => {
     if (!game || submitting || result) return;
@@ -184,12 +217,18 @@ export function UnionLearningGame() {
       </div>
 
       <div className="unionGameLayout">
-        <article className="unionGameArena">
+        <article
+          id="union-game-panel"
+          className="unionGameArena"
+          role="tabpanel"
+          aria-busy={loading}
+        >
           <div className="unionGameModes" role="tablist" aria-label="Modo de juego">
             <button
               type="button"
               role="tab"
               aria-selected={mode === "quiz"}
+              aria-controls="union-game-panel"
               className={mode === "quiz" ? "active" : ""}
               onClick={() => setMode("quiz")}
             >
@@ -199,11 +238,25 @@ export function UnionLearningGame() {
               type="button"
               role="tab"
               aria-selected={mode === "puzzle"}
+              aria-controls="union-game-panel"
               className={mode === "puzzle" ? "active" : ""}
               onClick={() => setMode("puzzle")}
             >
               <span aria-hidden="true">🧩</span> Ordena la norma
             </button>
+          </div>
+
+          <div className="unionDifficultyControl">
+            <label htmlFor="union-game-difficulty">Nivel de dificultad</label>
+            <select
+              id="union-game-difficulty"
+              value={difficulty}
+              onChange={(event) => setDifficulty(event.target.value as GameDifficulty)}
+            >
+              {Object.entries(DIFFICULTY_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
           </div>
 
           {loading ? (
@@ -216,7 +269,10 @@ export function UnionLearningGame() {
           ) : game ? (
             <>
               <div className="unionQuestionMeta">
-                <span>{game.question.category}</span>
+                <div>
+                  <span>{game.question.category}</span>
+                  <span>{KIND_LABELS[game.question.kind]} · {DIFFICULTY_LABELS[game.question.difficulty]}</span>
+                </div>
                 <b>+{game.question.points} pts</b>
               </div>
               {game.practice && <div className="unionPracticeNotice">Modo repaso: ya dominaste este bloque. Puedes seguir practicando sin duplicar puntos.</div>}
@@ -239,7 +295,9 @@ export function UnionLearningGame() {
                   ))}
                 </div>
               ) : (
-                <ol className="unionPuzzleList" aria-label="Elementos para ordenar">
+                <>
+                  <p className="unionPuzzleHelp" id="union-puzzle-help">Usa los botones Subir y Bajar hasta colocar la secuencia correcta.</p>
+                  <ol className="unionPuzzleList" aria-label="Elementos para ordenar" aria-describedby="union-puzzle-help">
                   {orderedItems.map((item, index) => (
                     <li key={item}>
                       <span>{index + 1}</span><b>{item}</b>
@@ -259,12 +317,19 @@ export function UnionLearningGame() {
                       </div>
                     </li>
                   ))}
-                </ol>
+                  </ol>
+                </>
               )}
 
               {error && <p className="unionInlineError" role="alert">{error}</p>}
               {result && (
-                <div className={`unionAnswerResult ${result.correct ? "correct" : "incorrect"}`} aria-live="polite">
+                <div
+                  ref={resultRef}
+                  tabIndex={-1}
+                  className={`unionAnswerResult ${result.correct ? "correct" : "incorrect"}`}
+                  role="status"
+                  aria-live="polite"
+                >
                   <strong>{result.correct ? (result.awardedPoints ? `¡Correcto! +${result.awardedPoints} puntos` : "¡Correcto! Reto de práctica") : "Casi. Vamos a convertirlo en aprendizaje."}</strong>
                   {!result.correct && (
                     <p><b>Respuesta correcta:</b> {Array.isArray(result.solution) ? result.solution.join(" → ") : result.solution}</p>
@@ -308,8 +373,9 @@ export function UnionLearningGame() {
           <p className="unionPrivacyNote">El ranking muestra nombre abreviado; nunca publica matrícula, CURP ni datos de la credencial.</p>
           <details>
             <summary>¿Cómo se asignan los puntos?</summary>
-            <p>La primera respuesta correcta vale 100 puntos en trivia y 150 en rompecabezas. Repetir sirve para estudiar, pero no duplica puntos.</p>
+            <p>La primera respuesta correcta otorga de 100 a 125 puntos en preguntas y casos, o de 150 a 175 en secuencias. Repetir sirve para estudiar, pero no duplica puntos.</p>
           </details>
+          <p className="unionEducationNote">Contenido educativo. Para un caso concreto, consulta la fuente oficial y recibe orientación sindical.</p>
         </aside>
       </div>
     </section>

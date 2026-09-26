@@ -8,6 +8,7 @@ const NEWS_SETTINGS_ID = "primary";
 
 type NewsSettingsRow = {
   radioStreamUrl: string;
+  commercialIntervalMinutes: number;
   updatedAt: string;
   updatedBy: string | null;
 };
@@ -88,16 +89,29 @@ function effectiveRadioStreamUrl(value?: string | null) {
 
 export async function getNewsSettings() {
   const row = await env.DB.prepare(
-    `SELECT radio_stream_url AS radioStreamUrl,updated_at AS updatedAt,
+    `SELECT radio_stream_url AS radioStreamUrl,commercial_interval_minutes AS commercialIntervalMinutes,updated_at AS updatedAt,
       updated_by AS updatedBy FROM news_settings WHERE id=?`,
   )
     .bind(NEWS_SETTINGS_ID)
     .first<NewsSettingsRow>();
   return {
     radioStreamUrl: effectiveRadioStreamUrl(row?.radioStreamUrl),
+    commercialIntervalMinutes: row?.commercialIntervalMinutes || 0,
     updatedAt: row?.updatedAt || null,
     updatedBy: row?.updatedBy || null,
   };
+}
+
+export async function saveCommercialInterval(value: number, actor: string) {
+  if (!Number.isInteger(value) || value < 0 || value > 180 || (value !== 0 && value < 5))
+    throw new Error("Elige 0 para desactivar o un intervalo de 5 a 180 minutos.");
+  await env.DB.prepare(
+    `INSERT INTO news_settings (id,commercial_interval_minutes,updated_by,updated_at)
+     VALUES (?,?,?,CURRENT_TIMESTAMP)
+     ON CONFLICT(id) DO UPDATE SET commercial_interval_minutes=excluded.commercial_interval_minutes,
+       updated_by=excluded.updated_by,updated_at=CURRENT_TIMESTAMP`,
+  ).bind(NEWS_SETTINGS_ID, value, actor).run();
+  return getNewsSettings();
 }
 
 export async function saveNewsRadioStreamUrl(value: string, actor: string) {

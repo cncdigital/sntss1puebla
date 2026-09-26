@@ -11,6 +11,10 @@ const AUTH_PATHS = new Set([
   "/api/worker/google/verify",
 ]);
 const DEVI_PATHS = new Set(["/api/devi/chat", "/api/devi/voice"]);
+const PUBLIC_MEDIA_PATHS = new Set([
+  "/api/credential-photo",
+  "/api/media",
+]);
 const UPLOAD_PATHS = new Set([
   "/api/access-registration",
   "/api/application-documents",
@@ -18,6 +22,7 @@ const UPLOAD_PATHS = new Set([
   "/api/devi/progress-list-upload",
   "/api/devi/progress-lists",
   "/api/devi/training",
+  "/api/admin/news/mp3",
 ]);
 const TRUSTED_HOSTS = new Set([
   "sntss1puebla.com",
@@ -31,7 +36,7 @@ const TRUSTED_HOSTS = new Set([
 ]);
 
 const DEFAULT_MAX_BODY_BYTES = 1024 * 1024;
-const UPLOAD_MAX_BODY_BYTES = 32 * 1024 * 1024;
+const UPLOAD_MAX_BODY_BYTES = 90 * 1024 * 1024;
 const MAX_QUERY_LENGTH = 4096;
 const MAX_COOKIE_LENGTH = 8192;
 const MAX_RATE_LIMIT_KEYS = 4096;
@@ -74,6 +79,11 @@ function clientKey(request: Request) {
 }
 
 function rateLimitRule(pathname: string, method: string) {
+  if (
+    (method === "GET" || method === "HEAD") &&
+    PUBLIC_MEDIA_PATHS.has(pathname)
+  )
+    return { group: "credential-media", limit: 120 };
   if (!MUTATING_METHODS.has(method)) return null;
   if (AUTH_PATHS.has(pathname)) return { group: "auth", limit: 30 };
   if (DEVI_PATHS.has(pathname)) return { group: "devi", limit: 45 };
@@ -155,6 +165,8 @@ export function guardRequest(request: Request) {
   }
 
   if (!isTrustedHost(url)) {
+    // This explicit host allowlist is also the application-layer guarantee
+    // that a workers.dev/direct Worker URL cannot trust forwarded OAI identity.
     return jsonError(400, "INVALID_HOST", "Host no reconocido.");
   }
 
@@ -186,7 +198,9 @@ export function guardRequest(request: Request) {
     if (!Number.isSafeInteger(contentLength) || contentLength < 0) {
       return jsonError(400, "INVALID_CONTENT_LENGTH", "El tamaño del contenido no es válido.");
     }
-    const maxBodyBytes = UPLOAD_PATHS.has(url.pathname) ? UPLOAD_MAX_BODY_BYTES : DEFAULT_MAX_BODY_BYTES;
+    const isUploadPath =
+      UPLOAD_PATHS.has(rawPath) || rawPath === "/api/admin/news/mp3";
+    const maxBodyBytes = isUploadPath ? UPLOAD_MAX_BODY_BYTES : DEFAULT_MAX_BODY_BYTES;
     if (contentLength > maxBodyBytes) {
       return jsonError(413, "PAYLOAD_TOO_LARGE", "El contenido excede el tamaño permitido.");
     }

@@ -1,33 +1,74 @@
-import { sha256 } from "../reader/auth";
 import {
   constantTimeEqual,
   createPasswordSalt,
   derivePasswordHash,
   PASSWORD_ITERATIONS,
-} from "../worker/password-crypto";
+} from "../worker/password-crypto.ts";
 
-const PBKDF2_PREFIX = "pbkdf2";
+export type StoredPrivilegedPin = {
+  pinHash: string;
+  pinSalt: string | null;
+  pinIterations: number | null;
+};
 
-export async function hashPrivilegedPin(pin: string) {
-  const salt = createPasswordSalt();
-  const hash = await derivePasswordHash(pin, salt, PASSWORD_ITERATIONS);
-  return `${PBKDF2_PREFIX}$${PASSWORD_ITERATIONS}$${salt}$${hash}`;
+export type PrivilegedPinCredential = {
+  pinHash: string;
+  pinSalt: string;
+  pinIterations: number;
+};
+
+async function legacyPinHash(pin: string) {
+  const bytes = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(pin),
+  );
+  return [...new Uint8Array(bytes)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
-export async function verifyPrivilegedPin(pin: string, stored: string) {
-  if (stored.startsWith(`${PBKDF2_PREFIX}$`)) {
-    const [, iterationText, salt, expected] = stored.split("$");
-    const iterations = Number(iterationText);
-    if (!Number.isInteger(iterations) || iterations < 100_000 || !salt || !expected)
-      return false;
-    const actual = await derivePasswordHash(pin, salt, iterations);
-    return constantTimeEqual(actual, expected);
+export function privilegedPinValidationError(pin: string) {
+  return /^\d{6,12}$/.test(pin)
+    ? null
+    : "La contraseña debe tener de 6 a 12 dígitos.";
+}
+
+export async function createPrivilegedPinCredential(
+  pin: string,
+): Promise<PrivilegedPinCredential> {
+  const pinSalt = createPasswordSalt();
+  return {
+    pinHash: await derivePasswordHash(pin, pinSalt, PASSWORD_ITERATIONS),
+    pinSalt,
+    pinIterations: PASSWORD_ITERATIONS,
+  };
+}
+
+export async function verifyPrivilegedPin(
+  pin: string,
+  stored: StoredPrivilegedPin,
+) {
+  const hasModernMetadata = Boolean(stored.pinSalt || stored.pinIterations);
+  if (hasModernMetadata) {
+    if (
+      !stored.pinSalt ||
+      !Number.isInteger(stored.pinIterations) ||
+      Number(stored.pinIterations) < 1 ||
+      Number(stored.pinIterations) > PASSWORD_ITERATIONS
+    )
+      return { valid: false, needsUpgrade: false };
+    const candidate = await derivePasswordHash(
+      pin,
+      stored.pinSalt,
+      Number(stored.pinIterations),
+    );
+    return {
+      valid: constantTimeEqual(candidate, stored.pinHash),
+      needsUpgrade: false,
+    };
   }
-  // One-time compatibility path for existing SHA-256 hashes. A successful
-  // login is upgraded to PBKDF2 by the privileged session route.
-  return constantTimeEqual(await sha256(pin), stored);
-}
 
-export function isLegacyPinHash(stored: string) {
-  return !stored.startsWith(`${PBKDF2_PREFIX}$`);
+  const candidate = await legacyPinHash(pin);
+  const valid = constantTimeEqual(candidate, stored.pinHash);
+  return { valid, needsUpgrade: valid };
 }

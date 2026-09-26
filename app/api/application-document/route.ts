@@ -1,28 +1,8 @@
 import { env } from "cloudflare:workers";
-
-async function adminAllowed(request: Request) {
-  const email =
-    request.headers.get("oai-authenticated-user-email")?.trim().toLowerCase() ??
-    "";
-  if (email === "guardiandelallama@gmail.com") return true;
-  const token =
-    request.headers
-      .get("cookie")
-      ?.split(";")
-      .map((part) => part.trim())
-      .find((part) => part.startsWith("sntss_privileged="))
-      ?.slice(17) ?? "";
-  if (!token) return false;
-  const account = await env.DB.prepare(
-    "SELECT p.matricula FROM privileged_sessions s JOIN privileged_accounts p ON p.matricula=s.matricula WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP AND p.active=1 AND p.can_admin=1",
-  )
-    .bind(token)
-    .first();
-  return Boolean(account);
-}
+import { requirePrivilege } from "../authz";
 
 export async function GET(request: Request) {
-  if (!(await adminAllowed(request)))
+  if (!(await requirePrivilege(request, "admin")))
     return Response.json({ error: "No autorizado" }, { status: 403 });
   const id = Number(new URL(request.url).searchParams.get("id"));
   if (!Number.isInteger(id) || id < 1)

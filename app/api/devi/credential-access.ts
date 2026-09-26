@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 import { getPrivilege, getWorkerSession } from "../authz";
 import { getCredentialValidity } from "../credential-validity";
+import { resolveRequestedMatricula } from "../../devi/credential-request";
 
 export type DeviCredentialAccess = {
   authenticated: boolean;
@@ -8,10 +9,6 @@ export type DeviCredentialAccess = {
   matricula: string | null;
   reason: string;
 };
-
-function requestedMatricula(request: Request) {
-  return request.headers.get("x-sntss-matricula")?.replace(/\D/g, "") || "";
-}
 
 export async function getDeviCredentialAccess(
   request: Request,
@@ -31,15 +28,15 @@ export async function getDeviCredentialAccess(
       reason: "Sesión no autorizada.",
     };
 
-  const requested = requestedMatricula(request);
-  if (requested && !available.includes(requested))
+  const resolution = resolveRequestedMatricula(request, available);
+  if (!resolution.authorized)
     return {
       authenticated: true,
       valid: false,
       matricula: null,
-      reason: "La identidad solicitada no coincide con la sesión activa.",
+      reason: resolution.reason,
     };
-  const matricula = requested || worker?.matricula || privilege?.matricula || "";
+  const matricula = resolution.matricula;
   const application = await env.DB.prepare(
     `SELECT a.id FROM applications a
      JOIN workers w ON w.id=a.worker_id

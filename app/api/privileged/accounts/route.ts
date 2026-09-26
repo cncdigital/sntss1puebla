@@ -1,30 +1,13 @@
 import { env } from "cloudflare:workers";
-import { sha256 } from "../../reader/auth";
-
-function privilegedToken(request: Request) {
-  return (
-    request.headers
-      .get("cookie")
-      ?.split(";")
-      .map((part) => part.trim())
-      .find((part) => part.startsWith("sntss_privileged="))
-      ?.slice(17) ?? ""
-  );
-}
-
-async function requireSpecialAdmin(request: Request) {
-  const token = privilegedToken(request);
-  if (!token) return null;
-  return env.DB.prepare(
-    "SELECT p.matricula FROM privileged_sessions s JOIN privileged_accounts p ON p.matricula=s.matricula WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP AND p.active=1 AND p.can_admin=1",
-  )
-    .bind(token)
-    .first<{ matricula: string }>();
-}
+import { requirePrivilege } from "../../authz";
+import {
+  createPrivilegedPinCredential,
+  privilegedPinValidationError,
+} from "../pin-crypto";
 
 export async function GET(request: Request) {
-  if (!(await requireSpecialAdmin(request)))
-    return Response.json({ error: "Acceso exclusivo para matrícula maestra" }, { status: 403 });
+  if (!(await requirePrivilege(request, "admin")))
+    return Response.json({ error: "Acceso exclusivo para administración" }, { status: 403 });
 
   const accounts = await env.DB.prepare(
     "SELECT p.matricula,p.can_admin AS canAdmin,p.can_reader AS canReader,p.active,COALESCE(w.full_name,'Matrícula especial') AS fullName FROM privileged_accounts p LEFT JOIN workers w ON w.matricula=p.matricula WHERE p.can_reader=1 ORDER BY p.can_admin DESC,p.matricula",
@@ -47,9 +30,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const manager = await requireSpecialAdmin(request);
+  const manager = await requirePrivilege(request, "admin");
   if (!manager)
-    return Response.json({ error: "Acceso exclusivo para matrícula maestra" }, { status: 403 });
+    return Response.json({ error: "Acceso exclusivo para administración" }, { status: 403 });
 
   const { matricula = "", pin = "" } = (await request.json()) as {
     matricula?: string;
@@ -59,8 +42,9 @@ export async function POST(request: Request) {
   const normalizedPin = pin.replace(/\D/g, "");
   if (normalizedMatricula.length < 4 || normalizedMatricula.length > 12)
     return Response.json({ error: "Escribe una matrícula válida" }, { status: 400 });
-  if (normalizedPin.length < 4 || normalizedPin.length > 8)
-    return Response.json({ error: "El PIN debe tener de 4 a 8 números" }, { status: 400 });
+  const pinError = privilegedPinValidationError(normalizedPin);
+  if (pinError)
+    return Response.json({ error: pinError }, { status: 400 });
   if (normalizedMatricula === manager.matricula)
     return Response.json({ error: "La matrícula maestra ya tiene acceso total" }, { status: 400 });
 
@@ -86,11 +70,21 @@ export async function POST(request: Request) {
       { status: 403 },
     );
 
-  const pinHash = await sha256(normalizedPin);
+  const credential = await createPrivilegedPinCredential(normalizedPin);
   await env.DB.prepare(
-    "INSERT INTO privileged_accounts (matricula,pin_hash,can_admin,can_reader,active) VALUES (?,?,0,1,1) ON CONFLICT(matricula) DO UPDATE SET pin_hash=excluded.pin_hash,can_reader=1,active=1",
+    `INSERT INTO privileged_accounts
+      (matricula,pin_hash,pin_salt,pin_iterations,can_admin,can_reader,active)
+     VALUES (?,?,?,?,0,1,1)
+     ON CONFLICT(matricula) DO UPDATE SET
+      pin_hash=excluded.pin_hash,pin_salt=excluded.pin_salt,
+      pin_iterations=excluded.pin_iterations,can_reader=1,active=1`,
   )
-    .bind(normalizedMatricula, pinHash)
+    .bind(
+      normalizedMatricula,
+      credential.pinHash,
+      credential.pinSalt,
+      credential.pinIterations,
+    )
     .run();
   await env.DB.prepare("DELETE FROM privileged_sessions WHERE matricula=?")
     .bind(normalizedMatricula)
@@ -108,9 +102,9 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const manager = await requireSpecialAdmin(request);
+  const manager = await requirePrivilege(request, "admin");
   if (!manager)
-    return Response.json({ error: "Acceso exclusivo para matrícula maestra" }, { status: 403 });
+    return Response.json({ error: "Acceso exclusivo para administración" }, { status: 403 });
 
   const { matricula = "", active } = (await request.json()) as {
     matricula?: string;

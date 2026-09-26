@@ -254,15 +254,6 @@ export async function POST(request: Request) {
       },
       { status: 401, headers: NO_STORE_HEADERS },
     );
-  if (worker.temporaryPasswordExpired)
-    return Response.json(
-      {
-        error:
-          "La contraseña temporal ya venció. Solicita al administrador una nueva.",
-        code: "TEMPORARY_PASSWORD_EXPIRED",
-      },
-      { status: 401, headers: NO_STORE_HEADERS },
-    );
   if (worker.passwordLocked) return lockedResponse();
   if (!password)
     return Response.json(

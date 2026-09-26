@@ -28,8 +28,6 @@ export type WorkerAuthRecord = {
   iterations: number | null;
   failedAttempts: number | null;
   passwordLocked: number;
-  mustChangePassword: number;
-  temporaryPasswordExpired: number;
   adminValidated: number;
 };
 
@@ -111,9 +109,6 @@ export async function findWorkerForAuthentication(matricula: string) {
       wp.password_salt AS passwordSalt,wp.iterations,
       wp.failed_attempts AS failedAttempts,
       CASE WHEN wp.locked_until>CURRENT_TIMESTAMP THEN 1 ELSE 0 END AS passwordLocked,
-      COALESCE(wp.must_change_password,0) AS mustChangePassword,
-      CASE WHEN wp.temporary_expires_at IS NOT NULL
-        AND wp.temporary_expires_at<=CURRENT_TIMESTAMP THEN 1 ELSE 0 END AS temporaryPasswordExpired,
       COALESCE(
         NULLIF(UPPER(TRIM(w.curp)),''),
         (
@@ -220,7 +215,6 @@ export async function createWorkerSession(worker: WorkerAuthRecord) {
       email: worker.email,
       phone: worker.phone,
       canCoachProgress: canCoachProgressLists(worker.matricula),
-      mustChangePassword: Boolean(worker.mustChangePassword),
     },
   };
 }

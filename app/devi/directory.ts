@@ -1,4 +1,4 @@
-import directory from "./directory.generated.json" with { type: "json" };
+import directory from "./directory.generated.json";
 import type { DeviSource } from "./knowledge";
 
 export type DirectoryKind = "secretaria" | "comision" | "subcomision";

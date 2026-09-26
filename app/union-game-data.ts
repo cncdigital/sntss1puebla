@@ -1,13 +1,17 @@
 export type UnionGameMode = "quiz" | "puzzle";
+export type UnionGameDifficulty = "basico" | "intermedio" | "avanzado";
+export type UnionGameKind = "trivia" | "caso" | "verdadero-falso" | "secuencia";
 
 type BaseQuestion = {
   id: string;
   mode: UnionGameMode;
-  category: "Contrato Colectivo" | "Estatutos";
+  category: "Contrato Colectivo" | "Estatutos" | "Cultura sindical";
   prompt: string;
   explanation: string;
   reference: string;
   points: number;
+  difficulty?: UnionGameDifficulty;
+  kind?: UnionGameKind;
 };
 
 export type QuizQuestion = BaseQuestion & {
@@ -429,7 +433,7 @@ export const UNION_GAME_QUESTIONS: UnionGameQuestion[] = [
       "El 1.75% adicional se acumula al 5% contractual; no reemplaza el inicio de 1.25% ni la trayectoria pactada.",
     reference: "Cláusula 157 y actualización institucional de la revisión salarial 2026–2027",
     points: 150,
-  },,
+  },
 
   {
     id: "cct-vacaciones-tope",
@@ -565,14 +569,243 @@ export const UNION_GAME_QUESTIONS: UnionGameQuestion[] = [
     reference: "Estatutos, artículo 152, página 69",
     points: 175,
   },
+  {
+    id: "cultura-seguridad-social-pilar",
+    mode: "quiz",
+    category: "Cultura sindical",
+    prompt: "¿Qué reconoce el CCT como pilar de estabilidad, concordia y desarrollo nacional?",
+    options: [
+      "La seguridad social",
+      "La competencia entre centros de trabajo",
+      "La reducción de la cobertura",
+      "El trabajo aislado",
+    ],
+    correctAnswer: "La seguridad social",
+    explanation:
+      "La Declaración del CCT destaca a la seguridad social como instrumento de justicia social y redistribución, sostenido por principios de solidaridad, equidad e integridad.",
+    reference: "CCT 2025–2027, Declaración, página 3",
+    points: 100,
+    difficulty: "basico",
+    kind: "trivia",
+  },
+  {
+    id: "cultura-calidad-participacion",
+    mode: "quiz",
+    category: "Cultura sindical",
+    prompt: "Reto de servicio: ¿en qué se cimenta la cultura de calidad descrita en la Declaración del CCT?",
+    options: [
+      "En la participación conjunta y coordinada de trabajadores y funcionarios",
+      "En decisiones individuales sin coordinación",
+      "Solo en tecnología nueva",
+      "Únicamente en controles administrativos",
+    ],
+    correctAnswer:
+      "En la participación conjunta y coordinada de trabajadores y funcionarios",
+    explanation:
+      "El CCT vincula la mejora del servicio con la participación coordinada de quienes realizan las tareas institucionales.",
+    reference: "CCT 2025–2027, Declaración, página 3",
+    points: 125,
+    difficulty: "intermedio",
+    kind: "caso",
+  },
+  {
+    id: "cct-licencia-antiguedad",
+    mode: "quiz",
+    category: "Contrato Colectivo",
+    prompt: "¿Qué antigüedad mínima señala la Cláusula 44 para solicitar licencia sin goce de sueldo?",
+    options: ["Seis meses", "Un año", "Dos años", "Cinco años"],
+    correctAnswer: "Un año",
+    explanation:
+      "La licencia puede concederse a quien cuente con al menos un año de antigüedad, en los términos de la Cláusula 44.",
+    reference: "CCT 2025–2027, Cláusula 44",
+    points: 100,
+    difficulty: "basico",
+    kind: "trivia",
+  },
+  {
+    id: "cct-licencia-solicitud-caso",
+    mode: "quiz",
+    category: "Contrato Colectivo",
+    prompt: "Reto de caso: una persona solicitará licencia sin goce de sueldo. ¿Cómo debe presentar la solicitud?",
+    options: [
+      "Por conducto del Sindicato, al menos cinco días hábiles antes",
+      "Después de iniciar la licencia",
+      "Solo de manera verbal al jefe inmediato",
+      "Con treinta días naturales de anticipación ante cualquier oficina",
+    ],
+    correctAnswer: "Por conducto del Sindicato, al menos cinco días hábiles antes",
+    explanation:
+      "La Cláusula 44 establece el conducto sindical y una anticipación mínima de cinco días hábiles.",
+    reference: "CCT 2025–2027, Cláusula 44",
+    points: 125,
+    difficulty: "intermedio",
+    kind: "caso",
+  },
+  {
+    id: "cct-prima-dominical-verdadero-falso",
+    mode: "quiz",
+    category: "Contrato Colectivo",
+    prompt: "Verdadero o falso: laborar en domingo genera una prima adicional del 25% sobre el salario de un día ordinario.",
+    options: ["Verdadero", "Falso"],
+    correctAnswer: "Verdadero",
+    explanation:
+      "La Cláusula 46, fracción II, reconoce la prima dominical adicional del 25%.",
+    reference: "CCT 2025–2027, Cláusula 46, fracción II",
+    points: 100,
+    difficulty: "basico",
+    kind: "verdadero-falso",
+  },
+  {
+    id: "cct-vacaciones-fraccionadas-caso",
+    mode: "quiz",
+    category: "Contrato Colectivo",
+    prompt: "Reto de caso: si se dividen las vacaciones, ¿en cuántas partes como máximo pueden disfrutarse?",
+    options: ["Dos partes", "Tres partes", "Cuatro partes", "Sin límite"],
+    correctAnswer: "Dos partes",
+    explanation:
+      "La Cláusula 47 permite disfrutarlas de forma continua o dividirlas en un máximo de dos partes con un número semejante de días.",
+    reference: "CCT 2025–2027, Cláusula 47",
+    points: 125,
+    difficulty: "intermedio",
+    kind: "caso",
+  },
+  {
+    id: "cct-descanso-ocho-horas-verdadero-falso",
+    mode: "quiz",
+    category: "Contrato Colectivo",
+    prompt: "Verdadero o falso: en una jornada de ocho horas, los 30 minutos para descanso o alimentos cuentan como tiempo efectivo de trabajo.",
+    options: ["Verdadero", "Falso"],
+    correctAnswer: "Verdadero",
+    explanation:
+      "La Cláusula 46, fracción I, incluye esos 30 minutos dentro del tiempo efectivo de trabajo.",
+    reference: "CCT 2025–2027, Cláusula 46, fracción I",
+    points: 100,
+    difficulty: "basico",
+    kind: "verdadero-falso",
+  },
+  {
+    id: "cct-comunicaciones-plazo-caso",
+    mode: "quiz",
+    category: "Contrato Colectivo",
+    prompt: "Reto de caso: una comunicación entre Instituto y Sindicato requiere solución. ¿Cuál es el plazo máximo contractual para contestarla?",
+    options: ["Cinco días", "Diez días", "Quince días", "Treinta días"],
+    correctAnswer: "Quince días",
+    explanation:
+      "La Cláusula 8 dispone que estas comunicaciones se contesten por escrito, con razones y de forma resolutiva, en un máximo de 15 días.",
+    reference: "CCT 2025–2027, Cláusula 8",
+    points: 125,
+    difficulty: "intermedio",
+    kind: "caso",
+  },
+  {
+    id: "puzzle-licencia-sin-sueldo",
+    mode: "puzzle",
+    category: "Contrato Colectivo",
+    prompt: "Ordena los elementos básicos para tramitar una licencia sin goce de sueldo.",
+    items: [
+      "Contar con al menos un año de antigüedad",
+      "Presentar la solicitud por conducto del Sindicato",
+      "Hacerlo al menos cinco días hábiles antes del inicio",
+      "Disfrutar la licencia autorizada en forma continua o discontinua",
+    ],
+    explanation:
+      "La Cláusula 44 reúne antigüedad, conducto sindical, anticipación y forma de disfrute; la autorización concreta depende del trámite aplicable.",
+    reference: "CCT 2025–2027, Cláusula 44",
+    points: 175,
+    difficulty: "avanzado",
+    kind: "secuencia",
+  },
+  {
+    id: "puzzle-guardia-planeacion",
+    mode: "puzzle",
+    category: "Contrato Colectivo",
+    prompt: "Ordena la planeación contractual de una guardia en descanso obligatorio.",
+    items: [
+      "Instituto y Sindicato elaboran el rol con al menos 45 días de anticipación",
+      "Se informa la guardia programada",
+      "El pago se realiza en la quincena anterior al día de la guardia",
+      "Se presta la guardia en la fecha programada",
+    ],
+    explanation:
+      "La Cláusula 45 prevé planeación conjunta y pago previo conforme a la Cláusula 33.",
+    reference: "CCT 2025–2027, Cláusulas 33 y 45",
+    points: 175,
+    difficulty: "avanzado",
+    kind: "secuencia",
+  },
 ];
 
 export function questionById(id: string) {
   return UNION_GAME_QUESTIONS.find((question) => question.id === id) || null;
 }
 
-export function questionsByMode(mode: UnionGameMode) {
-  return UNION_GAME_QUESTIONS.filter((question) => question.mode === mode);
+export function questionDifficulty(question: UnionGameQuestion): UnionGameDifficulty {
+  if (question.difficulty) return question.difficulty;
+  if (question.points >= 150) return "avanzado";
+  if (question.points >= 125) return "intermedio";
+  return "basico";
+}
+
+export function questionKind(question: UnionGameQuestion): UnionGameKind {
+  if (question.kind) return question.kind;
+  if (question.mode === "puzzle") return "secuencia";
+  return question.prompt.startsWith("Reto de caso:") ? "caso" : "trivia";
+}
+
+export function questionsByMode(
+  mode: UnionGameMode,
+  difficulty?: UnionGameDifficulty,
+) {
+  return UNION_GAME_QUESTIONS.filter(
+    (question) =>
+      question.mode === mode &&
+      (!difficulty || questionDifficulty(question) === difficulty),
+  );
+}
+
+export function chooseUnionGameQuestion(
+  questions: UnionGameQuestion[],
+  recentQuestionIds: Iterable<string> = [],
+  random: () => number = Math.random,
+) {
+  if (!questions.length) return null;
+  const recent = new Set(recentQuestionIds);
+  const withoutRecent = questions.filter((question) => !recent.has(question.id));
+  const candidates = withoutRecent.length ? withoutRecent : questions;
+  const index = Math.min(
+    candidates.length - 1,
+    Math.max(0, Math.floor(random() * candidates.length)),
+  );
+  return candidates[index];
+}
+
+export function unionGameBankIssues(
+  questions: UnionGameQuestion[] = UNION_GAME_QUESTIONS,
+) {
+  const issues: string[] = [];
+  const ids = new Set<string>();
+  const prompts = new Set<string>();
+  for (let index = 0; index < questions.length; index += 1) {
+    const question = questions[index];
+    if (!question) {
+      issues.push(`Posición ${index}: reto vacío`);
+      continue;
+    }
+    const normalizedPrompt = question.prompt.trim().toLocaleLowerCase("es-MX");
+    if (ids.has(question.id)) issues.push(`${question.id}: ID duplicado`);
+    if (prompts.has(normalizedPrompt)) issues.push(`${question.id}: enunciado duplicado`);
+    ids.add(question.id);
+    prompts.add(normalizedPrompt);
+    if (!question.reference.trim()) issues.push(`${question.id}: falta referencia`);
+    if (!question.explanation.trim()) issues.push(`${question.id}: falta retroalimentación`);
+    const answers = question.mode === "quiz" ? question.options : question.items;
+    if (answers.length < 2) issues.push(`${question.id}: necesita al menos dos opciones`);
+    if (new Set(answers).size !== answers.length)
+      issues.push(`${question.id}: contiene opciones duplicadas`);
+    if (question.mode === "quiz" && !question.options.includes(question.correctAnswer))
+      issues.push(`${question.id}: la respuesta correcta no aparece entre las opciones`);
+  }
+  return issues;
 }
 
 export function answerIsCorrect(question: UnionGameQuestion, answer: unknown) {
@@ -584,4 +817,3 @@ export function answerIsCorrect(question: UnionGameQuestion, answer: unknown) {
     question.items.every((item, index) => answer[index] === item)
   );
 }
-

@@ -18,6 +18,7 @@ interface Env {
   OPENAI_API_KEY?: string;
   OPENAI_DEVI_MODEL?: string;
   OPENAI_DEVI_TTS_MODEL?: string;
+  SNTSS_OWNER_EMAILS?: string;
   META_GRAPH_API_VERSION?: string;
   META_PAGE_ID?: string;
   META_PAGE_ACCESS_TOKEN?: string;

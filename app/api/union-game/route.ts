@@ -4,8 +4,12 @@ import { getCredentialValidity } from "../credential-validity";
 import {
   UNION_GAME_QUESTIONS,
   answerIsCorrect,
+  chooseUnionGameQuestion,
   questionById,
+  questionDifficulty,
+  questionKind,
   questionsByMode,
+  type UnionGameDifficulty,
   type UnionGameMode,
   type UnionGameQuestion,
 } from "../../union-game-data";
@@ -28,6 +32,12 @@ type RankingRow = {
 
 function modeFrom(value: string | null): UnionGameMode {
   return value === "puzzle" ? "puzzle" : "quiz";
+}
+
+function difficultyFrom(value: string | null): UnionGameDifficulty | undefined {
+  return value === "basico" || value === "intermedio" || value === "avanzado"
+    ? value
+    : undefined;
 }
 
 function publicName(fullName: string) {
@@ -60,6 +70,8 @@ function publicQuestion(question: UnionGameQuestion) {
         category: question.category,
         prompt: question.prompt,
         points: question.points,
+        difficulty: questionDifficulty(question),
+        kind: questionKind(question),
         options: shuffled(question.options),
       }
     : {
@@ -68,6 +80,8 @@ function publicQuestion(question: UnionGameQuestion) {
         category: question.category,
         prompt: question.prompt,
         points: question.points,
+        difficulty: questionDifficulty(question),
+        kind: questionKind(question),
         items: shuffled(question.items),
       };
 }
@@ -176,7 +190,15 @@ export async function GET(request: Request) {
   const access = await eligibleWorker(request);
   if (!access.worker) return access.response!;
   await ensurePlayer(access.worker);
-  const mode = modeFrom(new URL(request.url).searchParams.get("mode"));
+  const searchParams = new URL(request.url).searchParams;
+  const mode = modeFrom(searchParams.get("mode"));
+  const difficulty = difficultyFrom(searchParams.get("difficulty"));
+  const recentChallenges = await env.DB.prepare(
+    `SELECT question_id AS questionId FROM union_game_challenges
+     WHERE matricula=? ORDER BY created_at DESC LIMIT 5`,
+  )
+    .bind(access.worker.matricula)
+    .all<{ questionId: string }>();
   await env.DB.prepare(
     `DELETE FROM union_game_challenges
      WHERE matricula=? AND (expires_at<=CURRENT_TIMESTAMP OR completed_at IS NOT NULL)`,
@@ -189,10 +211,19 @@ export async function GET(request: Request) {
     .bind(access.worker.matricula)
     .all<{ questionId: string }>();
   const mastered = new Set(mastery.results.map((row) => row.questionId));
-  const pool = questionsByMode(mode);
+  const filteredPool = questionsByMode(mode, difficulty);
+  const pool = filteredPool.length ? filteredPool : questionsByMode(mode);
   const fresh = pool.filter((question) => !mastered.has(question.id));
   const candidates = fresh.length ? fresh : pool;
-  const question = candidates[Math.floor(Math.random() * candidates.length)];
+  const question = chooseUnionGameQuestion(
+    candidates,
+    recentChallenges.results.map((row) => row.questionId),
+  );
+  if (!question)
+    return Response.json(
+      { error: "No hay retos disponibles en este modo." },
+      { status: 404, headers: NO_STORE_HEADERS },
+    );
   const token = crypto.randomUUID();
   await env.DB.prepare(
     `INSERT INTO union_game_challenges

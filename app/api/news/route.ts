@@ -8,6 +8,7 @@ import {
   getNewsSettings,
   RADIO_STATION_PAGE_URL,
 } from "./radio-settings";
+import { listNewsMp3Tracks } from "./mp3-library";
 
 const NO_STORE_HEADERS = {
   "cache-control": "private, no-store, max-age=0",
@@ -23,10 +24,11 @@ async function authorized(request: Request) {
 }
 
 async function newsResponse(sync?: Awaited<ReturnType<typeof syncFacebookNews>>) {
-  const [news, meta, settings] = await Promise.all([
+  const [news, meta, settings, mp3] = await Promise.all([
     listFacebookNews(),
     facebookNewsPublicStatus(),
     getNewsSettings(),
+    listNewsMp3Tracks(),
   ]);
   return Response.json(
     {
@@ -37,6 +39,7 @@ async function newsResponse(sync?: Awaited<ReturnType<typeof syncFacebookNews>>)
         streamPath: "/api/news/radio",
         directUrl: RADIO_STATION_PAGE_URL,
       },
+      mp3,
       sync: sync || null,
     },
     { headers: NO_STORE_HEADERS },

@@ -7,6 +7,7 @@ import {
   getNewsSettings,
   saveNewsRadioStreamUrl,
 } from "../../news/radio-settings";
+import { listNewsMp3Tracks } from "../../news/mp3-library";
 
 const NO_STORE_HEADERS = {
   "cache-control": "private, no-store, max-age=0",
@@ -17,17 +18,23 @@ async function administrator(request: Request) {
   return requirePrivilege(request, "admin");
 }
 
+async function newsManager(request: Request) {
+  return requirePrivilege(request, "news");
+}
+
 export async function GET(request: Request) {
-  if (!(await administrator(request)))
+  if (!(await newsManager(request)))
     return Response.json(
       { error: "No autorizado" },
       { status: 403, headers: NO_STORE_HEADERS },
     );
-  const [settings, meta] = await Promise.all([
+  const [settings, meta, tracks, commercials] = await Promise.all([
     getNewsSettings(),
     facebookNewsPublicStatus(),
+    listNewsMp3Tracks(),
+    listNewsMp3Tracks("commercial"),
   ]);
-  return Response.json({ settings, meta }, { headers: NO_STORE_HEADERS });
+  return Response.json({ settings, meta, tracks, commercials }, { headers: NO_STORE_HEADERS });
 }
 
 export async function POST(request: Request) {

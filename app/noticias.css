@@ -43,6 +43,11 @@
 .newsRadioSignal.playing i:nth-of-type(2) { animation-delay: -.25s; }
 .newsRadioSignal.playing i:nth-of-type(3) { animation-delay: -.55s; }
 .newsRadioOpen { border: 1px solid #f2b321; border-radius: 9px; background: #f2b321; color: #33290d; padding: 10px 13px; font-size: 13px; font-weight: 900; text-decoration: none; white-space: nowrap; }
+.newsMp3Select { display: grid; min-width: min(100%,420px); gap: 8px; }
+.newsMp3Select select { min-width: 0; border: 1px solid rgba(255,255,255,.25); border-radius: 9px; background: #09233d; color: white; padding: 9px 11px; font: inherit; font-size: 12px; font-weight: 800; }
+.newsMp3Select audio { width: min(100%,420px); height: 38px; }
+.newsMp3Empty { color: #c8dce9; font-size: 12px; line-height: 1.45; text-align: right; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
 @keyframes newsRadioMeter { to { height: 8px; opacity: .65; } }
 .newsRadioError { grid-column: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: -14px; color: #ffd8ce; font-size: 12px; }
 .newsRadioError > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
@@ -101,6 +106,9 @@
   .newsEdition { display: none; }
   .newsRadio { grid-template-columns: 1fr; gap: 13px; padding: 19px 24px 21px; }
   .newsRadioConsole { width: 100%; }
+  .newsMp3Select { width: 100%; min-width: 0; }
+  .newsMp3Select audio { width: 100%; }
+  .newsMp3Empty { text-align: left; }
   .newsRadioError { grid-column: 1; margin-top: -5px; }
   .newsTicker { justify-content: flex-start; overflow-x: auto; }
   .newsContent { padding: 52px 15px 70px; }
@@ -123,6 +131,37 @@
 .newsAdminSection .button { margin-top: auto; }
 .newsAdminState { display: inline-flex; border-radius: 999px; padding: 6px 9px; background: #fff1c9; color: #8a6208; font-size: 9px; font-weight: 900; text-transform: uppercase; }
 .newsAdminState.connected { background: #e1f4ea; color: #137248; }
+.newsMp3AdminList { display: grid; width: 100%; gap: 8px; margin-top: 3px; }
+.newsMp3AdminList > article { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid #dce5ed; border-radius: 10px; background: white; padding: 10px 11px; }
+.newsMp3AdminList > article > div { min-width: 0; }
+.mp3AdminActions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
+.newsMp3AdminList b,.newsMp3AdminList small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.newsMp3AdminList b { color: #163b5a; font-size: 12px; }
+.newsMp3AdminList small { margin-top: 3px; color: #7b8b98; font-size: 10px; }
+.mp3LibraryId { display: inline-block; margin-right: 5px; color: #0d7a62; font-size: 10px; letter-spacing: .04em; }
+.radioCommercialSection { border: 1px solid #c5dce8; border-radius: 16px; background: #f3f9fc; }
+.radioCommercialClock { display: grid; justify-items: start; gap: 3px; width: 100%; border: 1px solid #b9d8e8; border-radius: 13px; background: linear-gradient(110deg,#0b3154,#155278); color: white; padding: 13px 16px; }
+.radioCommercialClock span { color: #e9c45e; font-size: 11px; font-weight: 850; text-transform: uppercase; letter-spacing: .09em; }
+.radioCommercialClock strong { font: 800 34px/1.1 Arial,sans-serif; font-variant-numeric: tabular-nums; }
+.radioCommercialClock small { color: #d2e6f1; font-size: 12px; white-space: normal; }
+.radioCommercialDraft { color: #a05b14; font-size: 12px; }
+.radioCommercialSection input[type="number"] { width: min(180px,100%); min-height: 44px; border: 1px solid #8fb8ce; border-radius: 9px; padding: 8px 10px; font: 750 18px Arial,sans-serif; }
+.radioCommercialUpload { display: grid; gap: 9px; margin: 14px 0; }
+.radioCommercialList { display: grid; gap: 8px; margin-top: 14px; }
+.radioCommercialList > div { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px; border-radius: 9px; background: white; }
+.radioCommercialList span { display: grid; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.radioCommercialList small { color: #567387; }
+.mp3MetadataEditor { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-top: 8px; }
+.mp3MetadataEditor label { display: grid; gap: 4px; min-width: min(160px, 100%); font-size: 13px; }
+.mp3MetadataEditor input { max-width: 100%; padding: 7px; border: 1px solid #a9d8c8; border-radius: 8px; font: inherit; }
+.mp3MetadataEditor .mp3LyricsField { flex: 1 0 100%; }
+.mp3MetadataEditor textarea { width: 100%; padding: 8px; border: 1px solid #a9d8c8; border-radius: 8px; font: inherit; }
+.mp3Id3Preview { display: grid; gap: 3px; margin: 2px 0 4px; border: 1px solid #a9d8c8; border-radius: 10px; background: #eefaf5; padding: 10px 12px; color: #24594e; }
+.mp3Id3Preview b { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+.mp3Id3Preview span { color: #123a52; font-size: 14px; font-weight: 850; }
+.mp3Id3Preview small { color: #54746f; font-size: 11px; }
+.mp3DuplicateNotice { display: grid; width: 100%; gap: 9px; border: 1px solid #c68d2d; border-radius: 12px; background: #fff6dd; color: #5a3b12; padding: 14px; font-size: 14px; line-height: 1.45; }
+.mp3DuplicateNotice > div { display: flex; flex-wrap: wrap; gap: 8px; }
 @media (max-width: 780px) {
   .newsAdminGrid { grid-template-columns: 1fr; }
   .newsAdminSection > p { min-height: 0; }
@@ -149,3 +188,80 @@
 @media print {
   .newsPage { display: none !important; }
 }
+
+.newsMp3Actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.newsMp3Actions button { border: 1px solid rgba(255,255,255,.3); border-radius: 8px; background: #0d426b; color: white; padding: 7px 9px; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
+.newsMp3Actions button.active { border-color: #f2b321; color: #f2b321; }
+.newsQualityChoice { display: inline-flex; align-items: center; gap: 5px; color: #bfd2e0; font-size: 10px; font-weight: 800; }
+.newsQualityChoice select { border: 1px solid rgba(255,255,255,.25); border-radius: 8px; background: #09233d; color: white; padding: 7px 8px; font: inherit; font-size: 11px; }
+.newsMp3Select > small { color: #bfd2e0; font-size: 10px; }
+.mp3GlobalPlayer { position: fixed; z-index: 260; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); width: min(860px, calc(100vw - 28px)); display: grid; grid-template-columns: minmax(150px,1fr) minmax(150px, min(24vw,260px)) auto minmax(180px, min(28vw,320px)); align-items: center; gap: 13px; border: 1px solid rgba(255,255,255,.18); border-radius: 15px; background: linear-gradient(110deg,rgba(4,19,38,.98),rgba(8,48,79,.96)); box-shadow: 0 14px 42px rgba(0,0,0,.3); padding: 10px 12px; color: white; backdrop-filter: blur(14px); cursor: grab; touch-action: none; user-select: none; }
+.mp3GlobalPlayer:active { cursor: grabbing; }
+.mp3GlobalInfo { display: flex; min-width: 0; align-items: center; gap: 9px; }
+.mp3GlobalInfo div { min-width: 0; }
+.mp3GlobalInfo b,.mp3GlobalInfo small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mp3GlobalInfo b { font-size: 12px; }
+.mp3GlobalInfo small { margin-top: 3px; color: #a9c5d9; font-size: 10px; }
+.mp3GlobalInfo small strong { color: #f2b321; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
+.mp3GlobalNote { display: grid; flex: 0 0 31px; width: 31px; height: 31px; place-items: center; border-radius: 9px; background: #f2b321; color: #182942; font-size: 20px; }
+.mp3GlobalCover { flex: 0 0 36px; width: 36px; height: 36px; object-fit: cover; border-radius: 7px; }
+.mp3AdminCover { float: left; width: 54px; height: 54px; margin-right: 10px; object-fit: cover; border-radius: 7px; }
+.mp3Id3CoverPreview { display: block; width: 96px; height: 96px; margin: 8px 0; object-fit: cover; border-radius: 9px; }
+.mp3Availability { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.mp3Availability span { border-radius: 999px; background: #eaf0f4; color: #485f70; padding: 5px 9px; font-size: 12px; font-weight: 700; }
+.mp3Availability span.complete { background: #daf4e7; color: #175a45; }
+.mp3LyricsLookup { display: grid; width: 100%; gap: 8px; min-width: 0; }
+.mp3LyricsLookup small { font-size: 13px; white-space: normal; }
+.mp3LyricsMatch { display: grid; gap: 7px; border: 1px solid #b6d4e1; border-radius: 10px; padding: 10px; min-width: 0; background: #f3f9fc; }
+.mp3LyricsMatch b { font-size: 14px; white-space: normal; }
+.mp3LyricsMatch textarea { width: 100%; min-width: 0; padding: 8px; border: 1px solid #b6d4e1; border-radius: 7px; font: inherit; }
+.mp3LyricsMatch a { font-size: 13px; }
+.mp3OnlineSync { display: grid; flex: 1 0 100%; min-width: 0; gap: 10px; border: 1px solid #c5dce8; border-radius: 11px; background: #f3f9fc; padding: 11px; }
+.mp3OnlineSync > .button { justify-self: start; }
+.mp3OnlineSync p { margin: 0; color: #456277; font-size: 12px; line-height: 1.5; }
+.mp3CoverLookup { display: grid; gap: 10px; min-width: 0; }
+.mp3CoverLookup > strong { font-size: 14px; color: #153e59; }
+.mp3CoverLookup > small { white-space: normal; font-size: 12px; }
+.mp3CoverCandidates { display: grid; grid-template-columns: repeat(auto-fit,minmax(145px,1fr)); gap: 10px; }
+.mp3CoverCandidates > div { display: grid; align-content: start; gap: 7px; min-width: 0; border: 1px solid #c5dce8; border-radius: 10px; background: white; padding: 9px; }
+.mp3CoverCandidates img { width: 100%; aspect-ratio: 1; border-radius: 7px; object-fit: contain; background: #edf3f7; }
+.mp3CoverCandidates span,.mp3CoverCandidates a { overflow-wrap: anywhere; font-size: 12px; }
+.mp3SelectedCover { width: 110px; height: 110px; border-radius: 9px; object-fit: contain; background: white; }
+.radioLiveAdmin { grid-column: 1 / -1; border: 1px solid #bedce9; border-radius: 14px; padding: 20px; background: #eef8fc; }
+.radioLiveAdmin h3 { margin: 0 0 8px; }
+.radioLiveAdmin p { max-width: 760px; margin: 0 0 14px; }
+.radioLiveAdminControls { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+.radioLiveBadge,.radioOnAirBadge { display: inline-flex; align-items: center; border-radius: 24px; padding: 5px 11px; background: #b22729; color: #fff; font-size: 12px; font-weight: 900; letter-spacing: .04em; }
+.radioLiveAdmin .radioLiveError { margin-top: 12px; color: #9d282b; }
+.radioLiveMicButton { display: inline-flex; align-items: center; gap: 10px; background: #16436b; color: #fff; border-radius: 28px; padding: 11px 18px; font-weight: 750; }
+.radioLiveMicButton svg { width: 22px; height: 22px; flex: none; }
+.radioLiveMicButton.isLive { background: #a8272e; box-shadow: 0 0 0 3px #a8272e24; }
+.radioLiveMicButton:disabled { opacity: .65; cursor: wait; }
+.radioLiveMeterGroup { max-width: 460px; margin-top: 17px; }
+.radioLiveMeterLabel { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 7px; color: #193950; font-size: 14px; font-weight: 700; }
+.radioLiveMeterTrack { height: 12px; overflow: hidden; border-radius: 20px; background: #c8dbe6; }
+.radioLiveMeterFill { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#16a887,#e9bf39,#d7463c); transition: width 110ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .radioLiveMeterFill { transition: none; } }
+.mp3GlobalWave { position: relative; min-width: 0; }
+.mp3GlobalVisualizer { display: block; width: 100%; height: 39px; border-radius: 9px; background: rgba(255,255,255,.06); }
+.mp3GlobalLyricsGhost { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 9px; background: linear-gradient(90deg,rgba(4,19,38,.28),rgba(4,19,38,.6),rgba(4,19,38,.28)); color: rgba(255,255,255,.75); padding: 0 10px; font: 800 12px/1.25 Georgia,serif; text-align: center; text-shadow: 0 2px 7px #061629; pointer-events: none; animation: mp3GhostLyric .35s ease-out; }
+@keyframes mp3GhostLyric { from { opacity: .25; } to { opacity: 1; } }
+.mp3GlobalControls { display: flex; align-items: center; gap: 4px; }
+.mp3GlobalControls button { width: 30px; height: 30px; border: 1px solid rgba(255,255,255,.22); border-radius: 8px; background: rgba(255,255,255,.08); color: white; font: inherit; font-size: 12px; cursor: pointer; }
+.mp3GlobalControls button,.mp3GlobalControls select { touch-action: manipulation; user-select: auto; cursor: pointer; }
+.mp3GlobalControls button.active { border-color: #f2b321; color: #f2b321; }
+.mp3GlobalControls .mp3GlobalPlay { background: #f2b321; color: #19283c; font-weight: 950; }
+.mp3QualitySelect { height: 30px; border: 1px solid rgba(255,255,255,.22); border-radius: 8px; background: rgba(255,255,255,.08); color: white; padding: 0 4px; font: inherit; font-size: 11px; font-weight: 800; }
+.mp3QualitySelect option { color: #14283d; }
+.mp3GlobalPlayer audio { width: 100%; height: 34px; }
+.mp3GlobalAudio { display: none; }
+.mp3GlobalPlayer.minimized { width: min(360px, calc(100vw - 28px)); grid-template-columns: minmax(0,1fr) auto; }
+.mp3GlobalPlayer.minimized audio { display: none; }
+@media (max-width: 700px) {
+  .mp3GlobalPlayer { width: min(360px, calc(100vw - 28px)); grid-template-columns: minmax(0,1fr) auto; gap: 8px; padding: 9px; }
+  .mp3GlobalWave { grid-column: 1/-1; grid-row: 2; }
+  .mp3GlobalPlayer audio { grid-column: 1/-1; grid-row: 4; width: 100%; }
+  .mp3GlobalControls { justify-content: end; }
+  .mp3GlobalPlayer.minimized { width: min(330px, calc(100vw - 28px)); }
+}
+@media (prefers-reduced-motion: reduce) { .mp3GlobalLyricsGhost { animation: none; } }

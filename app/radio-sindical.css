@@ -1,0 +1,119 @@
+.radioPage { min-height: 75vh; background: #eef4f8; color: #102a42; padding-bottom: 110px; }
+.radioHeader { padding: 55px max(24px,6vw) 34px; background: #071d36; color: white; }
+.radioHeader span { color: #eab438; font-size: 13px; font-weight: 850; letter-spacing: .14em; }
+.radioHeader h1 { margin: 10px 0; font: 700 clamp(42px,6vw,76px)/1.05 Georgia,serif; }
+.radioHeader p { margin: 0; color: #c9dbe8; font-size: 16px; }
+.radioAndroidInstall { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; max-width: 1324px; margin: 14px auto 0; padding: 0 28px; }
+.radioAndroidInstall a { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 6px 12px; border: 1px solid #aec4d3; border-radius: 8px; background: #fff; color: #133b56; font-size: 14px; font-weight: 700; text-decoration: none; }
+.radioAndroidInstall a:hover,.radioAndroidInstall a:focus-visible { border-color: #135375; background: #e2f1f8; outline: 2px solid #135375; outline-offset: 2px; }
+.radioAndroidInstall small { color: #475e70; font-size: 14px; line-height: 1.35; }
+@media (max-width: 700px) { .radioAndroidInstall { padding: 0 16px; } }
+.radioLayout { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(280px,.8fr); gap: 22px; max-width: 1380px; margin: auto; padding: 28px; }
+.radioStage { overflow: hidden; min-height: 710px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 22px; background: radial-gradient(circle at 50% 32%,#1c628c,#09233e 62%,#061629); color: white; padding: 36px; text-align: center; }
+.radioArtwork { position: relative; width: min(100%,420px); flex: none; }
+.radioRecord { width: 100%; aspect-ratio: 1; display: grid; place-items: center; border: 3px solid #173c58; border-radius: 50%; background: repeating-radial-gradient(circle,#071b30 0 9px,#123751 10px 11px); box-shadow: 0 0 0 10px rgba(255,255,255,.04),0 24px 55px rgba(0,0,0,.35); }
+.radioCoverLyric { position: absolute; inset: auto 0 0; display: grid; gap: 5px; max-height: 40%; overflow: hidden; border-radius: 0 0 16px 16px; padding: 13px 16px; background: rgba(5,24,42,.8); backdrop-filter: blur(8px); color: white; text-align: center; pointer-events: none; }
+.radioCoverLyric small { font-size: 12px; font-weight: 850; letter-spacing: .09em; color: #f2c458; }
+.radioCoverLyric span { display: -webkit-box; overflow: hidden; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-height: 1.35; font-size: clamp(17px,2vw,22px); font-weight: 750; animation: radioLyricAppear .45s ease-out; }
+.radioMaximize { margin-top: 20px; min-height: 44px; padding: 10px 16px; border: 1px solid #eab438; border-radius: 10px; background: #eab438; color: #102a42; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer; }
+.radioMaximize:focus-visible,.radioFullscreen button:focus-visible,.radioFullscreenPlain:focus-visible { outline: 3px solid #f5cf69; outline-offset: 3px; }
+.radioFullscreen { position: fixed; inset: 0; z-index: 2147483646; display: grid; grid-template-rows: auto minmax(0,1fr) auto; width: 100vw; height: 100dvh; overflow: hidden; overscroll-behavior: contain; background: #061629; color: white; }
+.radioFullscreenBackdrop { position: absolute; inset: -3%; width: 106%; height: 106%; object-fit: cover; filter: blur(32px) brightness(.32); pointer-events: none; }
+.radioFullscreenTop,.radioFullscreenArtwork,.radioFullscreenBottom { position: relative; z-index: 1; }
+.radioFullscreenTop { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: calc(14px + env(safe-area-inset-top)) 24px 12px; background: linear-gradient(#061629dd,#06162944); }
+.radioFullscreenTop > div { display: grid; gap: 4px; min-width: 0; }
+.radioFullscreenTop strong { font: 700 clamp(18px,2vw,25px) Georgia,serif; }
+.radioFullscreenTop span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #d1e3ed; font-size: 14px; }
+.radioFullscreen button { flex: none; min-height: 44px; border: 1px solid #ffffff77; border-radius: 10px; background: #071d36dc; color: white; padding: 8px 15px; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+.radioFullscreenArtwork { display: grid; place-items: center; min-height: 0; padding: 8px 20px; }
+.radioFullscreenArtwork img { display: block; width: 100%; height: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 12px 30px #0009); }
+.radioFullscreenArtwork > span { display: grid; place-items: center; width: min(70vw,55vh); aspect-ratio: 1; border-radius: 50%; background: repeating-radial-gradient(circle,#071b30 0 14px,#123751 15px 17px); color: #eab438; font-size: clamp(70px,12vw,140px); }
+.radioFullscreenLyricOverlay { position: absolute; z-index: 2; width: min(calc(100% - 24px), 850px); max-height: 65%; display: grid; justify-items: center; transform: translate(-50%,-50%); cursor: grab; user-select: none; }
+.radioFullscreenLyricOverlay:active { cursor: grabbing; }
+.radioFullscreenLyricOverlay .radioFullscreenLine,.radioFullscreenLyricOverlay .radioFullscreenEmpty { touch-action: none; }
+.radioFullscreenLyricOverlay .radioFullscreenLine { border-radius: 16px; background: rgba(4,19,37,.75); padding: 12px 22px; backdrop-filter: blur(8px); }
+.radioFullscreenLyricOverlay .radioFullscreenPlain { max-height: min(32vh,230px); cursor: auto; user-select: text; }
+.radioFullscreenPlain small { cursor: grab; touch-action: none; user-select: none; }
+.radioFullscreenPlain small:active { cursor: grabbing; }
+.radioFullscreenBottom { display: grid; justify-items: center; gap: 10px; padding: 12px 24px calc(14px + env(safe-area-inset-bottom)); background: linear-gradient(#06162977,#061629f5 30%); text-align: center; }
+.radioFullscreenLine { max-width: min(100%,1000px); margin: 0; overflow-wrap: anywhere; font-size: clamp(24px,4vw,46px); font-weight: 800; line-height: 1.22; text-shadow: 0 2px 14px #000; animation: radioLyricAppear .45s ease-out; }
+.radioFullscreenEmpty { margin: 0; font-size: 18px; }
+.radioFullscreenPlain { width: min(100%,850px); max-height: min(27vh,230px); overflow-y: auto; border-radius: 14px; background: #061629d9; padding: 14px 18px; text-align: left; }
+.radioFullscreenPlain small { display: block; margin-bottom: 8px; color: #eab438; font-size: 13px; }
+.radioFullscreenPlain p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: clamp(17px,2vw,23px); line-height: 1.55; }
+.radioFullscreenControls { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; }
+.radioFullscreen .radioKaraokeToggle { border-color: #f5c85d; background: #f5c85d; color: #08233c; }
+.radioFullscreen .radioKaraokeToggle.active { border-color: #58dcca; background: #104e62; color: #e9fffd; }
+.radioKaraokeMeter { width: min(100%,470px); padding: 9px 14px 11px; border: 1px solid #63d5cd88; border-radius: 17px; background: linear-gradient(120deg,#06283ce8,#12455cdd); box-shadow: 0 10px 30px #00192b99; }
+.radioKaraokeMeter canvas { display: block; width: min(100%,300px); height: 48px; margin: auto; }
+.radioKaraokeReading { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #d7f7f4; font-size: 12px; text-align: left; }
+.radioKaraokeReading strong { color: #f5d376; font-size: 19px; font-variant-numeric: tabular-nums; }
+.radioKaraokeTrack { height: 5px; overflow: hidden; border-radius: 9px; background: #ffffff33; margin-top: 6px; }
+.radioKaraokeTrack span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#58ded1,#f5d376,#f09375); transition: width .12s ease-out; }
+@keyframes radioLyricAppear { from { opacity: .35; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.radioRecord span { width: 74px; height: 74px; display: grid; place-items: center; border-radius: 50%; background: #eab438; color: #09233e; font-size: 35px; }
+.radioRecord.hasCover { overflow: hidden; border-radius: 18px; background: #123751; }
+.radioRecord img { width: 100%; height: 100%; object-fit: cover; }
+.radioNow small { display: block; margin-top: 7px; color: #bcd7e7; }
+.radioNow { margin-top: 25px; }
+.radioNow > span { color: #eab438; font-size: 14px; font-weight: 850; letter-spacing: .12em; }
+.radioNow h2 { margin: 8px 0 4px; font: 700 clamp(24px,3vw,38px)/1.15 Georgia,serif; }
+.radioNow p { margin: 0; color: #bcd7e7; font-size: 17px; }
+.radioDjAnnouncement { max-width: 640px; margin: 14px auto 0; padding: 10px 14px; border: 1px solid #ecc25c88; border-radius: 12px; background: #071d36bf; color: #f6e3b5; font-size: 15px; line-height: 1.45; }
+.radioVisualizer { width: min(100%,700px); height: 105px; margin: 13px 0; border-radius: 12px; background: rgba(255,255,255,.045); }
+.radioControls { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
+.radioControls button,.radioControls select { min-height: 42px; border: 1px solid rgba(255,255,255,.25); border-radius: 9px; background: rgba(255,255,255,.1); color: white; padding: 9px 12px; font: inherit; cursor: pointer; }
+.radioControls .radioPlayButton { background: #eab438; border-color: #eab438; color: #102a42; font-weight: 850; }
+.radioControls .selected { border-color: #eab438; }
+.radioControls label { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.radioControls select option { color: #102a42; }
+.radioLibrary { min-height: 520px; max-height: 730px; overflow: auto; border: 1px solid #d7e3eb; border-radius: 20px; background: white; padding: 22px; }
+.radioLibrary h2 { display: flex; justify-content: space-between; margin: 0 0 14px; font: 700 28px Georgia,serif; }
+.radioLibrary h2 span { font: 800 16px Arial,sans-serif; color: #426784; }
+.radioLibrary ol { margin: 0; padding: 0; list-style: none; }
+.radioLibrary li + li { border-top: 1px solid #e5edf2; }
+.radioLibrary li button { width: 100%; min-height: 66px; display: flex; align-items: center; gap: 14px; border: 0; background: transparent; color: #102a42; padding: 9px; text-align: left; cursor: pointer; }
+.radioLibrary li button:hover,.radioLibrary li button.selected { border-radius: 10px; background: #e7f2fa; }
+.radioTrackNumber { flex: 0 0 35px; color: #13759f; font-size: 18px; font-weight: 900; }
+.radioLibrary li strong,.radioLibrary li small { display: block; }
+.radioLibrary li strong { font-size: 16px; }
+.radioLibrary li small { margin-top: 4px; color: #5c7182; font-size: 14px; }
+.radioPlaying { margin-left: auto; color: #0d7a62; }
+.radioLyrics { max-width: 1324px; margin: 0 auto; border-radius: 20px; background: white; padding: 30px; }
+.radioLyrics span { color: #13759f; font-size: 13px; font-weight: 850; letter-spacing: .14em; }
+.radioLyrics h2 { margin: 7px 0 20px; font: 700 29px Georgia,serif; }
+.radioLyrics p { max-width: 760px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 17px; line-height: 1.8; }
+.radioLyrics .radioLyricsEmpty { color: #62798a; }
+.radioLyrics .radioLyricsHint { color: #5c7182; font-size: 14px; margin: -8px 0 14px; }
+.radioTimedLyrics { position: relative; max-height: 350px; overflow-y: auto; scroll-behavior: smooth; border-radius: 12px; background: #f2f7fa; padding: 18px; }
+.radioPlainLyrics { max-height: 350px; overflow-y: auto; border-radius: 12px; background: #f2f7fa; padding: 20px; }
+.radioPlainLyrics p { max-width: none; }
+.radioPlainLyrics:focus-visible,.radioTimedLyrics button:focus-visible { outline: 3px solid #13759f; outline-offset: -3px; }
+.radioTimedLyrics button { display: flex; align-items: baseline; gap: 14px; width: 100%; min-height: 44px; padding: 9px 12px; border: 0; border-radius: 9px; background: transparent; color: #536c7f; font-family: inherit; font-size: 17px; font-weight: 500; line-height: 1.5; text-align: left; cursor: pointer; transition: background .2s,color .2s; }
+.radioTimedLyrics button:hover { background: #e4eef5; }
+.radioTimedLyrics button.active { background: #dceefa; color: #0a4165; font-weight: 800; }
+.radioLyricTime { min-width: 40px; color: #147ba5; font-size: 12px; font-weight: 850; font-variant-numeric: tabular-nums; }
+@media (max-width: 820px) { .radioLayout { grid-template-columns: 1fr; padding: 16px; } .radioStage { min-height: 0; padding: 32px 20px; } .radioArtwork { width: min(100%,380px); } .radioLibrary { min-height: 0; max-height: 370px; } .radioLyrics { margin: 0 16px; padding: 24px; } }
+@media (max-width: 600px) {
+  .radioHeader { padding: 20px 16px 16px; }
+  .radioHeader span { font-size: 11px; }
+  .radioHeader h1 { margin: 5px 0; font-size: clamp(32px,9vw,43px); }
+  .radioHeader p { font-size: 13px; }
+  .radioLayout { gap: 12px; padding: 12px; }
+  .radioStage { padding: 18px 12px 20px; border-radius: 16px; }
+  .radioArtwork { width: min(72vw,30dvh,270px); }
+  .radioMaximize { margin-top: 10px; min-height: 44px; padding: 8px 12px; font-size: 13px; }
+  .radioNow { margin-top: 12px; }
+  .radioNow > span { font-size: 11px; }
+  .radioNow h2 { margin: 5px 0 3px; font-size: clamp(20px,6vw,27px); }
+  .radioNow p { font-size: 14px; }
+  .radioNow small { margin-top: 4px; font-size: 12px; }
+  .radioVisualizer { height: 48px; margin: 8px 0; }
+  .radioControls { gap: 7px; }
+  .radioControls button,.radioControls select { min-height: 44px; padding: 8px 10px; }
+  .radioLibrary { max-height: 260px; padding: 16px; }
+  .radioLyrics { margin: 0 12px; padding: 18px; }
+}
+@media (max-width: 420px) { .radioCoverLyric { max-height: 43%; padding: 9px 10px; } .radioCoverLyric span { font-size: 17px; line-height: 1.25; } }
+@media (max-width: 600px) { .radioFullscreenTop { padding-left: 14px; padding-right: 14px; } .radioFullscreenTop button { padding: 8px 10px; } .radioFullscreenArtwork { padding: 6px; } .radioFullscreenLyricOverlay { max-height: 53%; } .radioFullscreenLyricOverlay .radioFullscreenLine { padding: 10px 14px; } .radioFullscreenBottom { padding-left: 14px; padding-right: 14px; } }
+@media (prefers-reduced-motion: reduce) { .radioCoverLyric span,.radioFullscreenLine { animation: none; } .radioTimedLyrics { scroll-behavior: auto; } }

@@ -300,7 +300,7 @@ export function ConveniosPanel({ memberName, matricula }: ConveniosPanelProps) {
             Los descuentos pueden estar sujetos a vigencia, disponibilidad y
             condiciones de cada establecimiento. Confirma la promoción antes
             de comprar y presenta únicamente los documentos señalados en la
-            publicación oficial. Información revisada manualmente el 20 de
+            publicación oficial. Información revisada manualmente el 22 de
             septiembre de 2026. Se mantienen los convenios con condiciones
             verificables, incluido Lexia Health Academy, y no se agregan
             beneficios sin una fuente oficial vigente.

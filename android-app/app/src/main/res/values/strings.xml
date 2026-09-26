@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Credenciales SNTSS1Puebla</string>
-    <string name="radio_title">Radio SNTSS Puebla</string>
+    <string name="app_name">Radio Sindical</string>
+    <string name="asset_statements">[{\"relation\":[\"delegate_permission/common.handle_all_urls\"],\"target\":{\"namespace\":\"web\",\"site\":\"https://sntss1puebla.com\"}}]</string>
+    <string name="radio_title">Radio Sindical</string>
     <string name="radio_subtitle">La voz de quienes hacen grande al IMSS</string>
-    <string name="radio_connecting">Conectando con Radio SNTSS Puebla…</string>
+    <string name="radio_connecting">Preparando Radio Sindical…</string>
+    <string name="radio_sign_in">No se pudo cargar la biblioteca. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="play_radio_car">Reproducir</string>
+    <string name="radio_paused">Pausar</string>
+    <string name="radio_previous">Anterior</string>
+    <string name="radio_next">Siguiente</string>
+    <string name="radio_ready">Tu música, también en Android Auto.</string>
+    <string name="song_lyrics_title">Letra de la canción</string>
+    <string name="song_lyrics_empty">La letra aparecerá aquí cuando esté disponible. En el auto se muestran los controles y el título.</string>
+    <string name="radio_maximize">⛶ Maximizar portada</string>
+    <string name="radio_close_fullscreen">Cerrar ✕</string>
 </resources>
