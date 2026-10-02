@@ -121,6 +121,11 @@ function conversationalReply(message: string): DeviReply | null {
   return null;
 }
 
+/** True for greetings, thanks and questions about DeVi herself. */
+export function isDeviSmallTalk(message: string) {
+  return conversationalReply(plain(message, 1800)) !== null;
+}
+
 export function answerPensionQuestion(message = "jubilaciones y pensiones"): DeviReply {
   const pensionSources = sourcesById(
     ["cct-79", "cct-80", "cct-84", "cct-85"],
@@ -151,8 +156,10 @@ export function answerKnowledgeQuestion(
   previousUserMessages: string[] = [],
 ): DeviReply {
   const cleanMessage = plain(message, 1800);
+  // Greetings and thanks carry no documentary claim, so they skip the legal
+  // footer (Dato útil / Derecho / Obligación) that substantive answers receive.
   const conversation = conversationalReply(cleanMessage);
-  if (conversation) return finishReply(conversation);
+  if (conversation) return conversation;
   const cleanHistory = previousUserMessages
     .map((entry) => plain(entry, 900))
     .filter(Boolean)
