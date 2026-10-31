@@ -465,7 +465,8 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
       const title = commercialTitle.trim() || commercialFile.name.replace(/\.mp3$/i, "");
       if (commercials.some((item) => item.title.toLocaleLowerCase() === title.toLocaleLowerCase() || item.fileName === commercialFile.name))
         throw new Error("Este comercial ya está en la biblioteca. Retíralo antes de cargar una nueva versión.");
-      const normalized = await normalizeMp3ForRadio(commercialFile);\n      await uploadMp3Blob(normalized, commercialFile.name, { title, kind: "commercial", normalizationProfile: RADIO_NORMALIZATION_PROFILE.label });
+      const normalized = await normalizeMp3ForRadio(commercialFile);
+      await uploadMp3Blob(normalized, commercialFile.name, { title, kind: "commercial", normalizationProfile: RADIO_NORMALIZATION_PROFILE.label });
       const updated = await requestNewsAdminSettings();
       setCommercials(updated.commercials || []);
       setCommercialFile(null); setCommercialTitle("");
@@ -509,7 +510,9 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
         setError("La biblioteca cambió. Revisa de nuevo la canción antes de subirla.");
         return;
       }
-      const normalized = await normalizeMp3ForRadio(mp3File);\n      const normalizedFile = new File([normalized], mp3File.name, { type: "audio/mpeg" });\n      const uploaded = await uploadMp3Blob(normalized, mp3File.name, { title: mp3Title.trim(), artist: mp3Artist.trim(), album: mp3Album.trim(), lyrics: mp3Lyrics.trim(), replaceTrackId: duplicate?.id, normalizationProfile: RADIO_NORMALIZATION_PROFILE.label });
+      const normalized = await normalizeMp3ForRadio(mp3File);
+      const normalizedFile = new File([normalized], mp3File.name, { type: "audio/mpeg" });
+      const uploaded = await uploadMp3Blob(normalized, mp3File.name, { title: mp3Title.trim(), artist: mp3Artist.trim(), album: mp3Album.trim(), lyrics: mp3Lyrics.trim(), replaceTrackId: duplicate?.id, normalizationProfile: RADIO_NORMALIZATION_PROFILE.label });
       let coverFailed = false;
       if (mp3Cover && uploaded.trackId) {
         try { await uploadCover(uploaded.trackId, mp3Cover); }
@@ -744,7 +747,8 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
           <div className="radioCommercialList">{commercials.map((commercial) => <div key={commercial.id}><span><b>{commercial.title}</b><small>MP3 · {commercial.fileName} · {savedCommercialInterval ? `en cola cada ${savedCommercialInterval} min` : "programación desactivada"}</small></span><button className="button tiny" type="button" disabled={mp3Saving} onClick={() => void removeCommercial(commercial.id)}>Retirar</button></div>)}</div>
         </section>}
         {mode === "radio" && <form className="newsAdminSection" onSubmit={uploadMp3}>
-          <span className="newsAdminState connected">Carga protegida · {tracks.length} MP3</span>\n          <button className="button secondary" type="button" onClick={() => void normalizeLibrary()} disabled={mp3Saving || loading || !tracks.length}>Normalizar biblioteca a {RADIO_NORMALIZATION_PROFILE.label}</button>
+          <span className="newsAdminState connected">Carga protegida · {tracks.length} MP3</span>
+          <button className="button secondary" type="button" onClick={() => void normalizeLibrary()} disabled={mp3Saving || loading || !tracks.length}>Normalizar biblioteca a {RADIO_NORMALIZATION_PROFILE.label}</button>
           <h3>Biblioteca sindical</h3>
           <p>Sube canciones MP3 directamente al portal. Solo Administrador y Prensa pueden alimentar o retirar esta biblioteca.</p>
           <label className="field"><span>Nombre de la canción (opcional)</span><input value={mp3Title} onChange={(event) => { setMp3Title(event.target.value); setReplaceConfirmedId(null); }} maxLength={180} placeholder="Se toma del nombre del archivo si lo dejas vacío" /></label>
