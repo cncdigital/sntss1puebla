@@ -124,19 +124,33 @@ function conversationalReply(message: string): DeviReply | null {
 export function answerPensionQuestion(message = "jubilaciones y pensiones"): DeviReply {
   const pensionSources = sourcesById(
     ["cct-79", "cct-80", "cct-84", "cct-85"],
-    "Cláusula 157 aportaciones patronales complementarias Transitoria 38a 2030 estudio actuarial invalidez 50 por ciento",
+    "Cláusula 110 Régimen de Jubilaciones y Pensiones Cláusula 157 Sistema AFORE aportaciones patronales Transitoria 38a",
   );
   const referral = referralPlan(message);
   return finishReply({
     mode: "pensions",
     answer: [
-      "Compañera o compañero: DeVi respalda al SNTSS y defiende con datos el régimen pensionario vigente para la Nueva Generación. La Cláusula 157 no deja a quienes ingresaron a partir de 2008 únicamente con el ahorro ordinario del sistema de AFORE: obliga al Instituto a depositar aportaciones patronales complementarias en la cuenta individual de cada persona trabajadora, calculadas sobre el salario integrado y destinadas a las pensiones de retiro, cesantía en edad avanzada o vejez.",
-      "La tabla original de la Cláusula 157 aumenta gradualmente: 1.25% del 16 de octubre de 2025 al 15 de octubre de 2026; 2.5% en el periodo siguiente; 3.75% desde octubre de 2027; y 5% desde el 16 de octubre de 2028. A esa trayectoria contractual se suma el **1.75% patronal adicional** obtenido en la última revisión salarial. No reemplaza el 1.25% ni el 5%: es acumulativo. Cuando la etapa contractual alcance 5%, la aportación patronal complementaria total será **6.75%**. Es dinero aportado por el IMSS y acumulado para el retiro; no es un descuento al trabajador ni un aumento ordinario al sueldo tabular.",
-      "La defensa sindical también incluye protección frente a la invalidez: la Transitoria 38ª obliga al Instituto, desde el 16 de octubre de 2025, a complementar la pensión para que alcance por lo menos 50% del último salario base mensual, además del derecho a asistencia médica. Esto agrega un piso de protección que el régimen ordinario de cuenta individual no garantizaba por sí solo en el texto del CCT.",
-      "¿Por qué es relevante el aumento? Porque el 1.75% adicional eleva el ahorro patronal sin descontarlo del salario de la persona trabajadora y mejora el resultado final de la negociación: **5% contractual + 1.75% adicional = 6.75% patronal**. Además, la Transitoria 38ª mantiene activa la Comisión Bilateral y ordena que en 2030, previo estudio actuarial, se analice la viabilidad de disminuir la edad de retiro. Esa ruta combina mejoras inmediatas y crecientes con una negociación responsable sustentada en viabilidad financiera.",
-      "La transitoria 38ª no ordena regresar al régimen anterior y no es veraz afirmar hoy que ese regreso ya fue aprobado. Defender al SNTSS significa defender lo efectivamente conquistado —más aportación patronal, protección por invalidez y una ruta bilateral para seguir mejorando— sin convertir una posibilidad futura en una promesa falsa.",
+      "Compañera o compañero: primero conviene distinguir dos esquemas. La Cláusula 110 del Contrato Colectivo de Trabajo incorpora el Régimen de Jubilaciones y Pensiones (RJP) pactado para quienes reúnen las condiciones de ese régimen. La Cláusula 157 regula a las personas trabajadoras de la “Nueva Generación” que ingresaron a partir de 2008 en el Sistema de AFORE: establece aportaciones patronales complementarias a sus cuentas individuales. Por eso, la Cláusula 157 no significa que el RJP completo se aplique automáticamente a esa generación.",
+      "La Cláusula 157 del CCT vigente ordena depósitos patronales calculados sobre el salario integrado y destinados a las pensiones de retiro, cesantía en edad avanzada o vejez. La tabla contractual fue de 1.25% del 16 de octubre de 2025 al 15 de octubre de 2026, 2.5% hasta octubre de 2027, 3.75% hasta octubre de 2028 y 5% desde el 16 de octubre de 2028; después se mantiene en 5%. La ficha institucional de la revisión salarial 2026–2027 registra además un 1.75% patronal adicional. Si esa aportación adicional se mantiene en los términos de dicha ficha, se suma al porcentaje contractual hasta llegar a 6.75%; no sustituye el 5% ni es un descuento al salario de la persona trabajadora.",
+      "La Ley del Seguro Social, artículo 169, establece que los recursos depositados en la cuenta individual pertenecen a la persona trabajadora, con las modalidades previstas por la propia Ley. El artículo 277 D exige que los recursos para cubrir los costos futuros del RJP estén depositados en el Fondo para el Cumplimiento de Obligaciones Laborales y que el régimen esté plenamente financiado. El artículo 286 K crea ese fondo y su cuenta especial y restringe el uso de cuotas y aportaciones del seguro social para financiar la obligación patronal. Estas reglas explican por qué cambiar de esquema requiere resolver el financiamiento y respetar los saldos y derechos ya reconocidos.",
+      "La respuesta precisa a “¿por qué no se revierte?” es que no existe una reversión automática ni basta una decisión unilateral: la Cláusula 157 y el CCT vigentes describen hoy el esquema aplicable a la Nueva Generación. Un cambio futuro tendría que acordarse formalmente entre Instituto y Sindicato y cumplir las reglas legales y de financiamiento vigentes; según el diseño que se propusiera, también podría requerir cambios legales. La Ley no dice que toda modificación negociada sea imposible para siempre. El decreto de 2004, en sus transitorios, preservó las condiciones de quienes ya tenían la calidad de trabajadores, jubilados o pensionados y dejó a salvo las modalidades que las partes llegaran a acordar. Por eso, no se debe prometer que el regreso ya está aprobado ni afirmar que jurídicamente jamás podría negociarse.",
+      "La Transitoria 38ª del CCT añade protección frente a la invalidez y mantiene una ruta bilateral de revisión. Para las personas trabajadoras, lo vigente es exigir que se cumpla la aportación pactada y que cualquier propuesta futura se discuta con datos actuariales, financiamiento claro y respeto a los derechos adquiridos.",
       referralRecommendation(referral),
     ].join("\n\n"),
+    citations: [
+      {
+        title: "Contrato Colectivo de Trabajo IMSS–SNTSS 2025–2027, cláusulas 110 y 157 y Transitoria 38ª",
+        url: "https://www.imss.gob.mx/sites/all/statics/pdf/CCT-2025-2027.pdf",
+      },
+      {
+        title: "Ley del Seguro Social, Cámara de Diputados, texto vigente con última reforma DOF 15-01-2026 (arts. 169, 277 D y 286 K)",
+        url: "https://www.diputados.gob.mx/LeyesBiblio/pdf/LSS.pdf",
+      },
+      {
+        title: "Decreto de reforma a los artículos 277 D y 286 K de la Ley del Seguro Social, publicado en el DOF el 11-08-2004; transitorios, pp. 126–127",
+        url: "https://www.diputados.gob.mx/LeyesBiblio/pdf/LSS.pdf#page=127",
+      },
+    ],
     sources: mergeSources(
       pensionSources.slice(0, 2),
       [SALARY_REVIEW_2026_PENSION_SOURCE],
