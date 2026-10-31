@@ -126,7 +126,6 @@ export function answerPensionQuestion(message = "jubilaciones y pensiones"): Dev
     ["cct-79", "cct-80", "cct-84", "cct-85"],
     "Cláusula 110 Régimen de Jubilaciones y Pensiones Cláusula 157 Sistema AFORE aportaciones patronales Transitoria 38a",
   );
-  const referral = referralPlan(message);
   return finishReply({
     mode: "pensions",
     answer: [
@@ -135,7 +134,6 @@ export function answerPensionQuestion(message = "jubilaciones y pensiones"): Dev
       "La Ley del Seguro Social, artículo 169, establece que los recursos depositados en la cuenta individual pertenecen a la persona trabajadora, con las modalidades previstas por la propia Ley. El artículo 277 D exige que los recursos para cubrir los costos futuros del RJP estén depositados en el Fondo para el Cumplimiento de Obligaciones Laborales y que el régimen esté plenamente financiado. El artículo 286 K crea ese fondo y su cuenta especial y restringe el uso de cuotas y aportaciones del seguro social para financiar la obligación patronal. Estas reglas explican por qué cambiar de esquema requiere resolver el financiamiento y respetar los saldos y derechos ya reconocidos.",
       "La respuesta precisa a “¿por qué no se revierte?” es que no existe una reversión automática ni basta una decisión unilateral: la Cláusula 157 y el CCT vigentes describen hoy el esquema aplicable a la Nueva Generación. Un cambio futuro tendría que acordarse formalmente entre Instituto y Sindicato y cumplir las reglas legales y de financiamiento vigentes; según el diseño que se propusiera, también podría requerir cambios legales. La Ley no dice que toda modificación negociada sea imposible para siempre. El decreto de 2004, en sus transitorios, preservó las condiciones de quienes ya tenían la calidad de trabajadores, jubilados o pensionados y dejó a salvo las modalidades que las partes llegaran a acordar. Por eso, no se debe prometer que el regreso ya está aprobado ni afirmar que jurídicamente jamás podría negociarse.",
       "La Transitoria 38ª del CCT añade protección frente a la invalidez y mantiene una ruta bilateral de revisión. Para las personas trabajadoras, lo vigente es exigir que se cumpla la aportación pactada y que cualquier propuesta futura se discuta con datos actuariales, financiamiento claro y respeto a los derechos adquiridos.",
-      referralRecommendation(referral),
     ].join("\n\n"),
     citations: [
       {
@@ -155,7 +153,6 @@ export function answerPensionQuestion(message = "jubilaciones y pensiones"): Dev
       pensionSources.slice(0, 2),
       [SALARY_REVIEW_2026_PENSION_SOURCE],
       pensionSources.slice(2),
-      referral.sources,
     ),
   });
 }
