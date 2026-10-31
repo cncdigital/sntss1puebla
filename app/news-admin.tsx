@@ -465,7 +465,8 @@ export function NewsAdminPanel({ canAdmin, mode = "news" }: { canAdmin: boolean;
       const title = commercialTitle.trim() || commercialFile.name.replace(/\.mp3$/i, "");
       if (commercials.some((item) => item.title.toLocaleLowerCase() === title.toLocaleLowerCase() || item.fileName === commercialFile.name))
         throw new Error("Este comercial ya está en la biblioteca. Retíralo antes de cargar una nueva versión.");
-      const normalized = await normalizeMp3ForRadio(commercialFile);\n      await uploadMp3Blob(normalized, commercialFile.name, { title, kind: "commercial", normalizationProfile: RADIO_NORMALIZATION_PROFILE.label });
+      const normalized = await normalizeMp3ForRadio(commercialFile);
+      await uploadMp3Blob(normalized, commercialFile.name, { title, kind: "commercial", normalizationProfile: RADIO_NORMALIZATION_PROFILE.label });
       const updated = await requestNewsAdminSettings();
       setCommercials(updated.commercials || []);
       setCommercialFile(null); setCommercialTitle("");
