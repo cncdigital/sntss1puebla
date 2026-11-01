@@ -771,6 +771,10 @@ export function isPensionTopic(value: string) {
   return [
     "jubilacion",
     "jubilaciones",
+    "jubilarme",
+    "jubilar",
+    "jubilo",
+    "pensionarme",
     "pension",
     "pensiones",
     "regimen de jubilaciones",

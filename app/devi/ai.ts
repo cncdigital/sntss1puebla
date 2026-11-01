@@ -1,4 +1,9 @@
-import { answerKnowledgeQuestion, type DeviReply } from "./engine";
+import {
+  answerKnowledgeQuestion,
+  isDeviSmallTalk,
+  type DeviReply,
+} from "./engine";
+import { answerCommonWorkerQuestion } from "./intents";
 import {
   searchKnowledgeDetailed,
   type DeviSource,
@@ -378,19 +383,19 @@ function trainerAugmentedLocalResult(
 function isUnionOrLaborQuestion(message: string) {
   const normalized = normalizeSearchText(message);
   if (
-    /\b(cct|contrato colectivo|sntss|sindic\w*|imss|rjp|ley federal del trabajo|ley del seguro social|escalafon\w*|adscripci\w*|prestaci\w*|antiguedad|incapacidad\w*|riesgo de trabajo|salario\w*|sueldo\w*|trabajador\w*|laboral\w*)\b/.test(
+    /\b(cct|contrato colectivo|sntss|sindic\w*|imss|rjp|ley federal del trabajo|ley del seguro social|escalafon\w*|adscripci\w*|prestaci\w*|antiguedad|incapacidad\w*|riesgo de trabajo|salario\w*|sueldo\w*|trabajador\w*|laboral\w*|aguinaldo\w*|prima vacacional|jubil\w*|pension\w*|retardo\w*|quincena\w*)\b/.test(
       normalized,
     )
   )
     return true;
   if (
-    /\b(profesiograma\w*|checador\w*|reloj\s+(?:marcador|registrador)|infectocontag\w*|fondo\s+de\s+ahorro)\b/.test(
+    /\b(profesiograma\w*|checador\w*|checaron|checar|reloj\s+(?:marcador|registrador)|infectocontag\w*|fondo\s+de\s+ahorro|horas?\s+extras?|tiempo\s+extraordinario|dias?\s+economicos?)\b/.test(
       normalized,
     )
   )
     return true;
   if (
-    /\b(clausula|clausala|claus|cl|transitoria|trans)\s+\d{1,3}\b/.test(
+    /\b(clausula|clausala|claus|cl|transitoria|trans|articulo|art)\s+\d{1,3}\b/.test(
       normalized,
     )
   )
@@ -478,12 +483,23 @@ export async function answerHybridQuestion(
   const contextualQuestion = contextualizeQuery(safeQuestion, safeHistory);
   const initialSearch = searchKnowledgeDetailed(contextualQuestion, 5);
   const model = normalizedModel(config.model);
+  // A curated CCT/RIT intent is the most precise signal that the question is
+  // contractual (vacaciones, aguinaldo, guardería, horas extra...). Without it,
+  // those everyday questions were routed to the general web model and lost
+  // their documentary grounding.
   const unionQuestion =
     eligibleTrainerSources.length > 0 ||
     baseline.mode !== "knowledge" ||
+    Boolean(answerCommonWorkerQuestion(contextualQuestion)) ||
     isUnionOrLaborQuestion(contextualQuestion);
   const apiKey = config.apiKey?.trim() ?? "";
-  const unavailable = unionQuestion ? fallback : generalUnavailableResult();
+  // When the general model is unavailable, a greeting still deserves DeVi's own
+  // local reply instead of an error-like message.
+  const unavailable = unionQuestion
+    ? fallback
+    : isDeviSmallTalk(safeQuestion)
+      ? localResult(baseline)
+      : generalUnavailableResult();
   if (!apiKey) return unavailable;
 
   const baselineOfficialSources = (

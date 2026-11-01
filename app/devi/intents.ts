@@ -907,7 +907,7 @@ const COMMON_INTENTS: CommonIntent[] = [
     id: "birthday-no-automatic-paid-leave",
     matches: (text) =>
       has(text, /\b(cumplean\w*|cumplir\s+anos|dia\s+de\s+mi\s+cumple)\b/) &&
-      has(text, /\b(permiso|faltar|ausentar\w*|dia\s+libre|goce|salario|pagan|correspon\w*|dan)\b/),
+      has(text, /\b(permiso|faltar|ausentar\w*|dia\s+libre|dias?\s+de\s+descanso|descans\w*|goce|salario|pagan|correspon\w*|dan|toca\w*|tengo\s+derecho)\b/),
     answer: () =>
       direct(
         "El CCT 2025-2027 y el artículo 65 del Reglamento Interior de Trabajo **no establecen un permiso pagado automático por cumpleaños**. No sería correcto prometer uno ni descontarlo de los permisos económicos sin revisar una causa distinta.",
@@ -1337,7 +1337,7 @@ const COMMON_INTENTS: CommonIntent[] = [
   {
     id: "late-arrival-rules",
     matches: (text) =>
-      has(text, /\b(lleg\w*(?:\s+\w+){0,4}\s+tarde|retardo\w*|minuto\w*\s+(?:de\s+)?tarde|puntualidad)\b/) &&
+      has(text, /\b(lleg\w*(?:\s+\w+){0,4}\s+tarde|(?:chec|marc|registr)\w*(?:\s+\w+){0,2}\s+tarde|retardo\w*|minuto\w*\s+(?:de\s+)?tarde|puntualidad)\b/) &&
       has(text, /\b(que\s+pasa|desc(?:ont|uent)\w*|sancion\w*|falta|tolerancia|chec\w*|registr\w*|entrada)\b/),
     answer: () =>
       direct(
@@ -1357,14 +1357,23 @@ const COMMON_INTENTS: CommonIntent[] = [
   {
     id: "work-risk-incapacity-and-compensation",
     matches: (text) =>
-      has(
+      (has(
         text,
         /\b(riesgo\w*\s+de\s+trabajo|accidente\w*\s+(?:de|del|en\s+el)\s+trabajo|accidente\w*\s+laboral\w*|enfermedad\w*\s+(?:de|del)\s+trabajo|incapacidad\w*\s+(?:por|de)\s+riesgo)\b/,
       ) &&
-      has(
+        has(
+          text,
+          /\b(incapacidad\w*|incapacit\w*|pag\w*|salario|prestacion\w*|indemniz\w*|cuanto|dura\w*|tiempo|correspon\w*|que\s+me\s+dan|que\s+recibo)\b/,
+        )) ||
+      // Colloquial first-person reports: "me caí en el trabajo y me lastimé".
+      (has(
         text,
-        /\b(incapacidad\w*|incapacit\w*|pag\w*|salario|prestacion\w*|indemniz\w*|cuanto|dura\w*|tiempo|correspon\w*|que\s+me\s+dan|que\s+recibo)\b/,
-      ),
+        /\b(me\s+(?:cai|lastime|lesione|golpee|corte|torci|queme|fracture|accidente|pinche|pique)|(?:sufri|tuve)\s+un\s+accidente)\b/,
+      ) &&
+        has(
+          text,
+          /\b(en\s+el\s+trabajo|trabajando|laborando|en\s+mi\s+(?:turno|servicio|trabajo|unidad|area|jornada|guardia)|en\s+(?:la|el)\s+(?:unidad|servicio|hospital|clinica|piso|area)|(?:de\s+)?camino\s+(?:al|del)\s+trabajo|en\s+el\s+trayecto)\b/,
+        )),
     answer: () =>
       direct(
         "Si un accidente o enfermedad de trabajo te incapacita para laborar, la Cláusula 91 establece **salario íntegro y las demás prestaciones del CCT mientras no se declare una incapacidad permanente**. El Contrato no fija aquí un número único de días: la duración depende de la valoración médica y de la determinación formal del tipo de incapacidad.",
